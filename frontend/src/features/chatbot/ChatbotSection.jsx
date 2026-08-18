@@ -92,16 +92,16 @@ export function ChatbotSection({ onSwitchTab }) {
     <div className="min-h-[calc(100vh-4rem)] bg-[#000000] text-white font-['Plus_Jakarta_Sans',sans-serif] select-none flex flex-col justify-between p-2.5 sm:p-6 space-y-3 sm:space-y-4">
       
       {/* Top Header Banner */}
-      <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-2.5 sm:pb-3 border-b border-[#27272a]">
+      <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-2.5 sm:pb-3">
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 bg-[#18181b] border-[#27272a] text-white">
-            <Wifi className="w-4 h-4 text-emerald-400" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 bg-white/90 border-white/80 text-emerald-600 shadow-sm">
+            <Wifi className="w-4 h-4 text-emerald-600" />
           </div>
           <div>
-            <h1 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight flex items-center gap-2">
-              BFibernet <span className="text-[#a1a1aa] font-normal text-xs sm:text-base">AI Copilot</span>
-              <span className="inline-flex items-center gap-1 text-[10px] bg-emerald-950/80 text-emerald-400 border border-emerald-800/60 px-2 py-0.5 rounded-full font-mono">
-                <Sparkles className="w-2.5 h-2.5" /> RAG v2.4 Active
+            <h1 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight flex items-center gap-2 drop-shadow-xs">
+              BFibernet <span className="text-white/90 font-medium text-xs sm:text-base">AI Copilot</span>
+              <span className="inline-flex items-center gap-1 text-[11px] bg-white/95 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-full font-bold shadow-xs">
+                <Sparkles className="w-3 h-3 text-emerald-600" /> RAG v2.4 Active
               </span>
             </h1>
           </div>
@@ -110,9 +110,9 @@ export function ChatbotSection({ onSwitchTab }) {
         {messages.length > 0 && (
           <button
             onClick={() => setMessages([])}
-            className="text-xs text-zinc-400 hover:text-white flex items-center gap-1 bg-[#18181b] border border-[#27272a] hover:border-zinc-600 px-2.5 py-1 rounded-lg transition"
+            className="text-xs text-slate-800 hover:text-slate-950 font-medium flex items-center gap-1.5 bg-white/90 hover:bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs transition cursor-pointer"
           >
-            <RefreshCw className="w-3 h-3" /> Clear Chat
+            <RefreshCw className="w-3 h-3 text-slate-600" /> Clear Chat
           </button>
         )}
       </div>
@@ -121,14 +121,6 @@ export function ChatbotSection({ onSwitchTab }) {
       <div className="flex-1 max-w-4xl mx-auto w-full flex flex-col overflow-y-auto py-1">
         {messages.length === 0 ? (
           <div className="my-auto space-y-4 sm:space-y-6 animate-fadeIn w-full">
-            <div className="text-left border-b border-[#27272a] pb-3">
-              <h2 className="text-base sm:text-xl font-semibold text-white tracking-tight">
-                What can I assist you with today, <span className="text-zinc-400 font-normal">Vikas?</span>
-              </h2>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-                Ask about BFibernet fiber plans, installation SLAs, billing policies, or launch an AI agent below.
-              </p>
-            </div>
 
             {/* Quick Suggested Prompts */}
             <div className="flex flex-wrap gap-2">
@@ -141,84 +133,88 @@ export function ChatbotSection({ onSwitchTab }) {
                 <button
                   key={i}
                   onClick={() => handleQuickPrompt(prompt)}
-                  className="text-xs bg-[#09090b] hover:bg-[#18181b] text-zinc-300 hover:text-white border border-[#27272a] hover:border-zinc-500 px-3 py-1.5 rounded-full transition text-left"
+                  className="text-xs bg-white/95 hover:bg-white text-slate-800 font-semibold border border-white/80 hover:border-sky-300 shadow-sm hover:shadow-md px-3.5 py-2 rounded-full transition-all duration-200 text-left flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
-                  💡 "{prompt}"
+                  <span className="text-amber-500">💡</span> "{prompt}"
                 </button>
               ))}
             </div>
 
-            {/* 4 Agent Action Cards Console */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3.5 pt-2">
+            {/* 4 Agent Action Cards Console - Simple, Rectangular, Pythonish */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 pt-2">
+              {/* Feedback Agent */}
               <div 
                 onClick={() => handleAgentLaunch('feedback')}
-                className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-2 sm:space-y-3"
+                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center border bg-[#000000] text-white border-[#27272a] group-hover:border-white transition-colors">
-                    <MessageSquare className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
+                    <MessageSquare className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-[#a1a1aa] group-hover:text-white flex items-center gap-1 transition-colors">
-                    <span>LAUNCH</span> <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
+                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">Feedback Agent</h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Collect live voice feedback & support ratings</p>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Feedback Agent</h3>
+                  <span className="text-[10px] font-mono text-slate-400">.py</span>
                 </div>
               </div>
 
+              {/* Recharge Reminder */}
               <div 
                 onClick={() => handleAgentLaunch('recharge')}
-                className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-2 sm:space-y-3"
+                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center border bg-[#000000] text-white border-[#27272a] group-hover:border-white transition-colors">
-                    <Zap className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
+                    <Zap className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-[#a1a1aa] group-hover:text-white flex items-center gap-1 transition-colors">
-                    <span>LAUNCH</span> <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
+                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">Recharge Reminder</h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Automated renewal reminders & plan extensions</p>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Recharge Reminder</h3>
+                  <span className="text-[10px] font-mono text-slate-400">.py</span>
                 </div>
               </div>
 
+              {/* New Offers Call */}
               <div 
                 onClick={() => handleAgentLaunch('offers')}
-                className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-2 sm:space-y-3"
+                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center border bg-[#000000] text-white border-[#27272a] group-hover:border-white transition-colors">
-                    <Gift className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
+                    <Gift className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-[#a1a1aa] group-hover:text-white flex items-center gap-1 transition-colors">
-                    <span>LAUNCH</span> <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
+                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">New Offers Call</h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Broadcast promotional upgrades & festive deals</p>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">New Offers Call</h3>
+                  <span className="text-[10px] font-mono text-slate-400">.py</span>
                 </div>
               </div>
 
+              {/* Competitor Price Monitor */}
               <div 
                 onClick={() => handleAgentLaunch('competitor')}
-                className="p-3 sm:p-4 rounded-lg sm:rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-2 sm:space-y-3"
+                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
               >
                 <div className="flex items-center justify-between">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center border bg-[#000000] text-white border-[#27272a] group-hover:border-white transition-colors">
-                    <TrendingDown className="w-4 h-4 text-white" />
+                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
+                    <TrendingDown className="w-4 h-4 text-black" />
                   </div>
-                  <span className="text-[10px] sm:text-xs font-semibold text-[#a1a1aa] group-hover:text-white flex items-center gap-1 transition-colors">
-                    <span>LAUNCH</span> <ArrowRight className="w-3.5 h-3.5 text-white" />
+                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
+                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
                   </span>
                 </div>
-                <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">Competitor Price Monitor</h3>
-                  <p className="text-[11px] text-zinc-400 mt-0.5">Compare JioFiber, Airtel & ACT market rates</p>
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Competitor Price Monitor</h3>
+                  <span className="text-[10px] font-mono text-slate-400">.py</span>
                 </div>
               </div>
             </div>
@@ -288,12 +284,12 @@ export function ChatbotSection({ onSwitchTab }) {
         )}
       </div>
 
-      {/* Command Console Input Bar — Modern Monochrome Style */}
+      {/* Command Console Input Bar — Modern Styled Console */}
       <div className="max-w-4xl mx-auto w-full pt-2 sm:pt-3">
         <form onSubmit={handleSend}>
-          <div className="p-2 sm:p-2.5 rounded-xl border border-[#27272a] bg-[#09090b] focus-within:border-zinc-500 transition flex items-center gap-2 sm:gap-3">
-            <div className="p-2 sm:p-2.5 rounded-lg border shrink-0 bg-[#000000] text-white border-[#27272a]">
-              <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-400" />
+          <div className="p-2 sm:p-2.5 rounded-2xl border border-sky-200/90 bg-white/95 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 transition-all duration-200 flex items-center gap-2 sm:gap-3 shadow-lg shadow-sky-900/10">
+            <div className="p-2 sm:p-2.5 rounded-xl shrink-0 bg-gradient-to-br from-slate-900 to-slate-800 text-cyan-400 border border-slate-700 shadow-sm">
+              <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
             </div>
 
             <input
@@ -301,24 +297,24 @@ export function ChatbotSection({ onSwitchTab }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask BFibernet AI about plans, SLAs, billing, or technical support..."
-              className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-zinc-500 outline-none font-normal px-1 sm:px-2 py-1.5 min-w-0"
+              className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none font-medium px-1 sm:px-2 py-1.5 min-w-0"
             />
 
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className={`px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wider transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer border ${
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer border ${
                 input.trim() && !isLoading
-                  ? 'bg-white text-black border-white hover:bg-zinc-200 active:scale-95'
-                  : 'bg-[#000000] text-zinc-600 border-[#27272a] cursor-not-allowed'
+                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white border-transparent shadow-md shadow-sky-600/30 active:scale-95'
+                  : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
               }`}
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 text-zinc-400 animate-spin" />
+                <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
               ) : (
                 <>
                   <span className="hidden xs:inline">Send</span>
-                  <Send className="w-3.5 h-3.5 text-black" />
+                  <Send className="w-3.5 h-3.5 text-white" />
                 </>
               )}
             </button>
@@ -326,7 +322,7 @@ export function ChatbotSection({ onSwitchTab }) {
         </form>
 
         {/* Footer info text */}
-        <p className="text-center text-[9px] sm:text-[11px] mt-1.5 text-zinc-500">
+        <p className="text-center text-[10px] sm:text-xs mt-2 text-white/90 font-medium drop-shadow-xs">
           BFibernet Enterprise AI Copilot • Powered by Grounded RAG Knowledge Base
         </p>
       </div>

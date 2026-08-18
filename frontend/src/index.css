@@ -97,18 +97,20 @@ html.light ::-webkit-scrollbar-thumb:hover {
 }
 
 /* ---------------------------------------------------- */
-/* LIGHT THEME COMPREHENSIVE OVERRIDES (PRO REF DESIGN) */
+/* LIGHT THEME COMPREHENSIVE OVERRIDES (LIGHT BLUE SILK WAVE WALLPAPER) */
 /* ---------------------------------------------------- */
 
 html.light body {
-  background-color: #f0f4f8 !important;
+  background-color: #256499 !important;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(219, 234, 254, 0.85) 0px, transparent 50%),
-    radial-gradient(at 100% 0%, rgba(204, 251, 241, 0.75) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(243, 232, 255, 0.85) 0px, transparent 50%),
-    radial-gradient(at 0% 100%, rgba(254, 226, 226, 0.75) 0px, transparent 50%) !important;
+    url('/light_bg_wave.svg'),
+    radial-gradient(at 85% 15%, rgba(160, 227, 240, 0.95) 0px, transparent 60%),
+    radial-gradient(at 15% 85%, rgba(22, 67, 106, 0.9) 0px, transparent 65%),
+    linear-gradient(135deg, #16436a 0%, #256499 40%, #4697cf 70%, #80d5e8 90%, #a0e3f0 100%) !important;
   background-attachment: fixed !important;
-  color: #0f172a !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  color: #ffffff !important;
 }
 
 /* Page Outer Background (Root viewport wrapper) */
@@ -116,142 +118,203 @@ html.light .bg-\[\#000000\] {
   background-color: transparent !important;
 }
 
-/* Sidebar Container (100% Solid Opaque Pure White Surface) */
+/* Sidebar Container (Translucent Ocean Silk Glass Surface) */
 html.light aside {
-  background-color: #ffffff !important;
+  background-color: rgba(18, 53, 85, 0.65) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
   opacity: 1 !important;
-  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
-  border-color: rgba(15, 23, 42, 0.25) !important;
+  box-shadow: 4px 0 25px rgba(15, 23, 42, 0.25) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
 }
 
-/* Navbar, Header & Main Container Cards (Elevated Pure White Surface) */
-html.light header,
-html.light .bg-\[\#09090b\] {
+html.light aside div,
+html.light aside span,
+html.light aside button {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+}
+
+html.light aside .text-white {
+  color: #ffffff !important;
+}
+
+html.light aside .text-\[\#a1a1aa\],
+html.light aside .text-\[\#71717a\] {
+  color: #cbd5e1 !important;
+}
+
+/* Active Sidebar Item */
+html.light aside .bg-\[\#18181b\] {
+  background-color: rgba(56, 189, 248, 0.28) !important;
+  border-color: rgba(125, 211, 252, 0.6) !important;
+  color: #ffffff !important;
+  box-shadow: 0 2px 10px rgba(14, 165, 233, 0.2) !important;
+}
+
+html.light aside button:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+  color: #ffffff !important;
+}
+
+/* Navbar & Header (Translucent Ocean Silk Glass Header) */
+html.light header {
+  background-color: rgba(18, 53, 85, 0.65) !important;
+  backdrop-filter: blur(24px) !important;
+  -webkit-backdrop-filter: blur(24px) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #ffffff !important;
+}
+
+html.light header .bg-\[\#09090b\],
+html.light header .bg-\[\#18181b\] {
+  background-color: rgba(255, 255, 255, 0.15) !important;
+  border-color: rgba(255, 255, 255, 0.25) !important;
+  color: #ffffff !important;
+}
+
+html.light header .text-white,
+html.light header .text-\[\#a1a1aa\] {
+  color: #ffffff !important;
+}
+
+/* ---------------------------------------------------- */
+/* HOME PAGE & MAIN WORKSPACE CONTENT HIGH VISIBILITY */
+/* ---------------------------------------------------- */
+
+/* Header Titles & Subtitles directly on the Home Page Wallpaper */
+html.light main h1,
+html.light main h2 {
+  color: #ffffff !important;
+  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.4);
+}
+
+html.light main p.text-zinc-400,
+html.light main span.text-zinc-400,
+html.light main .text-zinc-400 {
+  color: #e0f2fe !important;
+}
+
+/* Quick Prompt Suggestion Pills */
+html.light main .flex-wrap button {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  color: #0f172a !important;
+  font-weight: 600 !important;
+  border-color: rgba(186, 230, 253, 0.9) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1) !important;
+}
+
+html.light main .flex-wrap button:hover {
   background-color: #ffffff !important;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05), 0 2px 6px -1px rgba(15, 23, 42, 0.03) !important;
-  border-color: rgba(15, 23, 42, 0.32) !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
+  color: #0284c7 !important;
+}
+
+/* Main Content Cards & Section Cards (High Legibility Opaque White Surface) */
+html.light main .bg-\[\#09090b\] {
+  background-color: rgba(255, 255, 255, 0.96) !important;
+  backdrop-filter: blur(16px) !important;
+  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
+  border-color: rgba(186, 230, 253, 0.9) !important;
+  color: #0f172a !important;
+}
+
+html.light main .bg-\[\#09090b\] h3,
+html.light main .bg-\[\#09090b\] h2,
+html.light main .bg-\[\#09090b\] .text-white {
+  color: #0f172a !important;
+}
+
+html.light main .bg-\[\#09090b\] p,
+html.light main .bg-\[\#09090b\] .text-zinc-400,
+html.light main .bg-\[\#09090b\] .text-\[\#a1a1aa\] {
+  color: #475569 !important;
+}
+
+/* Card Icon Box inside Home Page Launch Cards */
+html.light main .bg-\[\#09090b\] .bg-\[\#000000\],
+html.light main .bg-\[\#09090b\] .bg-\[\#18181b\] {
+  background-color: #f0f9ff !important;
+  border-color: #bae6fd !important;
+  color: #0284c7 !important;
+}
+
+html.light main .bg-\[\#09090b\] .bg-\[\#000000\] svg,
+html.light main .bg-\[\#09090b\] .bg-\[\#18181b\] svg {
+  color: #0284c7 !important;
+}
+
+/* Hover effects for Home Page Agent Cards */
+html.light main .hover\:bg-\[\#18181b\]:hover {
+  background-color: #ffffff !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2) !important;
+}
+
+/* Chatbot Messages Visibility */
+html.light main .bg-zinc-100 {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+  color: #ffffff !important;
+  border-color: #0284c7 !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25) !important;
+}
+
+html.light main .bg-zinc-100 .text-zinc-900,
+html.light main .bg-zinc-100 .text-zinc-600 {
+  color: #ffffff !important;
+}
+
+/* Bot Message Bubbles */
+html.light main .bg-gradient-to-b {
+  background: #ffffff !important;
+  color: #0f172a !important;
+  border-color: rgba(186, 230, 253, 0.9) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
+}
+
+/* Command Console Input Box at Bottom */
+html.light main form .bg-\[\#09090b\] {
+  background-color: #ffffff !important;
+  border-color: rgba(186, 230, 253, 0.9) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15) !important;
+}
+
+html.light main form input {
+  color: #0f172a !important;
+  font-weight: 500 !important;
+}
+
+html.light main form input::placeholder {
+  color: #64748b !important;
+}
+
+html.light main form button[type="submit"] {
+  background-color: #0f172a !important;
+  color: #ffffff !important;
+  border-color: #0f172a !important;
+}
+
+html.light main form button[type="submit"]:hover {
+  background-color: #0284c7 !important;
+  border-color: #0284c7 !important;
 }
 
 /* Modal Dialog Overlay Backdrop */
 html.light .bg-black\/80 {
-  background-color: rgba(15, 23, 42, 0.4) !important;
-  backdrop-filter: blur(8px) !important;
-}
-
-/* Active Pill & Highlight Containers */
-html.light .bg-\[\#18181b\] {
-  background-color: #f1f5f9 !important;
-  color: #0f172a !important;
-  border-color: rgba(15, 23, 42, 0.32) !important;
-}
-
-/* Hover States for Items & Cards */
-html.light .hover\:bg-\[\#18181b\]:hover,
-html.light .hover\:bg-\[\#121215\]:hover {
-  background-color: #f8fafc !important;
-}
-
-html.light .hover\:bg-zinc-200:hover {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-}
-
-/* Crisp & Visible Slate Borders in Light Theme */
-html.light .border-\[\#27272a\] {
-  border-color: rgba(15, 23, 42, 0.32) !important;
-}
-
-html.light .focus-within\:border-white:focus-within,
-html.light .focus\:border-white:focus {
-  border-color: #0f172a !important;
-}
-
-html.light .hover\:border-white:hover {
-  border-color: #0f172a !important;
-}
-
-html.light .border-zinc-800\/40 {
-  border-color: rgba(15, 23, 42, 0.28) !important;
-}
-
-/* Primary Text */
-html.light .text-white {
-  color: #0f172a !important;
-}
-
-/* High Contrast Inactive Menu Text & Options in Light Theme */
-html.light .text-\[\#a1a1aa\] {
-  color: #334155 !important;
-}
-
-html.light .text-\[\#71717a\] {
-  color: #475569 !important;
-}
-
-html.light .text-zinc-600 {
-  color: #475569 !important;
-}
-
-/* Group Hover Text & Icons */
-html.light .group-hover\:text-white:hover,
-html.light .group:hover .group-hover\:text-white {
-  color: #0f172a !important;
-}
-
-/* Primary Action Buttons */
-html.light .bg-white {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-  border-color: #0f172a !important;
-}
-
-html.light .text-black {
-  color: #ffffff !important;
-}
-
-html.light .border-white {
-  border-color: #0f172a !important;
-}
-
-html.light .fill-black {
-  fill: #ffffff !important;
-}
-
-/* Soft Accent Badges */
-html.light .bg-purple-600 {
-  background-color: #f3e8ff !important;
-  color: #6b21a8 !important;
-  border-color: rgba(107, 33, 168, 0.3) !important;
-}
-
-/* Form Controls, Dropdowns & Input Message Bar (Visible Slate Borders) */
-html.light input,
-html.light select,
-html.light textarea {
-  background-color: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(15, 23, 42, 0.35) !important;
-}
-
-html.light input:focus,
-html.light select:focus,
-html.light textarea:focus {
-  border-color: #0f172a !important;
-}
-
-html.light input::placeholder,
-html.light textarea::placeholder {
-  color: #94a3b8 !important;
+  background-color: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(10px) !important;
 }
 
 /* Table Headers & Rows */
 html.light thead tr {
   background-color: #f8fafc !important;
-  border-bottom-color: rgba(15, 23, 42, 0.32) !important;
+  border-bottom-color: rgba(203, 213, 225, 0.8) !important;
 }
 
 html.light tbody tr {
-  border-bottom-color: rgba(15, 23, 42, 0.24) !important;
+  border-bottom-color: rgba(203, 213, 225, 0.6) !important;
 }
 
 html.light tbody tr:hover {
@@ -261,7 +324,7 @@ html.light tbody tr:hover {
 /* Modal Inner Section Headers & Footers */
 html.light .bg-\[\#000000\].border-b,
 html.light .bg-\[\#000000\].border-t {
-  background-color: #f8f8fa !important;
+  background-color: #f8fafc !important;
 }
 
 /* Animations */
