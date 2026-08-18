@@ -128,28 +128,28 @@ export function FeedbackDetailModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fadeIn font-['Plus_Jakarta_Sans',sans-serif]">
-      <div className="w-full max-w-4xl rounded-2xl border border-[#27272a] bg-[#09090b] text-white shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[95vh] min-h-[680px]">
+      <div className="w-full max-w-4xl rounded-t-2xl sm:rounded-2xl border border-[#27272a] bg-[#09090b] text-white shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[95vh]">
         
         {/* Card Header Banner */}
-        <div className="p-5 sm:p-6 border-b flex items-center justify-between gap-3 bg-[#000000] border-[#27272a] shrink-0">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-full border border-[#27272a] bg-[#18181b] text-white font-semibold text-base flex items-center justify-center shrink-0 shadow-sm">
+        <div className="p-3.5 sm:p-6 border-b flex items-center justify-between gap-2 bg-[#000000] border-[#27272a] shrink-0">
+          <div className="flex items-center gap-2.5 sm:gap-3.5 overflow-hidden">
+            <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border border-[#27272a] bg-[#18181b] text-white font-semibold text-xs sm:text-base flex items-center justify-center shrink-0 shadow-sm">
               {activeFeedback?.avatar || (activeFeedback?.customer_name || '?').slice(0,2).toUpperCase()}
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h3 className="font-semibold text-base sm:text-lg text-white">{activeFeedback?.customer_name || 'Customer'}</h3>
+            <div className="overflow-hidden">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="font-semibold text-sm sm:text-lg text-white truncate">{activeFeedback?.customer_name || 'Customer'}</h3>
                 {isLiveCalling ? (
-                  <span className="px-3 py-0.5 rounded-full text-xs font-medium bg-[#18181b] text-white border border-[#27272a] animate-pulse flex items-center gap-1.5">
-                    <Activity className="w-3.5 h-3.5 animate-spin text-white" /> LIVE CALLING
+                  <span className="px-2 sm:px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-[#18181b] text-white border border-[#27272a] animate-pulse flex items-center gap-1">
+                    <Activity className="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin text-white" /> LIVE
                   </span>
                 ) : (
-                  <span className="px-3 py-0.5 rounded-full text-xs font-medium uppercase border bg-[#18181b] text-white border-[#27272a]">
+                  <span className="px-2 sm:px-3 py-0.5 rounded-full text-[10px] sm:text-xs font-medium uppercase border bg-[#18181b] text-white border-[#27272a]">
                     {activeFeedback?.sentiment || 'neutral'}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-[#a1a1aa] font-mono flex items-center gap-2 mt-1">
+              <p className="text-[10px] sm:text-xs text-[#a1a1aa] font-mono flex items-center gap-1.5 mt-0.5 truncate">
                 <span>{activeFeedback?.phone || ''}</span> • <span>{activeFeedback?.created_at || ''}</span>
               </p>
             </div>

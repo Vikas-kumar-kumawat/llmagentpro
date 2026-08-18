@@ -45,25 +45,25 @@ export function FeedbackMetricsCards({ metrics }) {
   ];
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 font-['Plus_Jakarta_Sans',sans-serif]">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 mb-4 sm:mb-6 font-['Plus_Jakarta_Sans',sans-serif]">
       {cards.map((card, idx) => (
         <div 
           key={idx} 
-          className="p-4 sm:p-5 bg-[#09090b] border border-[#27272a] hover:border-white hover:bg-[#18181b] transition-all duration-200 rounded-xl flex flex-col justify-between"
+          className="p-3 sm:p-5 bg-[#09090b] border border-[#27272a] hover:border-white hover:bg-[#18181b] transition-all duration-200 rounded-xl flex flex-col justify-between"
         >
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-xs uppercase tracking-wider text-[#a1a1aa] font-medium">
+          <div className="flex items-center justify-between mb-2 sm:mb-3">
+            <span className="text-[10px] sm:text-xs uppercase tracking-wider text-[#a1a1aa] font-medium truncate">
               {card.title}
             </span>
-            <div className={`w-8 h-8 rounded-lg border flex items-center justify-center shrink-0 ${card.boxBg}`}>
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg border flex items-center justify-center shrink-0 ${card.boxBg}`}>
               {card.icon}
             </div>
           </div>
           <div className="flex items-baseline justify-between mt-1">
-            <span className="text-2xl font-bold tracking-tight text-white font-mono">
+            <span className="text-base sm:text-2xl font-bold tracking-tight text-white font-mono">
               {card.value}
             </span>
-            <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-[#18181b] text-white border border-[#27272a]">
+            <span className="text-[10px] sm:text-xs font-medium px-1.5 sm:px-2 py-0.5 rounded-full bg-[#18181b] text-white border border-[#27272a]">
               {card.change}
             </span>
           </div>
