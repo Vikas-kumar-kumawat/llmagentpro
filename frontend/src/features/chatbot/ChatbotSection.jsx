@@ -193,11 +193,11 @@ export function ChatbotSection({ onSwitchTab }) {
       </div>
 
       {/* Command Console Input Bar — Monochrome Style */}
-      <div className="max-w-4xl mx-auto w-full pt-2">
+      <div className="max-w-4xl mx-auto w-full pt-3">
         <form onSubmit={handleSend}>
-          <div className="p-1.5 rounded-lg border border-[#27272a] bg-[#09090b] focus-within:border-white transition flex items-center gap-2">
-            <div className="p-2 rounded-md border shrink-0 bg-[#000000] text-white border-[#27272a]">
-              <Terminal className="w-4 h-4 text-white" />
+          <div className="p-2.5 rounded-xl border border-[#27272a] bg-[#09090b] focus-within:border-white transition flex items-center gap-3">
+            <div className="p-3 rounded-lg border shrink-0 bg-[#000000] text-white border-[#27272a]">
+              <Terminal className="w-5 h-5 text-white" />
             </div>
 
             <input
@@ -205,20 +205,20 @@ export function ChatbotSection({ onSwitchTab }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask BFibernet AI or type a command..."
-              className="w-full bg-transparent text-xs sm:text-sm text-white placeholder-[#71717a] outline-none font-medium px-1"
+              className="w-full bg-transparent text-sm sm:text-base text-white placeholder-[#71717a] outline-none font-medium px-2 py-1"
             />
 
             <button
               type="submit"
               disabled={!input.trim()}
-              className={`px-4 py-2 rounded-md text-xs font-semibold uppercase tracking-wider transition flex items-center gap-2 shrink-0 cursor-pointer border ${
+              className={`px-6 py-3 rounded-lg text-xs sm:text-sm font-semibold uppercase tracking-wider transition flex items-center gap-2 shrink-0 cursor-pointer border ${
                 input.trim()
                   ? 'bg-white text-black border-white hover:bg-zinc-200'
                   : 'bg-[#000000] text-[#71717a] border-[#27272a] cursor-not-allowed'
               }`}
             >
               <span>Execute</span>
-              <Send className="w-3.5 h-3.5" />
+              <Send className="w-4 h-4" />
             </button>
           </div>
         </form>

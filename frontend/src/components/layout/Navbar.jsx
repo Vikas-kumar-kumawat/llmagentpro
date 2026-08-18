@@ -13,14 +13,11 @@ export function Navbar({ onLogout }) {
       {/* Right side - Controls */}
       <div className="flex items-center gap-3">
         {/* User Info */}
-        <div className="flex items-center gap-2.5 bg-[#09090b] px-3 py-1 rounded-lg border border-[#27272a]">
+        <div className="flex items-center gap-2 bg-[#09090b] px-3 py-1.5 rounded-lg border border-[#27272a]">
           <div className="w-5 h-5 rounded flex items-center justify-center text-xs font-mono bg-[#18181b] text-white border border-[#27272a] shrink-0">
             <User className="w-3.5 h-3.5 text-white" />
           </div>
-          <span className="text-xs font-medium text-white">admin-vikas</span>
-          <span className="text-[10px] font-medium bg-[#18181b] text-[#a1a1aa] border border-[#27272a] px-1.5 py-0.5 rounded-full">
-            ONLINE
-          </span>
+          <span className="text-xs font-medium text-white">vikas</span>
         </div>
 
         {/* Theme Switcher */}
