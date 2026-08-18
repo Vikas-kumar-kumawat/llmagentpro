@@ -388,7 +388,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   };
 
   return (
-    <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[#000000] text-white select-none space-y-8">
+    <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[var(--bg-app)] text-[var(--text-primary)] select-none space-y-8 transition-colors duration-200">
       {/* 1. Header Bar */}
       <FeedbackHeader />
 
@@ -405,8 +405,10 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
 
       {/* Action Toast */}
       {callingState.msg && (
-        <div className="mb-6 p-3.5 rounded-xl bg-[#09090b] border border-[#27272a] text-white text-xs font-mono flex items-center gap-2 animate-fadeIn">
-          <Zap className="w-4 h-4 text-white animate-pulse" />
+        <div className={`mb-6 p-3.5 rounded-xl border text-xs font-mono flex items-center gap-2 animate-fadeIn ${
+          isDark ? 'bg-[#09090b] border-[#27272a] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
+          <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
           <span>{callingState.msg}</span>
         </div>
       )}

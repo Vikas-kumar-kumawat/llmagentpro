@@ -53,7 +53,7 @@ function MainAppLayout({ onLogout }) {
   }, [loadAllData]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#000000] text-white">
+    <div className={`flex h-screen overflow-hidden transition-colors duration-200 ${isDark ? 'bg-[#000000] text-white' : 'bg-transparent text-white'}`}>
       {/* BFibernet Sidebar */}
       <Sidebar
         activeAgent={activeAgent}
@@ -63,7 +63,7 @@ function MainAppLayout({ onLogout }) {
       />
 
       {/* Main BFibernet Workspace */}
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#000000]">
+      <main className={`flex-1 flex flex-col h-screen overflow-y-auto transition-colors duration-200 ${isDark ? 'bg-[#000000] text-white' : 'bg-transparent'}`}>
         {/* Top Navbar Header with Admin Badge */}
         <Navbar 
           onLogout={onLogout} 

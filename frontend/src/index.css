@@ -1,336 +1,218 @@
 @import "tailwindcss";
 
+/* ──────────────────────────────────────────────
+   DARK THEME — Sleek black/zinc high-tech
+────────────────────────────────────────────── */
+html.dark {
+  --bg-app: #000000;
+  --bg-card: #09090b;
+  --bg-surface: #121215;
+  --bg-hover: #18181b;
+  --text-primary: #ffffff;
+  --text-secondary: #cbd5e1;
+  --text-muted: #a1a1aa;
+  --border-color: #27272a;
+  --border-strong: #3f3f46;
+  --input-bg: #09090b;
+  --input-border: #27272a;
+  --accent-color: #38bdf8;
+  --card-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(9, 9, 11, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.06);
+}
+
+/* ──────────────────────────────────────────────
+   LIGHT THEME — Deep Studio Spotlight Aesthetic
+   Darker background for extreme element pop & high contrast
+────────────────────────────────────────────── */
+:root,
+html.light {
+  /* Smooth studio spotlight gradient (balanced lighter slate) */
+  --bg-app-gradient: radial-gradient(
+    ellipse at 50% 32%,
+    #526072 0%,
+    #3b4859 35%,
+    #263242 70%,
+    #16202c 100%
+  );
+
+  /* Glass surface colors — crisp, ultra-bright white cards for maximum legibility */
+  --bg-card: rgba(255, 255, 255, 0.96);
+  --bg-surface: rgba(255, 255, 255, 0.90);
+  --bg-hover: #ffffff;
+  --bg-sidebar: rgba(15, 23, 42, 0.82);
+  --bg-navbar: rgba(15, 23, 42, 0.75);
+
+  /* Text: sharp dark slate inside cards, white on headers */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --text-on-glass: #ffffff;
+  --text-on-glass-muted: rgba(255, 255, 255, 0.85);
+
+  /* Borders: glowing white-glass borders */
+  --border-color: rgba(255, 255, 255, 0.70);
+  --border-card: #ffffff;
+  --border-strong: #ffffff;
+  --border-dark: rgba(15, 23, 42, 0.15);
+
+  /* Inputs */
+  --input-bg: #ffffff;
+  --input-border: rgba(15, 23, 42, 0.20);
+  --input-text: #0f172a;
+
+  /* Accent: electric blue */
+  --accent-color: #3b82f6;
+  --accent-hover: #2563eb;
+
+  /* Shadows: deep 3D elevation */
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.50), 0 8px 20px rgba(0, 0, 0, 0.25);
+  --surface-shadow: 0 8px 25px -4px rgba(0, 0, 0, 0.35);
+
+  /* Glassmorphism */
+  --glass-bg: rgba(255, 255, 255, 0.96);
+  --glass-border: #ffffff;
+  --glass-blur: 24px;
+}
+
+/* ──────────────────────────────────────────────
+   BASE STYLES
+────────────────────────────────────────────── */
 @layer base {
-  html.dark body, html body {
+  * {
+    box-sizing: border-box;
+  }
+
+  html.dark body {
     background-color: #000000;
     color: #ffffff;
     font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     letter-spacing: -0.015em;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 
   html.light body {
-    background-color: #fafafa;
-    color: #09090b;
+    background: var(--bg-app-gradient);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: #ffffff;
     font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    letter-spacing: -0.01em;
+    transition: background-color 0.25s ease, color 0.25s ease;
   }
 }
 
-/* Custom Sleek Black & White Scrollbars */
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
+/* ──────────────────────────────────────────────
+   SCROLLBARS
+────────────────────────────────────────────── */
+html.dark ::-webkit-scrollbar-track {
   background: #000000;
 }
 
-html.light ::-webkit-scrollbar-track {
-  background: #f4f4f5;
-}
-
-::-webkit-scrollbar-thumb {
+html.dark ::-webkit-scrollbar-thumb {
   background: #27272a;
   border-radius: 4px;
 }
 
+html.dark ::-webkit-scrollbar-thumb:hover {
+  background: #3f3f46;
+}
+
+html.light ::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.25);
+}
+
 html.light ::-webkit-scrollbar-thumb {
-  background: #d4d4d8;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: #52525b;
-}
-
-html.light ::-webkit-scrollbar-thumb:hover {
-  background: #a1a1aa;
-}
-
-/* Black & White Theme Utilities */
-.nvidia-card {
-  background-color: #09090b;
-  border: 1px solid #27272a;
-  border-radius: 8px;
-}
-
-.nvidia-card-hover {
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.nvidia-card-hover:hover {
-  background-color: #18181b;
-  border-color: #ffffff;
-}
-
-.btn-nvidia-green {
-  background-color: #ffffff;
-  color: #000000;
-  font-weight: 600;
-  border-radius: 6px;
-  transition: background-color 0.15s ease;
-}
-
-.btn-nvidia-green:hover {
-  background-color: #e4e4e7;
-  color: #000000;
-}
-
-.btn-nvidia-secondary {
-  background-color: #09090b;
-  color: #ffffff;
-  border: 1px solid #27272a;
-  border-radius: 6px;
-  transition: background-color 0.15s ease, border-color 0.15s ease;
-}
-
-.btn-nvidia-secondary:hover {
-  background-color: #18181b;
-  border-color: #ffffff;
-  color: #ffffff;
-}
-
-.badge-green {
-  background-color: #18181b;
-  color: #ffffff;
-  border: 1px solid #27272a;
+  background: rgba(255, 255, 255, 0.50);
   border-radius: 4px;
 }
 
-/* ---------------------------------------------------- */
-/* LIGHT THEME COMPREHENSIVE OVERRIDES (LIGHT BLUE SILK WAVE WALLPAPER) */
-/* ---------------------------------------------------- */
-
-html.light body {
-  background-color: #256499 !important;
-  background-image: 
-    url('/light_bg_wave.svg'),
-    radial-gradient(at 85% 15%, rgba(160, 227, 240, 0.95) 0px, transparent 60%),
-    radial-gradient(at 15% 85%, rgba(22, 67, 106, 0.9) 0px, transparent 65%),
-    linear-gradient(135deg, #16436a 0%, #256499 40%, #4697cf 70%, #80d5e8 90%, #a0e3f0 100%) !important;
-  background-attachment: fixed !important;
-  background-size: cover !important;
-  background-position: center center !important;
-  color: #ffffff !important;
+html.light ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.80);
 }
 
-/* Page Outer Background (Root viewport wrapper) */
-html.light .bg-\[\#000000\] {
-  background-color: transparent !important;
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-/* Sidebar Container (Translucent Ocean Silk Glass Surface) */
+/* ──────────────────────────────────────────────
+   LIGHT THEME — GLASSMORPHISM COMPONENT TOKENS
+────────────────────────────────────────────── */
+
+/* Sidebar — Frosted dark slate glass panel */
 html.light aside {
-  background-color: rgba(18, 53, 85, 0.65) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  opacity: 1 !important;
-  box-shadow: 4px 0 25px rgba(15, 23, 42, 0.25) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(15, 23, 42, 0.82) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%) !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 6px 0 40px rgba(0, 0, 0, 0.50) !important;
   color: #ffffff !important;
 }
 
-html.light aside div,
-html.light aside span,
-html.light aside button {
-  border-color: rgba(255, 255, 255, 0.18) !important;
-}
-
-html.light aside .text-white {
-  color: #ffffff !important;
-}
-
-html.light aside .text-\[\#a1a1aa\],
-html.light aside .text-\[\#71717a\] {
-  color: #cbd5e1 !important;
-}
-
-/* Active Sidebar Item */
-html.light aside .bg-\[\#18181b\] {
-  background-color: rgba(56, 189, 248, 0.28) !important;
-  border-color: rgba(125, 211, 252, 0.6) !important;
-  color: #ffffff !important;
-  box-shadow: 0 2px 10px rgba(14, 165, 233, 0.2) !important;
-}
-
-html.light aside button:hover {
-  background-color: rgba(255, 255, 255, 0.12) !important;
-  color: #ffffff !important;
-}
-
-/* Navbar & Header (Translucent Ocean Silk Glass Header) */
+/* Navbar — Frosted dark slate glass header bar */
 html.light header {
-  background-color: rgba(18, 53, 85, 0.65) !important;
-  backdrop-filter: blur(24px) !important;
-  -webkit-backdrop-filter: blur(24px) !important;
-  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.18) !important;
+  background: rgba(15, 23, 42, 0.75) !important;
+  backdrop-filter: blur(var(--glass-blur)) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(160%) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.40) !important;
   color: #ffffff !important;
 }
 
-html.light header .bg-\[\#09090b\],
-html.light header .bg-\[\#18181b\] {
-  background-color: rgba(255, 255, 255, 0.15) !important;
-  border-color: rgba(255, 255, 255, 0.25) !important;
-  color: #ffffff !important;
+/* Main content area — inherits dark studio gradient */
+html.light main {
+  background: transparent !important;
 }
 
-html.light header .text-white,
-html.light header .text-\[\#a1a1aa\] {
-  color: #ffffff !important;
-}
-
-/* ---------------------------------------------------- */
-/* HOME PAGE & MAIN WORKSPACE CONTENT HIGH VISIBILITY */
-/* ---------------------------------------------------- */
-
-/* Header Titles & Subtitles directly on the Home Page Wallpaper */
-html.light main h1,
-html.light main h2 {
-  color: #ffffff !important;
-  text-shadow: 0 1px 3px rgba(15, 23, 42, 0.4);
-}
-
-html.light main p.text-zinc-400,
-html.light main span.text-zinc-400,
-html.light main .text-zinc-400 {
-  color: #e0f2fe !important;
-}
-
-/* Quick Prompt Suggestion Pills */
-html.light main .flex-wrap button {
-  background-color: rgba(255, 255, 255, 0.95) !important;
-  color: #0f172a !important;
-  font-weight: 600 !important;
-  border-color: rgba(186, 230, 253, 0.9) !important;
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.1) !important;
-}
-
-html.light main .flex-wrap button:hover {
-  background-color: #ffffff !important;
-  border-color: #0284c7 !important;
-  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25) !important;
-  color: #0284c7 !important;
-}
-
-/* Main Content Cards & Section Cards (High Legibility Opaque White Surface) */
-html.light main .bg-\[\#09090b\] {
-  background-color: rgba(255, 255, 255, 0.96) !important;
-  backdrop-filter: blur(16px) !important;
-  box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.18), 0 4px 12px rgba(15, 23, 42, 0.08) !important;
-  border-color: rgba(186, 230, 253, 0.9) !important;
+/* Cards & containers — ultra-bright white cards with sharp dark text that POP */
+html.light .theme-card,
+html.light [class*="bg-\\[#09090b\\]"],
+html.light [class*="bg-\\[#000000\\]"],
+html.light [class*="bg-\\[#18181b\\]"] {
+  background: var(--glass-bg) !important;
+  backdrop-filter: blur(20px) saturate(150%) !important;
+  border-color: var(--glass-border) !important;
+  box-shadow: var(--card-shadow) !important;
   color: #0f172a !important;
 }
 
-html.light main .bg-\[\#09090b\] h3,
-html.light main .bg-\[\#09090b\] h2,
-html.light main .bg-\[\#09090b\] .text-white {
-  color: #0f172a !important;
+/* ──────────────────────────────────────────────
+   LIGHT THEME — INPUT FIELD OVERRIDES
+────────────────────────────────────────────── */
+html.light input:not([class*="bg-transparent"]),
+html.light textarea:not([class*="bg-transparent"]),
+html.light select:not([class*="bg-transparent"]) {
+  background-color: #ffffff;
+  color: #0f172a;
 }
 
-html.light main .bg-\[\#09090b\] p,
-html.light main .bg-\[\#09090b\] .text-zinc-400,
-html.light main .bg-\[\#09090b\] .text-\[\#a1a1aa\] {
-  color: #475569 !important;
+html.light input::placeholder,
+html.light textarea::placeholder {
+  color: #64748b;
 }
 
-/* Card Icon Box inside Home Page Launch Cards */
-html.light main .bg-\[\#09090b\] .bg-\[\#000000\],
-html.light main .bg-\[\#09090b\] .bg-\[\#18181b\] {
-  background-color: #f0f9ff !important;
-  border-color: #bae6fd !important;
-  color: #0284c7 !important;
+html.light input:focus,
+html.light textarea:focus,
+html.light select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.30);
 }
 
-html.light main .bg-\[\#09090b\] .bg-\[\#000000\] svg,
-html.light main .bg-\[\#09090b\] .bg-\[\#18181b\] svg {
-  color: #0284c7 !important;
-}
-
-/* Hover effects for Home Page Agent Cards */
-html.light main .hover\:bg-\[\#18181b\]:hover {
-  background-color: #ffffff !important;
-  border-color: #0284c7 !important;
-  box-shadow: 0 12px 30px rgba(14, 165, 233, 0.2) !important;
-}
-
-/* Chatbot Messages Visibility */
-html.light main .bg-zinc-100 {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
-  color: #ffffff !important;
-  border-color: #0284c7 !important;
-  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.25) !important;
-}
-
-html.light main .bg-zinc-100 .text-zinc-900,
-html.light main .bg-zinc-100 .text-zinc-600 {
-  color: #ffffff !important;
-}
-
-/* Bot Message Bubbles */
-html.light main .bg-gradient-to-b {
-  background: #ffffff !important;
-  color: #0f172a !important;
-  border-color: rgba(186, 230, 253, 0.9) !important;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12) !important;
-}
-
-/* Command Console Input Box at Bottom */
-html.light main form .bg-\[\#09090b\] {
-  background-color: #ffffff !important;
-  border-color: rgba(186, 230, 253, 0.9) !important;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.15) !important;
-}
-
-html.light main form input {
-  color: #0f172a !important;
-  font-weight: 500 !important;
-}
-
-html.light main form input::placeholder {
-  color: #64748b !important;
-}
-
-html.light main form button[type="submit"] {
-  background-color: #0f172a !important;
-  color: #ffffff !important;
-  border-color: #0f172a !important;
-}
-
-html.light main form button[type="submit"]:hover {
-  background-color: #0284c7 !important;
-  border-color: #0284c7 !important;
-}
-
-/* Modal Dialog Overlay Backdrop */
-html.light .bg-black\/80 {
-  background-color: rgba(15, 23, 42, 0.45) !important;
-  backdrop-filter: blur(10px) !important;
-}
-
-/* Table Headers & Rows */
-html.light thead tr {
-  background-color: #f8fafc !important;
-  border-bottom-color: rgba(203, 213, 225, 0.8) !important;
-}
-
-html.light tbody tr {
-  border-bottom-color: rgba(203, 213, 225, 0.6) !important;
-}
-
-html.light tbody tr:hover {
-  background-color: #f1f5f9 !important;
-}
-
-/* Modal Inner Section Headers & Footers */
-html.light .bg-\[\#000000\].border-b,
-html.light .bg-\[\#000000\].border-t {
-  background-color: #f8fafc !important;
-}
-
-/* Animations */
+/* ──────────────────────────────────────────────
+   ANIMATIONS
+────────────────────────────────────────────── */
 @keyframes fadeIn {
-  from { opacity: 0; transform: scale(0.99); }
-  to { opacity: 1; transform: scale(1); }
+  from {
+    opacity: 0;
+    transform: scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 .animate-fadeIn {

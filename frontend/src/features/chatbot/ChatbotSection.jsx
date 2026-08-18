@@ -39,13 +39,13 @@ export function ChatbotSection({ onSwitchTab }) {
     if (!input.trim() || isLoading) return;
 
     const userQuery = input.trim();
-    const userMsg = { 
-      id: Date.now(), 
-      sender: 'human', 
-      text: userQuery, 
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+    const userMsg = {
+      id: Date.now(),
+      sender: 'human',
+      text: userQuery,
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    
+
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
     setIsLoading(true);
@@ -55,22 +55,22 @@ export function ChatbotSection({ onSwitchTab }) {
       const replyText = res.answer || "I am connected to the official BFibernet enterprise knowledge base. How can I help you today?";
       setMessages((prev) => [
         ...prev,
-        { 
-          id: Date.now() + 1, 
-          sender: 'agent', 
-          text: replyText, 
+        {
+          id: Date.now() + 1,
+          sender: 'agent',
+          text: replyText,
           sources: res.sources || [],
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
     } catch (err) {
       setMessages((prev) => [
         ...prev,
-        { 
-          id: Date.now() + 1, 
-          sender: 'agent', 
-          text: `Hello! I am your **BFibernet AI Copilot**. How can I assist you with your broadband service or enterprise fiber connection today?`, 
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        {
+          id: Date.now() + 1,
+          sender: 'agent',
+          text: `Hello! I am your **BFibernet AI Copilot**. How can I assist you with your broadband service or enterprise fiber connection today?`,
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
       ]);
     } finally {
@@ -89,19 +89,23 @@ export function ChatbotSection({ onSwitchTab }) {
   };
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] bg-[#000000] text-white font-['Plus_Jakarta_Sans',sans-serif] select-none flex flex-col justify-between p-2.5 sm:p-6 space-y-3 sm:space-y-4">
-      
+    <div className={`min-h-[calc(100vh-4rem)] font-['Plus_Jakarta_Sans',sans-serif] select-none flex flex-col justify-between p-2.5 sm:p-6 space-y-3 sm:space-y-4 transition-colors duration-200 ${isDark ? 'bg-[#000000] text-white' : 'bg-transparent text-slate-900'}`}>
+
       {/* Top Header Banner */}
       <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-2.5 sm:pb-3">
         <div className="flex items-center gap-2.5 sm:gap-3">
-          <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 bg-white/90 border-white/80 text-emerald-600 shadow-sm">
-            <Wifi className="w-4 h-4 text-emerald-600" />
+          <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 ${isDark ? 'bg-[#18181b] border-[#27272a] text-emerald-400' : 'bg-white text-slate-900 border-white shadow-md'
+            }`}>
+            <Wifi className="w-4 h-4 text-emerald-500" />
           </div>
           <div>
-            <h1 className="text-base sm:text-xl font-bold tracking-tight text-white leading-tight flex items-center gap-2 drop-shadow-xs">
-              BFibernet <span className="text-white/90 font-medium text-xs sm:text-base">AI Copilot</span>
-              <span className="inline-flex items-center gap-1 text-[11px] bg-white/95 text-emerald-700 border border-emerald-300 px-2.5 py-0.5 rounded-full font-bold shadow-xs">
-                <Sparkles className="w-3 h-3 text-emerald-600" /> RAG v2.4 Active
+            <h1 className="text-base sm:text-xl font-extrabold tracking-tight leading-tight flex items-center gap-2 text-white">
+              BFibernet <span className={isDark ? 'text-zinc-300 font-medium' : 'text-slate-200 font-medium'}>AI Copilot</span>
+              <span className={`inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-full font-bold shadow-md border ${isDark
+                ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700'
+                : 'bg-emerald-500 text-white border-emerald-400'
+                }`}>
+                <Sparkles className="w-3 h-3 text-white" /> RAG v2.4 Active
               </span>
             </h1>
           </div>
@@ -110,9 +114,12 @@ export function ChatbotSection({ onSwitchTab }) {
         {messages.length > 0 && (
           <button
             onClick={() => setMessages([])}
-            className="text-xs text-slate-800 hover:text-slate-950 font-medium flex items-center gap-1.5 bg-white/90 hover:bg-white border border-slate-200 px-3 py-1.5 rounded-lg shadow-xs transition cursor-pointer"
+            className={`text-xs font-semibold flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition cursor-pointer ${isDark
+              ? 'bg-[#18181b] hover:bg-[#27272a] text-zinc-300 border-[#27272a]'
+              : 'bg-white/20 hover:bg-white/30 text-white border-white/40 backdrop-blur-md shadow-xs'
+              }`}
           >
-            <RefreshCw className="w-3 h-3 text-slate-600" /> Clear Chat
+            <RefreshCw className="w-3 h-3 text-white" /> Clear Chat
           </button>
         )}
       </div>
@@ -133,89 +140,76 @@ export function ChatbotSection({ onSwitchTab }) {
                 <button
                   key={i}
                   onClick={() => handleQuickPrompt(prompt)}
-                  className="text-xs bg-white/95 hover:bg-white text-slate-800 font-semibold border border-white/80 hover:border-sky-300 shadow-sm hover:shadow-md px-3.5 py-2 rounded-full transition-all duration-200 text-left flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className={`text-xs font-semibold border px-3.5 py-2 rounded-full transition-all duration-200 text-left flex items-center gap-1.5 cursor-pointer active:scale-95 ${isDark
+                    ? 'bg-[#18181b] hover:bg-[#27272a] text-zinc-200 border-[#27272a] hover:border-sky-500/50'
+                    : 'bg-white hover:bg-slate-100 text-slate-900 border-white shadow-md hover:shadow-lg'
+                    }`}
                 >
                   <span className="text-amber-500">💡</span> "{prompt}"
                 </button>
               ))}
             </div>
 
-            {/* 4 Agent Action Cards Console - Simple, Rectangular, Pythonish */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 pt-2">
+            {/* 4 Agent Action Cards Console */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2">
               {/* Feedback Agent */}
-              <div 
+              <div
                 onClick={() => handleAgentLaunch('feedback')}
-                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
+                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer group flex items-center gap-3.5 ${isDark
+                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/80 hover:bg-[#121215]'
+                    : 'bg-white border-white hover:border-blue-400 shadow-lg hover:shadow-xl'
+                  }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
-                    <MessageSquare className="w-4 h-4 text-black" />
-                  </div>
-                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
-                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
-                  </span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 transition-colors ${isDark ? 'bg-[#18181b] border-[#27272a] text-white' : 'bg-blue-50 border-blue-100 text-blue-600'
+                  }`}>
+                  <MessageSquare className="w-5 h-5 text-blue-600" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Feedback Agent</h3>
-                  <span className="text-[10px] font-mono text-slate-400">.py</span>
-                </div>
+                <h3 className={`text-base font-bold transition ${isDark ? 'text-white group-hover:text-sky-400' : 'text-slate-900 group-hover:text-blue-600'}`}>Launch Feedback Agent</h3>
               </div>
 
               {/* Recharge Reminder */}
-              <div 
+              <div
                 onClick={() => handleAgentLaunch('recharge')}
-                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
+                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer group flex items-center gap-3.5 ${isDark
+                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/80 hover:bg-[#121215]'
+                    : 'bg-white border-white hover:border-blue-400 shadow-lg hover:shadow-xl'
+                  }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
-                    <Zap className="w-4 h-4 text-black" />
-                  </div>
-                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
-                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
-                  </span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 transition-colors ${isDark ? 'bg-[#18181b] border-[#27272a] text-white' : 'bg-amber-50 border-amber-100 text-amber-600'
+                  }`}>
+                  <Zap className="w-5 h-5 text-amber-500" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Recharge Reminder</h3>
-                  <span className="text-[10px] font-mono text-slate-400">.py</span>
-                </div>
+                <h3 className={`text-base font-bold transition ${isDark ? 'text-white group-hover:text-sky-400' : 'text-slate-900 group-hover:text-blue-600'}`}>Launch Recharge Reminder</h3>
               </div>
 
               {/* New Offers Call */}
-              <div 
+              <div
                 onClick={() => handleAgentLaunch('offers')}
-                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
+                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer group flex items-center gap-3.5 ${isDark
+                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/80 hover:bg-[#121215]'
+                    : 'bg-white border-white hover:border-blue-400 shadow-lg hover:shadow-xl'
+                  }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
-                    <Gift className="w-4 h-4 text-black" />
-                  </div>
-                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
-                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
-                  </span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 transition-colors ${isDark ? 'bg-[#18181b] border-[#27272a] text-white' : 'bg-purple-50 border-purple-100 text-purple-600'
+                  }`}>
+                  <Gift className="w-5 h-5 text-purple-600" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">New Offers Call</h3>
-                  <span className="text-[10px] font-mono text-slate-400">.py</span>
-                </div>
+                <h3 className={`text-base font-bold transition ${isDark ? 'text-white group-hover:text-sky-400' : 'text-slate-900 group-hover:text-blue-600'}`}>Launch New Offers Call</h3>
               </div>
 
               {/* Competitor Price Monitor */}
-              <div 
+              <div
                 onClick={() => handleAgentLaunch('competitor')}
-                className="p-3.5 sm:p-4 rounded-lg border border-slate-200 bg-white/95 hover:border-[#3776AB] hover:shadow-lg transition-all duration-200 cursor-pointer group flex flex-col justify-between space-y-3"
+                className={`p-4 rounded-xl border transition-all duration-200 cursor-pointer group flex items-center gap-3.5 ${isDark
+                    ? 'bg-[#09090b] border-[#27272a] hover:border-sky-500/80 hover:bg-[#121215]'
+                    : 'bg-white border-white hover:border-blue-400 shadow-lg hover:shadow-xl'
+                  }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="w-8 h-8 rounded-md flex items-center justify-center bg-slate-100 border border-slate-200 text-black group-hover:bg-[#3776AB]/10 transition-colors">
-                    <TrendingDown className="w-4 h-4 text-black" />
-                  </div>
-                  <span className="text-[10px] font-mono font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 flex items-center gap-1 group-hover:bg-[#3776AB] group-hover:text-white transition-colors">
-                    <span>launch()</span> <ArrowRight className="w-3 h-3" />
-                  </span>
+                <div className={`w-10 h-10 rounded-lg flex items-center justify-center border shrink-0 transition-colors ${isDark ? 'bg-[#18181b] border-[#27272a] text-white' : 'bg-emerald-50 border-emerald-100 text-emerald-600'
+                  }`}>
+                  <TrendingDown className="w-5 h-5 text-emerald-600" />
                 </div>
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-[#3776AB] transition">Competitor Price Monitor</h3>
-                  <span className="text-[10px] font-mono text-slate-400">.py</span>
-                </div>
+                <h3 className={`text-base font-bold transition ${isDark ? 'text-white group-hover:text-sky-400' : 'text-slate-900 group-hover:text-blue-600'}`}>Launch Competitor Price Monitor</h3>
               </div>
             </div>
           </div>
@@ -227,21 +221,28 @@ export function ChatbotSection({ onSwitchTab }) {
                 className={`flex ${msg.sender === 'human' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
-                  className={`max-w-[92%] sm:max-w-[85%] rounded-xl p-3.5 sm:p-5 space-y-2 shadow-lg border ${
-                    msg.sender === 'human'
-                      ? 'bg-zinc-100 text-zinc-900 border-white'
-                      : 'bg-[#09090b] text-white border-[#27272a] bg-gradient-to-b from-[#121215] to-[#09090b]'
-                  }`}
+                  className={`max-w-[92%] sm:max-w-[85%] rounded-xl p-3.5 sm:p-5 space-y-2 shadow-sm border ${msg.sender === 'human'
+                    ? isDark ? 'bg-sky-600 text-white border-sky-500' : 'bg-blue-600 text-white border-blue-500 shadow-md'
+                    : isDark
+                      ? 'bg-[#09090b] text-white border-[#27272a]'
+                      : 'bg-white/92 backdrop-blur-md text-slate-900 border-white/90 shadow-xl'
+                    }`}
                 >
-                  <div className="flex items-center justify-between gap-3 pb-2 border-b border-zinc-800/60">
-                    <span className={`font-semibold flex items-center gap-2 text-xs tracking-wide ${msg.sender === 'human' ? 'text-zinc-900 font-bold' : 'text-white'}`}>
+                  <div className={`flex items-center justify-between gap-3 pb-2 border-b ${msg.sender === 'human'
+                    ? 'border-sky-500/60'
+                    : isDark ? 'border-zinc-800' : 'border-slate-100'
+                    }`}>
+                    <span className={`font-semibold flex items-center gap-2 text-xs tracking-wide ${msg.sender === 'human' ? 'text-white font-bold' : isDark ? 'text-white' : 'text-slate-900'
+                      }`}>
                       {msg.sender === 'agent' ? (
                         <>
-                          <div className="w-5 h-5 rounded-md bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-                            <Bot className="w-3 h-3 text-emerald-400" />
+                          <div className={`w-5 h-5 rounded-md border flex items-center justify-center ${isDark ? 'bg-zinc-800 border-zinc-700' : 'bg-slate-100 border-slate-200'
+                            }`}>
+                            <Bot className="w-3 h-3 text-emerald-500" />
                           </div>
-                          <span className="font-bold text-white">BFIBERNET AI</span>
-                          <span className="text-[10px] bg-zinc-800/80 text-zinc-400 px-1.5 py-0.5 rounded font-mono border border-zinc-700/50">
+                          <span className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>BFIBERNET AI</span>
+                          <span className={`text-[10px] px-1.5 py-0.5 rounded font-mono border ${isDark ? 'bg-zinc-800/80 text-zinc-400 border-zinc-700/50' : 'bg-slate-100 text-slate-600 border-slate-200'
+                            }`}>
                             Copilot
                           </span>
                         </>
@@ -249,7 +250,8 @@ export function ChatbotSection({ onSwitchTab }) {
                         <>YOU</>
                       )}
                     </span>
-                    <span className={`text-[11px] font-mono ${msg.sender === 'human' ? 'text-zinc-600' : 'text-zinc-500'}`}>{msg.time}</span>
+                    <span className={`text-[11px] font-mono ${msg.sender === 'human' ? 'text-sky-100' : isDark ? 'text-zinc-500' : 'text-slate-400'
+                      }`}>{msg.time}</span>
                   </div>
 
                   {/* Formatted Content Rendering */}
@@ -265,15 +267,17 @@ export function ChatbotSection({ onSwitchTab }) {
             {/* Thinking / Loading Animation */}
             {isLoading && (
               <div className="flex justify-start">
-                <div className="max-w-[85%] rounded-xl p-4 bg-[#09090b] border border-[#27272a] text-white flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-md bg-zinc-800 flex items-center justify-center shrink-0">
-                    <Loader2 className="w-3.5 h-3.5 text-emerald-400 animate-spin" />
+                <div className={`max-w-[85%] rounded-xl p-4 border flex items-center gap-3 ${isDark ? 'bg-[#09090b] border-[#27272a] text-white' : 'bg-white/78 backdrop-blur-md border-white/50 text-slate-900 shadow-sm'
+                  }`}>
+                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${isDark ? 'bg-zinc-800' : 'bg-white/50'
+                    }`}>
+                    <Loader2 className="w-3.5 h-3.5 text-emerald-500 animate-spin" />
                   </div>
                   <div className="space-y-1">
-                    <p className="text-xs font-semibold text-zinc-300 flex items-center gap-1.5">
+                    <p className={`text-xs font-semibold flex items-center gap-1.5 ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
                       BFibernet AI Copilot <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
                     </p>
-                    <p className="text-[11px] text-zinc-400">Analyzing enterprise knowledge base...</p>
+                    <p className={`text-[11px] ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Analyzing enterprise knowledge base...</p>
                   </div>
                 </div>
               </div>
@@ -284,12 +288,16 @@ export function ChatbotSection({ onSwitchTab }) {
         )}
       </div>
 
-      {/* Command Console Input Bar — Modern Styled Console */}
+      {/* Command Console Input Bar */}
       <div className="max-w-4xl mx-auto w-full pt-2 sm:pt-3">
         <form onSubmit={handleSend}>
-          <div className="p-2 sm:p-2.5 rounded-2xl border border-sky-200/90 bg-white/95 focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20 transition-all duration-200 flex items-center gap-2 sm:gap-3 shadow-lg shadow-sky-900/10">
-            <div className="p-2 sm:p-2.5 rounded-xl shrink-0 bg-gradient-to-br from-slate-900 to-slate-800 text-cyan-400 border border-slate-700 shadow-sm">
-              <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-cyan-400" />
+          <div className={`p-2 sm:p-2.5 rounded-xl border transition-all duration-200 flex items-center gap-2 sm:gap-3 ${isDark
+              ? 'bg-[#09090b] border-[#27272a] focus-within:border-sky-500 focus-within:ring-2 focus-within:ring-sky-500/20'
+              : 'bg-white border-slate-200 shadow-xl focus-within:border-blue-600 focus-within:ring-2 focus-within:ring-blue-500/20'
+            }`}>
+            <div className={`p-2.5 rounded-lg shrink-0 border shadow-xs ${isDark ? 'bg-[#18181b] border-[#27272a] text-sky-400' : 'bg-blue-600 border-blue-600 text-white shadow-xs'
+              }`}>
+              <Terminal className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
             </div>
 
             <input
@@ -297,17 +305,21 @@ export function ChatbotSection({ onSwitchTab }) {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask BFibernet AI about plans, SLAs, billing, or technical support..."
-              className="w-full bg-transparent text-xs sm:text-sm text-slate-900 placeholder-slate-400 outline-none font-medium px-1 sm:px-2 py-1.5 min-w-0"
+              className={`w-full bg-transparent text-xs sm:text-sm outline-none font-medium px-1 sm:px-2 py-1.5 min-w-0 ${isDark ? 'text-white placeholder-zinc-500' : 'text-slate-900 placeholder-slate-400'
+                }`}
             />
 
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className={`px-4 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold uppercase tracking-wider transition-all duration-200 flex items-center justify-center gap-1.5 shrink-0 cursor-pointer border ${
-                input.trim() && !isLoading
-                  ? 'bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-500 hover:to-blue-600 text-white border-transparent shadow-md shadow-sky-600/30 active:scale-95'
+              className={`px-4 sm:px-5 py-2.5 rounded-lg text-xs sm:text-sm font-bold transition-all duration-200 flex items-center justify-center gap-2 shrink-0 cursor-pointer border ${input.trim() && !isLoading
+                ? isDark
+                  ? 'bg-sky-600 hover:bg-sky-500 text-white border-sky-500 shadow-md active:scale-95'
+                  : 'bg-blue-600 hover:bg-blue-700 text-white border-blue-600 shadow-md active:scale-95'
+                : isDark
+                  ? 'bg-[#18181b] text-zinc-600 border-[#27272a] cursor-not-allowed'
                   : 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed'
-              }`}
+                }`}
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 text-slate-400 animate-spin" />
@@ -322,7 +334,8 @@ export function ChatbotSection({ onSwitchTab }) {
         </form>
 
         {/* Footer info text */}
-        <p className="text-center text-[10px] sm:text-xs mt-2 text-white/90 font-medium drop-shadow-xs">
+        <p className={`text-center text-[10px] sm:text-xs mt-2 font-medium ${isDark ? 'text-zinc-500' : 'text-slate-700'
+          }`}>
           BFibernet Enterprise AI Copilot • Powered by Grounded RAG Knowledge Base
         </p>
       </div>
