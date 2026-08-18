@@ -107,7 +107,7 @@ export function ChatbotSection({ onSwitchTab }) {
                   </span>
                 </div>
                 <div>
-                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">Feedback Collector</h3>
+                  <h3 className="text-xs sm:text-sm font-semibold text-white group-hover:text-white transition">Feedback Agent</h3>
                 </div>
               </div>
 

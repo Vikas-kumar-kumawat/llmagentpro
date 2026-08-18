@@ -7,7 +7,7 @@ export function FeedbackHeader() {
       <div>
         <div className="flex items-center gap-3">
           <h1 className="text-lg sm:text-2xl font-semibold tracking-tight text-white">
-            Feedback Collector <span className="text-[#a1a1aa] font-normal">Agent</span>
+            Feedback <span className="text-[#a1a1aa] font-normal">Agent</span>
           </h1>
         </div>
       </div>

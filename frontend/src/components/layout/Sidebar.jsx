@@ -8,7 +8,8 @@ import {
   Headset,
   PanelLeft,
   Wifi,
-  X
+  X,
+  ShoppingBag
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -18,7 +19,8 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
 
   const agents = [
     { id: 'chatbot', name: 'BFibernet AI', icon: Brain },
-    { id: 'feedback', name: 'Feedback Collector', icon: MessageSquare },
+    { id: 'feedback', name: 'Feedback Agent', icon: MessageSquare },
+    { id: 'sales', name: 'Sales AI Agent', icon: ShoppingBag, badge: 'New' },
     { id: 'recharge', name: 'Recharge Reminder', icon: Zap },
     { id: 'offers', name: 'New Offers Call', icon: Gift, badge: 'Beta' },
     { id: 'competitor', name: 'Competitor Price Monitor', icon: TrendingDown },
