@@ -8,7 +8,8 @@ import {
   Bot,
   Send,
   Terminal,
-  ArrowRight
+  ArrowRight,
+  Wifi
 } from 'lucide-react';
 
 export function ChatbotSection({ onSwitchTab }) {
@@ -72,12 +73,10 @@ export function ChatbotSection({ onSwitchTab }) {
       {/* Top Header Banner */}
       <div className="max-w-4xl mx-auto w-full flex items-center justify-between pb-3 border-b border-[#27272a]">
         <div className="flex items-center gap-3">
-          <img
-            src="/bfibernet_logo.png"
-            alt="BFibernet Logo"
-            className="h-7 object-contain rounded bg-white px-1.5 py-0.5 border border-[#27272a]"
-          />
-          <h1 className="text-lg sm:text-2xl font-semibold tracking-tight text-white leading-tight font-['Plus_Jakarta_Sans',sans-serif]">
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 bg-[#18181b] border-[#27272a] text-white">
+            <Wifi className="w-4 h-4 text-white" />
+          </div>
+          <h1 className="text-lg sm:text-2xl font-bold tracking-tight text-white leading-tight font-['Plus_Jakarta_Sans',sans-serif]">
             BFibernet <span className="text-[#a1a1aa] font-normal">AI Copilot</span>
           </h1>
         </div>

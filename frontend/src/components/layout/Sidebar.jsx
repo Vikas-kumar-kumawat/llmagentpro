@@ -6,7 +6,8 @@ import {
   Gift,
   TrendingDown,
   Headset,
-  PanelLeft
+  PanelLeft,
+  Wifi
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
@@ -33,23 +34,18 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
       <div className="flex flex-col">
         {/* Header Logo Branding & Collapse Toggle */}
         {!isCollapsed ? (
-          <div className="p-3.5 flex items-center justify-between gap-2 border-b border-[#27272a] bg-[#000000]">
+          <div className="h-14 px-3.5 flex items-center justify-between gap-2 border-b border-[#27272a] bg-[#000000]">
             <div
-              className="flex items-center gap-2.5 cursor-pointer group flex-1"
+              className="flex items-center gap-2.5 cursor-pointer group flex-1 overflow-hidden"
               onClick={() => setActiveAgent('chatbot')}
               title="BFibernet AI Dashboard"
             >
-              <div className={`px-2 py-1 rounded-lg border transition-all duration-200 group-hover:scale-105 ${
-                isDark
-                  ? 'bg-white border-[#27272a] shadow-sm'
-                  : 'bg-[#09090b] border-slate-200 shadow-sm'
-              }`}>
-                <img
-                  src="/bfibernet_logo.png"
-                  alt="BFibernet Logo"
-                  className="h-7 object-contain"
-                />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-transform group-hover:scale-105 bg-[#18181b] border-[#27272a] text-white">
+                <Wifi className="w-4 h-4 text-white" />
               </div>
+              <span className="font-bold text-base tracking-tight text-white truncate font-['Plus_Jakarta_Sans',sans-serif]">
+                BFibernet
+              </span>
             </div>
 
             <button
@@ -61,22 +57,14 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
             </button>
           </div>
         ) : (
-          <div className="py-3 flex flex-col items-center gap-3 w-full border-b border-[#27272a] bg-[#000000]">
+          <div className="h-14 flex flex-col items-center justify-center w-full border-b border-[#27272a] bg-[#000000]">
             <button
               onClick={() => setIsCollapsed(false)}
               className="cursor-pointer group flex items-center justify-center p-1 rounded-lg transition"
               title="Expand Sidebar"
             >
-              <div className={`p-1.5 rounded-lg border transition-transform group-hover:scale-105 ${
-                isDark
-                  ? 'bg-white border-[#27272a]'
-                  : 'bg-[#09090b] border-slate-200'
-              }`}>
-                <img
-                  src="/bfibernet_logo.png"
-                  alt="BFibernet Logo"
-                  className="w-6 h-6 object-contain"
-                />
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-transform group-hover:scale-105 bg-[#18181b] border-[#27272a] text-white">
+                <Wifi className="w-4 h-4 text-white" />
               </div>
             </button>
           </div>

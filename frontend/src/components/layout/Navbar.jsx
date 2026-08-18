@@ -7,7 +7,7 @@ export function Navbar({ onLogout }) {
   const isDark = theme === 'dark';
 
   return (
-    <header className="w-full px-6 py-3 flex items-center justify-between border-b border-[#27272a] bg-[#000000] text-white select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif]">
+    <header className="w-full h-14 px-6 flex items-center justify-between border-b border-[#27272a] bg-[#000000] text-white select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif]">
       <div></div>
 
       {/* Right side - Controls */}

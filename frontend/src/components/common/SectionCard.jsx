@@ -16,14 +16,18 @@ export function SectionCard({ icon, title, subtitle, tag, isOpen, onToggle, chil
         }`}
       >
         <div className="flex items-center gap-3">
-          <span className="p-2.5 rounded-lg text-base font-bold border border-[#27272a] bg-[#18181b] text-white">
+          <span className={`p-2.5 rounded-lg text-base font-bold border ${
+            isDark ? 'border-[#27272a] bg-[#18181b] text-white' : 'border-slate-200 bg-slate-50 text-slate-800'
+          }`}>
             {icon}
           </span>
           <div>
             <div className="flex items-center gap-2">
-              <h2 className="text-base font-semibold text-white">{title}</h2>
+              <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-[#09090b]'}`}>{title}</h2>
               {tag && (
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-[#27272a] bg-[#18181b] text-[#a1a1aa]">
+                <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                  isDark ? 'border-[#27272a] bg-[#18181b] text-[#a1a1aa]' : 'border-slate-200 bg-slate-50 text-slate-600'
+                }`}>
                   {tag}
                 </span>
               )}
