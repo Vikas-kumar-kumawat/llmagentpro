@@ -53,7 +53,7 @@ function MainAppLayout({ onLogout }) {
   }, [loadAllData]);
 
   return (
-    <div className={`flex h-screen overflow-hidden ${isDark ? 'bg-[#000000] text-[#f8fafc]' : 'bg-[#f8fafc] text-slate-900'}`}>
+    <div className="flex h-screen overflow-hidden bg-[#000000] text-white">
       {/* BFibernet Sidebar */}
       <Sidebar
         activeAgent={activeAgent}
@@ -63,12 +63,12 @@ function MainAppLayout({ onLogout }) {
       />
 
       {/* Main BFibernet Workspace */}
-      <main className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#000000]">
         {/* Top Navbar Header with Admin Badge */}
         <Navbar onLogout={onLogout} />
 
-        {/* Dynamic Agent Workspace View */}
-        <div className={`flex-1 w-full ${['feedback', 'recharge', 'offers', 'competitor'].includes(activeAgent) ? 'max-w-7xl mx-auto p-4 md:p-6' : 'max-w-5xl mx-auto p-4 md:p-6'}`}>
+        {/* Dynamic Agent Workspace View — Notion Document Centered Layout */}
+        <div className={`flex-1 w-full ${['feedback', 'recharge', 'offers', 'competitor'].includes(activeAgent) ? 'max-w-6xl mx-auto p-4 md:p-8' : 'max-w-4xl mx-auto p-4 md:p-8'}`}>
           {activeAgent === 'chatbot' && (
             <ChatbotSection onSwitchTab={(tab) => setActiveAgent(tab)} />
           )}
@@ -102,9 +102,9 @@ function MainAppLayout({ onLogout }) {
           {(activeAgent === 'outbound' || activeAgent === 'calls') && (
             <div className="max-w-3xl mx-auto pt-4">
               <SectionCard
-                icon="📞"
-                title="Sales Calls Agent"
-                subtitle="Trigger voice calls via Twilio Voice API (Auto +91 prefixing)"
+                icon="🎧"
+                title="Customer Support Agent"
+                subtitle="Trigger voice calls & AI support operations via Twilio Voice API"
                 tag="POST /api/v1/make-call"
                 isOpen={true}
                 onToggle={() => { }}

@@ -61,7 +61,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
         customer_name: cName,
         phone: entry?.phone || '',
         avatar: initials,
-        avatarBg: 'bg-gradient-to-tr from-indigo-600 to-cyan-600',
+        avatarBg: 'bg-purple-600',
         feedback_text: entry?.feedback_text || 'No comment provided.',
         sentiment: (entry?.sentiment || 'neutral').toLowerCase(),
         rating: entry?.rating || 3,
@@ -175,9 +175,17 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
       setCallingState({ 
         loading: false, 
         phone: customerPhone, 
-        msg: res.success ? `Call initiated to ${customerName}!` : `Call Failed: ${res.message || 'Twilio Error'}`
+        msg: res.success ? `Call initiated to ${customerName}! ${res.simulated ? '(Simulated Mode)' : ''}` : `Call Failed: ${res.message || 'Twilio Error'}`
       });
-      if (onRefreshData) onRefreshData();
+
+      if (res.simulated) {
+        setTimeout(() => {
+          setRowCallStatuses(prev => ({ ...prev, [item.id]: 'completed' }));
+          if (onRefreshDataRef.current) onRefreshDataRef.current();
+        }, 5000);
+      } else if (onRefreshData) {
+        onRefreshData();
+      }
     } catch (err) {
       setCallingState({ loading: false, phone: customerPhone, msg: `Error initiating call.` });
     }
@@ -301,6 +309,19 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     if (onRefreshData) onRefreshData();
   };
 
+  // Handle Clear Previous Feedback
+  const handleClearFeedback = async (id) => {
+    if (!window.confirm("Are you sure you want to clear previous feedback & transcript for this customer?")) return;
+    try {
+      await updateCustomerRecord(id, { feedback_text: 'No previous feedback recorded.', transcript: [] });
+    } catch (err) {
+      console.error("Failed to clear feedback on backend:", err);
+    }
+    setLocalFeedbacks(prev => prev.map(item => item.id === id ? { ...item, feedback_text: 'No previous feedback recorded.', transcript: [], cleared: true } : item));
+    setSelectedFeedback(prev => prev ? { ...prev, feedback_text: 'No previous feedback recorded.', transcript: [], cleared: true } : null);
+    if (onRefreshData) onRefreshData();
+  };
+
   // Handle Save Edit Feedback
   const handleSaveEdit = async (id, updatedData) => {
     try {
@@ -334,7 +355,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
         customer_name: fbName.trim(),
         phone: formatted,
         avatar: fbName.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-        avatarBg: 'bg-gradient-to-tr from-cyan-600 to-blue-600',
+        avatarBg: 'bg-purple-600',
         feedback_text: fbText.trim(),
         sentiment: res.result?.sentiment || (fbRating >= 4 ? 'positive' : fbRating <= 2 ? 'negative' : 'neutral'),
         rating: fbRating,
@@ -355,9 +376,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   };
 
   return (
-    <div className={`w-full min-h-screen pb-12 font-sans transition-colors duration-200 ${
-      isDark ? 'bg-transparent text-[#f8fafc]' : 'bg-[#f8fafc] text-slate-900'
-    }`}>
+    <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[#000000] text-white select-none space-y-8">
       {/* 1. Header Bar */}
       <FeedbackHeader />
 
@@ -374,8 +393,8 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
 
       {/* Action Toast */}
       {callingState.msg && (
-        <div className="mb-4 p-3 rounded-xl bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-          <Zap className="w-4 h-4 text-cyan-500 animate-pulse" />
+        <div className="mb-6 p-3.5 rounded-xl bg-[#09090b] border border-[#27272a] text-white text-xs font-mono flex items-center gap-2 animate-fadeIn">
+          <Zap className="w-4 h-4 text-white animate-pulse" />
           <span>{callingState.msg}</span>
         </div>
       )}
@@ -387,24 +406,26 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
         handleCancelBatchCall={handleCancelBatchCall}
       />
 
-      {/* 5. Feedbacks Table & Controls */}
-      <FeedbackTable
-        filteredFeedbacks={filteredFeedbacks}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        sentimentFilter={sentimentFilter}
-        setSentimentFilter={setSentimentFilter}
-        onRefreshData={onRefreshData}
-        isBatchCalling={isBatchCalling}
-        handleCollectAllFeedbacks={handleCollectAllFeedbacks}
-        handleCancelBatchCall={handleCancelBatchCall}
-        setShowCollectModal={setShowCollectModal}
-        setSelectedFeedback={setSelectedFeedback}
-        handleTriggerCall={handleTriggerCall}
-        rowCallStatuses={rowCallStatuses}
-        handleDeleteFeedback={handleDeleteFeedback}
-        setEditingFeedback={setEditingFeedback}
-      />
+      {/* 5. Feedbacks Table & Controls - Generous Spacing Above */}
+      <div className="pt-10 mt-6">
+        <FeedbackTable
+          filteredFeedbacks={filteredFeedbacks}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          sentimentFilter={sentimentFilter}
+          setSentimentFilter={setSentimentFilter}
+          onRefreshData={onRefreshData}
+          isBatchCalling={isBatchCalling}
+          handleCollectAllFeedbacks={handleCollectAllFeedbacks}
+          handleCancelBatchCall={handleCancelBatchCall}
+          setShowCollectModal={setShowCollectModal}
+          setSelectedFeedback={setSelectedFeedback}
+          handleTriggerCall={handleTriggerCall}
+          rowCallStatuses={rowCallStatuses}
+          handleDeleteFeedback={handleDeleteFeedback}
+          setEditingFeedback={setEditingFeedback}
+        />
+      </div>
 
       {/* 6. Collect New Feedback Modal */}
       <CollectFeedbackModal
@@ -435,8 +456,10 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
         selectedFeedback={selectedFeedback}
         setSelectedFeedback={setSelectedFeedback}
         handleTriggerCall={handleTriggerCall}
+        handleClearFeedback={handleClearFeedback}
         rowCallStatuses={rowCallStatuses}
       />
     </div>
   );
 }
+

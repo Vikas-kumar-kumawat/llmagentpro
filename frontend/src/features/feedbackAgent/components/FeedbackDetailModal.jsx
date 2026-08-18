@@ -3,40 +3,33 @@ import {
   X, 
   Phone, 
   PhoneOff,
-  Volume2, 
-  Mic, 
   MessageSquare, 
-  Play, 
-  Pause,
   Activity,
-  Radio
+  Radio,
+  Star,
+  RotateCw
 } from 'lucide-react';
-import { useTheme } from '../../../context/ThemeContext';
 import { cancelActiveCall, getCustomerById } from '../../../services/apiService';
 
 export function FeedbackDetailModal({ 
   selectedFeedback, 
   setSelectedFeedback, 
   handleTriggerCall,
+  handleClearFeedback,
   rowCallStatuses = {} 
 }) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
-  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
-  const [audioProgress, setAudioProgress] = useState(0);
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelledSids, setCancelledSids] = useState(new Set());
-  const [liveData, setLiveData] = useState(null); // real-time polled data
+  const [liveData, setLiveData] = useState(null);
   const transcriptEndRef = useRef(null);
-
-  const isLiveCalling = rowCallStatuses[selectedFeedback?.id] === 'calling';
+  const activeFeedback = liveData || selectedFeedback;
+  const isRowCalling = rowCallStatuses[selectedFeedback?.id] === 'calling';
+  const isLiveCalling = isRowCalling && activeFeedback?.status !== 'completed' && activeFeedback?.status !== 'failed';
   const activeSid = rowCallStatuses[`${selectedFeedback?.id}_sid`];
 
-  // ── Live transcript polling: fetch fresh data every 2s while call is live ─
   useEffect(() => {
     if (!isLiveCalling || !selectedFeedback?.id) {
-      setLiveData(null);
+      setLiveData(prev => (prev !== null ? null : prev));
       return;
     }
 
@@ -44,17 +37,14 @@ export function FeedbackDetailModal({
       try {
         const data = await getCustomerById(selectedFeedback.id);
         if (data && !data.detail) setLiveData(data);
-      } catch (e) {
-        // silent — don't crash UI on polling error
-      }
+      } catch (e) {}
     };
 
-    fetchLiveData(); // immediate first fetch
+    fetchLiveData();
     const interval = setInterval(fetchLiveData, 2000);
     return () => clearInterval(interval);
   }, [isLiveCalling, selectedFeedback?.id]);
 
-  // ── Auto-scroll to latest transcript message ──────────────────────────────
   useEffect(() => {
     if (transcriptEndRef.current) {
       transcriptEndRef.current.scrollIntoView({ behavior: 'smooth' });
@@ -77,22 +67,13 @@ export function FeedbackDetailModal({
 
   const callWasCancelled = cancelledSids.has(selectedFeedback?.id);
 
-  // Stop audio on modal close or change
-  useEffect(() => {
-    setIsPlayingAudio(false);
-    setAudioProgress(0);
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-    }
-  }, [selectedFeedback]);
-
   if (!selectedFeedback) return null;
 
-  // Use live polled data when call is active, otherwise use static prop
-  const activeFeedback = liveData || selectedFeedback;
-
-  // Generate conversation transcript thread based on customer feedback entry
   const getTranscriptThread = (item) => {
+    if (item?.cleared || item?.feedback_text === 'No previous feedback recorded.') {
+      return [];
+    }
+
     let thread = [];
     if (item?.transcript) {
       try {
@@ -140,98 +121,35 @@ export function FeedbackDetailModal({
       ];
     }
 
-    // Ensure customer message is present if feedback_text exists but hasn't been added to transcript array
-    const hasCustomerMessage = thread.some(t => t.speaker === 'customer');
-    if (!hasCustomerMessage && item?.feedback_text && item.feedback_text !== 'Calling customer...') {
-      thread.push({
-        speaker: 'customer',
-        name: item?.customer_name || 'Customer',
-        time: 'Recorded Feedback',
-        text: item.feedback_text
-      });
-    }
-
     return thread;
   };
 
   const transcriptThread = getTranscriptThread(activeFeedback);
 
-  // Play audio simulation
-  const handleToggleAudio = () => {
-    if (isPlayingAudio) {
-      if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-      setIsPlayingAudio(false);
-      return;
-    }
-
-    setIsPlayingAudio(true);
-    setAudioProgress(10);
-
-    if ('speechSynthesis' in window) {
-      window.speechSynthesis.cancel();
-      const fullSpeech = transcriptThread.map(t => `${t.speaker === 'agent' ? 'AI Voice Assistant says' : 'Customer says'}: ${t.text}`).join('. ');
-      const utterance = new SpeechSynthesisUtterance(fullSpeech);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
-
-      utterance.onend = () => {
-        setIsPlayingAudio(false);
-        setAudioProgress(100);
-      };
-      utterance.onerror = () => {
-        setIsPlayingAudio(false);
-        setAudioProgress(0);
-      };
-
-      window.speechSynthesis.speak(utterance);
-    } else {
-      let current = 10;
-      const interval = setInterval(() => {
-        current += 20;
-        setAudioProgress(current);
-        if (current >= 100) {
-          clearInterval(interval);
-          setIsPlayingAudio(false);
-        }
-      }, 800);
-    }
-  };
-
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
-      <div className={`w-full max-w-3xl rounded-t-3xl sm:rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] ${
-        isDark ? 'bg-[#1a1a1a] border-[#2c2c2c] text-[#ececec]' : 'bg-white border-slate-200 text-slate-900'
-      }`}>
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fadeIn font-['Plus_Jakarta_Sans',sans-serif]">
+      <div className="w-full max-w-4xl rounded-2xl border border-[#27272a] bg-[#09090b] text-white shadow-2xl overflow-hidden flex flex-col h-[92vh] max-h-[95vh] min-h-[680px]">
+        
         {/* Card Header Banner */}
-        <div className={`p-4 sm:p-5 border-b flex items-center justify-between gap-3 ${
-          isLiveCalling 
-            ? 'bg-amber-500/15 border-amber-500/20' 
-            : isDark ? 'bg-[#222222] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
-        }`}>
-          <div className="flex items-center gap-3">
-            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${activeFeedback?.avatarBg || 'bg-gradient-to-tr from-cyan-600 to-blue-600'} text-white font-extrabold text-sm sm:text-base flex items-center justify-center shadow-lg shrink-0`}>
+        <div className="p-5 sm:p-6 border-b flex items-center justify-between gap-3 bg-[#000000] border-[#27272a] shrink-0">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-full border border-[#27272a] bg-[#18181b] text-white font-semibold text-base flex items-center justify-center shrink-0 shadow-sm">
               {activeFeedback?.avatar || (activeFeedback?.customer_name || '?').slice(0,2).toUpperCase()}
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-                <h3 className={`font-black text-base sm:text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-950'}`}>{activeFeedback?.customer_name || 'Customer'}</h3>
+              <div className="flex items-center gap-3">
+                <h3 className="font-semibold text-base sm:text-lg text-white">{activeFeedback?.customer_name || 'Customer'}</h3>
                 {isLiveCalling ? (
-                  <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse flex items-center gap-1">
-                    <Activity className="w-3 h-3 animate-spin" /> LIVE CALLING
+                  <span className="px-3 py-0.5 rounded-full text-xs font-medium bg-[#18181b] text-white border border-[#27272a] animate-pulse flex items-center gap-1.5">
+                    <Activity className="w-3.5 h-3.5 animate-spin text-white" /> LIVE CALLING
                   </span>
                 ) : (
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border capitalize ${
-                    activeFeedback?.sentiment === 'positive'
-                      ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                      : activeFeedback?.sentiment === 'negative'
-                      ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                      : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-                  }`}>
+                  <span className="px-3 py-0.5 rounded-full text-xs font-medium uppercase border bg-[#18181b] text-white border-[#27272a]">
                     {activeFeedback?.sentiment || 'neutral'}
                   </span>
                 )}
               </div>
-              <p className="text-[11px] sm:text-xs text-slate-500 font-mono flex items-center gap-2 mt-0.5">
+              <p className="text-xs text-[#a1a1aa] font-mono flex items-center gap-2 mt-1">
                 <span>{activeFeedback?.phone || ''}</span> • <span>{activeFeedback?.created_at || ''}</span>
               </p>
             </div>
@@ -239,283 +157,128 @@ export function FeedbackDetailModal({
 
           <button 
             onClick={() => setSelectedFeedback(null)} 
-            className={`p-2 rounded-xl transition cursor-pointer shrink-0 ${
-              isDark ? 'text-slate-400 hover:text-white hover:bg-[#2c2c2c]' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
-            }`}
+            className="p-2 rounded-lg transition cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#18181b] border border-[#27272a]"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
+        <div className="p-4 sm:p-5 overflow-y-auto space-y-4 flex-1 flex flex-col justify-between">
           {/* Recorded Customer Feedback Highlight Card */}
-          <div className={`p-3.5 sm:p-4.5 rounded-2xl border transition-all ${
-            isDark ? 'bg-[#161616] border-[#2a2a2a]' : 'bg-cyan-50/60 border-cyan-200/70 shadow-xs'
-          }`}>
-            <div className="flex items-center justify-between mb-2">
+          <div className="p-3.5 sm:p-4 rounded-xl border border-[#27272a] bg-[#000000] shrink-0">
+            <div className="flex items-center justify-between mb-1.5">
               <div className="flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-cyan-500" />
-                <span className="font-bold text-xs uppercase tracking-wider text-cyan-500">
-                  Recorded Customer Feedback
+                <MessageSquare className="w-3.5 h-3.5 text-white" />
+                <span className="font-semibold text-xs uppercase tracking-wider text-white">
+                  Customer Feedback
                 </span>
               </div>
-              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
-                activeFeedback?.sentiment === 'positive'
-                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                  : activeFeedback?.sentiment === 'negative'
-                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
-                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
-              }`}>
-                {activeFeedback?.sentiment || 'Neutral'}
-              </span>
+              <div className="flex items-center gap-1.5 text-white text-xs font-semibold">
+                <Star className="w-3.5 h-3.5 fill-current text-white" />
+                <span>{parseInt(activeFeedback?.rating) || 0} / 5</span>
+              </div>
             </div>
-            <p className={`text-xs sm:text-sm italic font-medium leading-relaxed ${
-              isDark ? 'text-zinc-200' : 'text-slate-800'
-            }`}>
-              "{activeFeedback?.feedback_text || activeFeedback?.notes || 'No customer feedback text recorded yet.'}"
+            <p className="text-xs sm:text-sm font-medium leading-relaxed text-[#a1a1aa] pt-0.5">
+              "{activeFeedback?.feedback_text || activeFeedback?.notes || 'No customer feedback text recorded.'}"
             </p>
           </div>
 
-          {/* Audio Player & Waveform Box */}
-          <div className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
-            isDark ? 'bg-[#151515] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100 shadow-sm'
-          }`}>
-            <div className="flex items-center justify-between mb-3">
-              <div className="flex items-center gap-2">
-                <Mic className="w-4 h-4 text-cyan-500" />
-                <span className="font-bold text-[11px] sm:text-xs uppercase tracking-wider text-cyan-500">
-                  Voice Call Recording & Synthesis Player
-                </span>
-              </div>
-
-              <span className="text-[10px] sm:text-xs font-mono text-slate-400">
-                {isPlayingAudio ? 'Playing...' : '0:42 / 1:15'}
-              </span>
-            </div>
-
-            <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                onClick={handleToggleAudio}
-                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white transition cursor-pointer shrink-0 shadow-md ${
-                  isPlayingAudio
-                    ? 'bg-amber-600 hover:bg-amber-500 animate-pulse'
-                    : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500'
-                }`}
-              >
-                {isPlayingAudio ? <Pause className="w-5 h-5 fill-white" /> : <Play className="w-5 h-5 fill-white ml-0.5" />}
-              </button>
-
-              {/* Animated Waveform Visualization */}
-              <div className="flex-1 space-y-1.5">
-                <div className="flex items-center gap-1 h-7 sm:h-8">
-                  {[25, 45, 75, 20, 90, 60, 30, 85, 50, 95, 30, 70, 45, 80, 20, 65, 90, 40, 75, 25, 85, 40, 60, 35, 75].map((h, i) => (
-                    <div
-                      key={i}
-                      className={`flex-1 rounded-full transition-all ${
-                        isPlayingAudio ? 'bg-cyan-500 animate-pulse' : isDark ? 'bg-zinc-800' : 'bg-slate-300'
-                      }`}
-                      style={{ height: isPlayingAudio ? `${Math.max(15, (h * (i % 3 + 1)) % 100)}%` : `${h}%` }}
-                    ></div>
-                  ))}
-                </div>
-
-                <div className="w-full bg-slate-200 dark:bg-zinc-800 rounded-full h-1.5 overflow-hidden">
-                  <div
-                    className="bg-cyan-500 h-1.5 transition-all duration-300 rounded-full"
-                    style={{ width: `${audioProgress}%` }}
-                  ></div>
-                </div>
-              </div>
-            </div>
-          </div>
-
           {/* Conversation Transcript Thread */}
-          <div className="space-y-3 sm:space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-zinc-800">
-              <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center gap-2">
-                <MessageSquare className="w-4 h-4 text-cyan-500" />
+          <div className="space-y-3 flex-1 flex flex-col min-h-0">
+            <div className="flex items-center justify-between pb-2 border-b border-[#27272a] shrink-0">
+              <h4 className="font-semibold text-xs uppercase tracking-wider text-[#a1a1aa] flex items-center gap-2">
                 {isLiveCalling ? 'Live Call Transcript' : 'Conversation Transcript'}
               </h4>
-              {isLiveCalling ? (
-                <span className="flex items-center gap-1.5 text-[10px] font-bold text-rose-400 animate-pulse">
-                  <Radio className="w-3 h-3" />
+              {isLiveCalling && (
+                <span className="flex items-center gap-1.5 text-xs font-mono font-semibold text-white animate-pulse">
+                  <Radio className="w-3.5 h-3.5 text-white" />
                   LIVE
                 </span>
-              ) : (
-                <span className="text-[10px] text-slate-500 font-mono">Recorded by LangGraph AI</span>
               )}
             </div>
-
-            {/* Live status bar */}
-            {isLiveCalling && (
-              <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
-                <span className="relative flex h-2 w-2 shrink-0">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
-                </span>
-                <span>Call in progress — transcript updates automatically</span>
-              </div>
-            )}
 
             {/* Transcript messages */}
-            <div className="space-y-4 max-h-[300px] sm:max-h-[340px] overflow-y-auto pr-1 scrollbar-thin">
-              {transcriptThread.map((chat, index) => {
-                const isAgent = chat.speaker === 'agent';
-                const isLastMsg = index === transcriptThread.length - 1;
-
-                return (
-                  <div
-                    key={index}
-                    className={`flex gap-2.5 sm:gap-3 items-start ${isAgent ? 'flex-row' : 'flex-row-reverse'} ${
-                      isLiveCalling && isLastMsg ? 'animate-fadeIn' : ''
-                    }`}
-                  >
-                    {/* Speaker Avatar */}
-                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow ${
-                      isAgent 
-                        ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' 
-                        : 'bg-blue-600/10 text-blue-400 border border-blue-500/20'
-                    }`}>
-                      {isAgent ? '🤖' : '👤'}
-                    </div>
-
-                    <div className={`flex-1 flex flex-col ${isAgent ? 'items-start' : 'items-end'}`}>
-                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 px-1">
-                        <span className={`text-[11px] sm:text-xs font-bold ${isAgent ? 'text-cyan-500' : 'text-blue-500'}`}>
-                          {chat.name}
-                        </span>
-                        <span className="text-[9px] sm:text-[10px] text-slate-500 font-mono">{chat.time}</span>
-                        {isLiveCalling && isLastMsg && (
-                          <span className="text-[9px] font-bold text-rose-400 animate-pulse">● LIVE</span>
-                        )}
-                      </div>
-
-                      <div className={`p-3 sm:p-4 rounded-2xl max-w-[88%] sm:max-w-[78%] text-xs sm:text-sm leading-relaxed border shadow-xs ${
-                        isAgent
-                          ? isDark 
-                            ? 'bg-[#222222] border-[#2d2d2d] text-zinc-200 rounded-tl-none' 
-                            : 'bg-slate-50 border-slate-200 text-slate-900 rounded-tl-none'
-                          : isDark
-                            ? 'bg-[#1e2d3d] border-[#2c4050] text-cyan-100 rounded-tr-none'
-                            : 'bg-blue-600 text-white border-blue-700 rounded-tr-none shadow-sm'
-                      }`}>
-                        {chat.text}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-
-              {/* Typing indicator */}
-              {isLiveCalling && !callWasCancelled && (
-                <div className="flex gap-3 items-start flex-row">
-                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
-                    🤖
-                  </div>
-                  <div className={`p-3 rounded-2xl rounded-tl-none border ${
-                    isDark ? 'bg-[#222222] border-[#2d2d2d]' : 'bg-slate-50 border-slate-200'
-                  }`}>
-                    <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                      <span className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                      <span className="w-2 h-2 rounded-full bg-cyan-500 animate-bounce" style={{ animationDelay: '300ms' }}></span>
-                    </div>
-                  </div>
+            <div className="space-y-2.5 max-h-[500px] sm:max-h-[550px] overflow-y-auto pr-2 flex-1">
+              {transcriptThread.length === 0 ? (
+                <div className="p-6 text-center text-xs text-[#71717a] font-mono border border-dashed border-[#27272a] rounded-xl bg-[#000000] my-auto">
+                  No active transcript history available for this customer.
                 </div>
+              ) : (
+                transcriptThread.map((chat, index) => {
+                  const isAgent = chat.speaker === 'agent';
+
+                  return (
+                    <div
+                      key={index}
+                      className={`flex gap-2.5 items-start ${isAgent ? 'flex-row' : 'flex-row-reverse'}`}
+                    >
+                      <div className="w-7 h-7 rounded-full border border-[#27272a] bg-[#18181b] text-white text-[11px] flex items-center justify-center shrink-0">
+                        {isAgent ? '🤖' : '👤'}
+                      </div>
+
+                      <div className={`flex-1 flex flex-col ${isAgent ? 'items-start' : 'items-end'}`}>
+                        <div className="flex items-center gap-1.5 mb-0.5 px-1">
+                          <span className="text-[11px] font-semibold text-white">
+                            {chat.name}
+                          </span>
+                          <span className="text-[10px] text-[#71717a] font-mono">{chat.time}</span>
+                        </div>
+
+                        <div className={`py-2 px-3 rounded-lg max-w-[78%] text-xs leading-normal border ${
+                          isAgent
+                            ? 'bg-[#000000] border-[#27272a] text-white rounded-tl-none' 
+                            : 'bg-white text-black border-white rounded-tr-none font-medium'
+                        }`}>
+                          {chat.text}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
               )}
 
-              {/* Auto-scroll anchor */}
               <div ref={transcriptEndRef} />
-            </div>
-          </div>
-
-          {/* Call Metadata Grid */}
-          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border ${
-            isDark ? 'bg-[#151515] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
-          }`}>
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Rating Given</span>
-              <span className="font-extrabold text-amber-500 text-sm sm:text-base">
-                {'★'.repeat(Math.max(0, Math.min(5, parseInt(activeFeedback?.rating) || 0)))}
-                {'☆'.repeat(Math.max(0, 5 - Math.min(5, parseInt(activeFeedback?.rating) || 0)))}
-                {' '}<span className="text-xs text-slate-400 font-normal">({parseInt(activeFeedback?.rating) || 0}/5)</span>
-              </span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Call Duration</span>
-              <span className="font-mono text-xs sm:text-sm font-semibold text-zinc-300">1 min 15 sec</span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Category Tag</span>
-              <span className="font-semibold text-xs sm:text-sm text-cyan-400 capitalize">
-                {(activeFeedback?.category || 'general').replace('_', ' ')}
-              </span>
             </div>
           </div>
         </div>
 
         {/* Modal Action Controls Footer */}
-        <div className={`p-4 sm:p-5 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 ${
-          isDark ? 'bg-[#222222] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
-        }`}>
+        <div className="p-4 sm:p-6 border-t flex flex-wrap items-center justify-between gap-3 bg-[#000000] border-[#27272a] shrink-0">
           <button
-            onClick={handleToggleAudio}
-            className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border ${
-              isPlayingAudio
-                ? 'bg-amber-500 text-white border-amber-600 animate-pulse'
-                : isDark ? 'bg-[#2c2c2c] hover:bg-[#333] text-zinc-200 border-[#383838]' : 'bg-white text-slate-800 border-slate-200'
-            }`}
+            onClick={() => handleClearFeedback && handleClearFeedback(selectedFeedback.id)}
+            className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a] transition cursor-pointer flex items-center gap-2 shrink-0"
           >
-            <Volume2 className="w-4 h-4 text-cyan-500" />
-            <span>{isPlayingAudio ? 'Stop Audio' : 'Play Voice Recording'}</span>
+            <RotateCw className="w-3.5 h-3.5 text-white" />
+            <span>Clear Previous Feedback</span>
           </button>
 
-          <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
+          <div className="flex items-center gap-3">
             <button
               onClick={() => setSelectedFeedback(null)}
-              className={`flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer border ${
-                isDark ? 'bg-[#2c2c2c] text-zinc-300 border-[#383838]' : 'bg-slate-100 text-slate-700 border-slate-200'
-              }`}
+              className="px-5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer border bg-[#18181b] hover:bg-[#27272a] text-white border-[#27272a]"
             >
               Close
             </button>
 
-            {/* Cancel Call Button — shown during live call */}
             {(isLiveCalling && !callWasCancelled) && (
               <button
                 onClick={handleCancelCall}
                 disabled={isCancelling}
-                className={`flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition shadow-md border ${
-                  isCancelling
-                    ? 'bg-rose-800/50 text-rose-300 border-rose-700/50 cursor-not-allowed'
-                    : 'bg-rose-600 hover:bg-rose-500 text-white border-rose-700 animate-pulse'
-                }`}
+                className="px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a]"
               >
                 <PhoneOff className="w-4 h-4" />
-                <span>{isCancelling ? 'Cancelling...' : '⛔ Cancel Call'}</span>
+                <span>{isCancelling ? 'Cancelling...' : 'Cancel Call'}</span>
               </button>
             )}
 
-            {/* Cancelled confirmation badge */}
-            {callWasCancelled && (
-              <span className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-bold bg-zinc-700/50 text-zinc-400 border border-zinc-600/40 flex items-center gap-2">
-                <PhoneOff className="w-4 h-4" />
-                Call Cancelled
-              </span>
-            )}
-
-            {/* Call Again — shown when not live */}
             {!isLiveCalling && (
               <button
                 onClick={() => {
                   handleTriggerCall(selectedFeedback.customer_name, selectedFeedback.phone);
                   setSelectedFeedback(null);
                 }}
-                className="flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md cursor-pointer flex items-center gap-2"
+                className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition cursor-pointer flex items-center gap-2"
               >
                 <Phone className="w-4 h-4" />
                 <span>Call Customer</span>
@@ -527,3 +290,6 @@ export function FeedbackDetailModal({
     </div>
   );
 }
+
+
+

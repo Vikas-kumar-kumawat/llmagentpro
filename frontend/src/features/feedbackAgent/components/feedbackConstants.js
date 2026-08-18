@@ -15,7 +15,7 @@ export const DEFAULT_FEEDBACKS = [
     customer_name: 'Vikas Kumar',
     phone: '+919057262630',
     avatar: 'VK',
-    avatarBg: 'bg-gradient-to-tr from-cyan-600 to-blue-600',
+    avatarBg: 'bg-purple-600',
     feedback_text: 'The service was wonderful! Quick delivery and friendly staff.',
     sentiment: 'positive',
     rating: 5,

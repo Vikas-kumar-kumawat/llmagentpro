@@ -15,6 +15,7 @@ class MakeCallRequest(BaseModel):
     name: str = Field(..., example="Rahul Sharma")
     phone: str = Field(..., example="9876543210")
     message: Optional[str] = Field(None, example="Custom greeting voice script")
+    customer_id: Optional[Any] = Field(None, example="12")
 
 class FeedbackCollectRequest(BaseModel):
     customer_name: str = Field(..., example="Rahul Sharma")

@@ -59,7 +59,7 @@ def start_cloudflare_tunnel(port: int = 8000) -> str:
     print(f"[Cloudflare Tunnel] Starting Cloudflare Quick Tunnel for port {port}...")
 
     try:
-        cmd = [cloudflared_bin, "tunnel", "--url", f"http://localhost:{port}"]
+        cmd = [cloudflared_bin, "tunnel", "--url", f"http://127.0.0.1:{port}"]
         _tunnel_process = subprocess.Popen(
             cmd,
             stdout=subprocess.PIPE,

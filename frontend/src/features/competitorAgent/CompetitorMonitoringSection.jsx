@@ -1,20 +1,11 @@
 import React, { useState } from 'react';
 import { 
-  TrendingDown, 
   Search, 
   RotateCw, 
-  CheckCircle2, 
-  AlertTriangle, 
-  PhoneCall, 
   Zap, 
-  Tag, 
-  ArrowUpRight, 
-  ArrowDownRight,
-  Sparkles,
   ShieldAlert,
-  Play
+  Phone
 } from 'lucide-react';
-import { useTheme } from '../../context/ThemeContext';
 import { makeOutboundCall } from '../../services/apiService';
 
 const DEFAULT_COMPETITORS = [
@@ -77,10 +68,7 @@ const DEFAULT_COMPETITORS = [
 ];
 
 export function CompetitorMonitoringSection({ onRefreshData }) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
-  const [competitors, setCompetitors] = useState(DEFAULT_COMPETITORS);
+  const [competitors] = useState(DEFAULT_COMPETITORS);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScanning, setIsScanning] = useState(false);
   const [scanResult, setScanResult] = useState(null);
@@ -125,31 +113,30 @@ export function CompetitorMonitoringSection({ onRefreshData }) {
   );
 
   return (
-    <div className={`w-full min-h-screen pb-12 font-sans transition-colors duration-200 ${
-      isDark ? 'bg-transparent text-[#f4f4f5]' : 'bg-[#f8fafc] text-slate-900'
-    }`}>
+    <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[#000000] text-white select-none space-y-6">
       {/* Header Bar */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 pt-2">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-4 border-b border-[#27272a]">
         <div>
-          <h1 className={`text-2xl md:text-3xl font-extrabold tracking-tight flex items-center gap-2 ${
-            isDark ? 'text-white' : 'text-slate-900'
-          }`}>
-            Competitor Price Monitoring Agent <span className="inline-block">🏷️</span>
-          </h1>
-          <p className={`text-xs md:text-sm font-medium mt-0.5 ${
-            isDark ? 'text-zinc-400' : 'text-slate-500'
-          }`}>
+          <div className="flex items-center gap-2">
+            <h1 className="text-lg sm:text-xl font-semibold tracking-tight text-white">
+              Competitor Price Monitor <span className="text-[#a1a1aa] font-normal">Agent</span>
+            </h1>
+            <span className="text-[11px] font-mono text-white bg-[#18181b] border border-[#27272a] px-2.5 py-0.5 rounded-full font-medium">
+              agent.competitor
+            </span>
+          </div>
+          <p className="text-xs text-[#a1a1aa] mt-1 leading-relaxed">
             Autonomous market intelligence engine tracking rival ISP broadband plans, pricing, & auto-generating counter offer call campaigns.
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5 self-start md:self-auto flex-wrap">
           <button
             onClick={handleRunScan}
             disabled={isScanning}
-            className="px-4 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-md transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
           >
-            <RotateCw className={`w-4 h-4 ${isScanning ? 'animate-spin' : ''}`} />
+            <RotateCw className={`w-3.5 h-3.5 text-black ${isScanning ? 'animate-spin' : ''}`} />
             <span>{isScanning ? 'Scanning Live ISPs...' : 'Scan Competitor Prices'}</span>
           </button>
         </div>
@@ -157,77 +144,69 @@ export function CompetitorMonitoringSection({ onRefreshData }) {
 
       {/* Action Toast */}
       {callingState.msg && (
-        <div className="mb-6 p-3.5 rounded-xl bg-orange-500/15 border border-orange-500/30 text-orange-400 text-xs font-semibold flex items-center gap-2 animate-fadeIn">
-          <Zap className="w-4 h-4 text-orange-500 animate-pulse" />
+        <div className="p-3.5 rounded-xl bg-[#09090b] border border-[#27272a] text-white text-xs font-mono flex items-center gap-2">
+          <Zap className="w-4 h-4 text-white animate-pulse" />
           <span>{callingState.msg}</span>
         </div>
       )}
 
       {/* Scan Result Agent Intelligence Box */}
       {scanResult && (
-        <div className={`mb-6 p-4 rounded-2xl border ${
-          isDark ? 'bg-amber-500/10 border-amber-500/30 text-amber-200' : 'bg-amber-50 border-amber-200 text-amber-900'
-        } animate-fadeIn`}>
-          <div className="flex items-center justify-between mb-2">
-            <span className="font-bold text-xs uppercase tracking-wider flex items-center gap-2 text-amber-400">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
+        <div className="p-4 rounded-xl border border-[#27272a] bg-[#09090b] text-white space-y-2">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-xs uppercase tracking-wider flex items-center gap-2 text-white">
+              <ShieldAlert className="w-4 h-4 text-white" />
               AI Market Intelligence Report
             </span>
-            <span className="text-[10px] font-mono opacity-80">LangGraph Scraper Engine</span>
+            <span className="text-[10px] font-mono text-[#a1a1aa]">LangGraph Scraper Engine</span>
           </div>
-          <p className="text-xs leading-relaxed font-medium">{scanResult.recommendation}</p>
+          <p className="text-xs leading-relaxed text-[#a1a1aa]">{scanResult.recommendation}</p>
         </div>
       )}
 
       {/* Metric Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#212121] border-[#2b2b2b]' : 'bg-white border-slate-100 shadow-sm'}`}>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Monitored ISPs</span>
-          <span className="text-3xl font-extrabold tracking-tight">4 Providers</span>
-          <span className="text-[10px] text-emerald-500 font-semibold block mt-1">Live tracking active</span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="p-4 sm:p-5 rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all">
+          <span className="text-xs uppercase tracking-wider text-[#a1a1aa] font-medium block mb-2">Monitored ISPs</span>
+          <span className="text-xl font-bold font-mono text-white">4 Providers</span>
+          <span className="text-[10px] text-[#a1a1aa] font-mono block mt-1">Live tracking active</span>
         </div>
 
-        <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#212121] border-[#2b2b2b]' : 'bg-white border-slate-100 shadow-sm'}`}>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Market Avg Price</span>
-          <span className="text-3xl font-extrabold tracking-tight">₹762 <span className="text-xs font-normal text-slate-400">/mo</span></span>
-          <span className="text-[10px] text-slate-400 font-semibold block mt-1">across 100-300Mbps</span>
+        <div className="p-4 sm:p-5 rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all">
+          <span className="text-xs uppercase tracking-wider text-[#a1a1aa] font-medium block mb-2">Market Avg Price</span>
+          <span className="text-xl font-bold font-mono text-white">₹762 <span className="text-xs text-[#a1a1aa] font-normal">/mo</span></span>
+          <span className="text-[10px] text-[#a1a1aa] font-mono block mt-1">across 100-300Mbps</span>
         </div>
 
-        <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#212121] border-[#2b2b2b]' : 'bg-white border-slate-100 shadow-sm'}`}>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">Price Undercuts</span>
-          <span className="text-3xl font-extrabold text-amber-500 tracking-tight">1 Active</span>
-          <span className="text-[10px] text-amber-500 font-semibold block mt-1">Jio ₹699 100Mbps plan</span>
+        <div className="p-4 sm:p-5 rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all">
+          <span className="text-xs uppercase tracking-wider text-[#a1a1aa] font-medium block mb-2">Price Undercuts</span>
+          <span className="text-xl font-bold font-mono text-white">1 Active</span>
+          <span className="text-[10px] text-[#a1a1aa] font-mono block mt-1">Jio ₹699 100Mbps plan</span>
         </div>
 
-        <div className={`p-5 rounded-2xl border ${isDark ? 'bg-[#212121] border-[#2b2b2b]' : 'bg-white border-slate-100 shadow-sm'}`}>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400 block mb-2">BFibernet Advantage</span>
-          <span className="text-3xl font-extrabold text-emerald-400 tracking-tight">75% Wins</span>
-          <span className="text-[10px] text-emerald-500 font-semibold block mt-1">3 of 4 ISP plans beaten</span>
+        <div className="p-4 sm:p-5 rounded-xl border border-[#27272a] bg-[#09090b] hover:border-white hover:bg-[#18181b] transition-all">
+          <span className="text-xs uppercase tracking-wider text-[#a1a1aa] font-medium block mb-2">BFibernet Advantage</span>
+          <span className="text-xl font-bold font-mono text-white">75% Wins</span>
+          <span className="text-[10px] text-[#a1a1aa] font-mono block mt-1">3 of 4 ISP plans beaten</span>
         </div>
       </div>
 
       {/* Main Competitor Price Monitoring Table */}
-      <div className={`rounded-2xl border overflow-hidden ${
-        isDark ? 'bg-[#212121] border-[#2b2b2b]' : 'bg-white border-slate-100 shadow-sm'
-      }`}>
-        <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 dark:border-[#2d2d2d]">
+      <div className="bg-[#09090b] border border-[#27272a] rounded-xl overflow-hidden pt-2">
+        <div className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-[#27272a] bg-[#000000]">
           <div>
-            <h2 className="text-base font-bold">Rival ISP Plans & Price Benchmarks</h2>
-            <p className="text-xs text-slate-400 mt-0.5">Scraped broadband plans vs BFibernet pricing</p>
+            <h2 className="text-sm font-semibold text-white">Rival ISP Plans & Price Benchmarks</h2>
+            <p className="text-xs text-[#a1a1aa] mt-0.5">Scraped broadband plans vs BFibernet pricing</p>
           </div>
 
           <div className="relative">
-            <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+            <Search className="w-3.5 h-3.5 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Filter ISP or speed..."
-              className={`py-1.5 pl-8 pr-3 rounded-xl text-xs font-medium border focus:outline-none transition w-48 md:w-60 ${
-                isDark
-                  ? 'bg-[#181818] text-[#ececec] border-[#2d2d2d] focus:border-orange-500 placeholder-zinc-600'
-                  : 'bg-slate-50 text-slate-900 border-slate-200 placeholder-slate-400 focus:border-orange-600'
-              }`}
+              className="w-full sm:w-48 py-1.5 pl-8 pr-3 rounded-lg text-xs bg-[#000000] text-white border border-[#27272a] focus:border-white focus:outline-none transition"
             />
           </div>
         </div>
@@ -235,58 +214,52 @@ export function CompetitorMonitoringSection({ onRefreshData }) {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className={`border-b text-[10px] font-bold uppercase tracking-wider ${
-                isDark ? 'border-[#2d2d2d] text-zinc-400 bg-[#1a1a1a]' : 'border-slate-100 text-slate-400 bg-slate-50'
-              }`}>
-                <th className="py-3.5 px-5">Competitor ISP</th>
-                <th className="py-3.5 px-5">Target Plan</th>
-                <th className="py-3.5 px-5">Rival Price</th>
-                <th className="py-3.5 px-5">BFibernet Rate</th>
-                <th className="py-3.5 px-5">Price Delta</th>
-                <th className="py-3.5 px-5 text-right">Counter Strategy Action</th>
+              <tr className="border-b border-[#27272a] text-xs font-semibold uppercase tracking-wider text-[#a1a1aa] bg-[#000000]">
+                <th className="py-3 px-4">Competitor ISP</th>
+                <th className="py-3 px-4">Target Plan</th>
+                <th className="py-3 px-4">Rival Price</th>
+                <th className="py-3 px-4">BFibernet Rate</th>
+                <th className="py-3 px-4">Price Delta</th>
+                <th className="py-3 px-4 text-right">Counter Strategy Action</th>
               </tr>
             </thead>
-            <tbody className={`divide-y text-xs ${isDark ? 'divide-[#2d2d2d]/50' : 'divide-slate-100'}`}>
+            <tbody className="divide-y divide-[#27272a] text-xs">
               {filteredCompetitors.map((item) => (
-                <tr key={item.id} className={isDark ? 'hover:bg-[#262626]' : 'hover:bg-slate-50/80'}>
-                  <td className="py-4 px-5">
+                <tr key={item.id} className="transition hover:bg-[#18181b] cursor-pointer">
+                  <td className="py-3.5 px-4">
                     <div className="flex items-center gap-2.5">
                       <span className="text-base">{item.logo}</span>
-                      <span className="font-bold">{item.provider}</span>
+                      <span className="font-semibold text-white">{item.provider}</span>
                     </div>
                   </td>
 
-                  <td className="py-4 px-5">
+                  <td className="py-3.5 px-4">
                     <div>
-                      <p className="font-semibold">{item.planName}</p>
-                      <p className="text-[10px] text-slate-400 font-mono">{item.ottBundles}</p>
+                      <p className="font-medium text-white">{item.planName}</p>
+                      <p className="text-[10px] text-[#a1a1aa] font-mono">{item.ottBundles}</p>
                     </div>
                   </td>
 
-                  <td className="py-4 px-5 font-bold font-mono text-slate-300">
-                    ₹{item.price}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                  <td className="py-3.5 px-4 font-bold font-mono text-white">
+                    ₹{item.price}<span className="text-[10px] text-[#a1a1aa] font-normal">/mo</span>
                   </td>
 
-                  <td className="py-4 px-5 font-bold font-mono text-cyan-400">
-                    ₹{item.bfibernetPrice}<span className="text-[10px] text-slate-400 font-normal">/mo</span>
+                  <td className="py-3.5 px-4 font-bold font-mono text-white">
+                    ₹{item.bfibernetPrice}<span className="text-[10px] text-[#a1a1aa] font-normal">/mo</span>
                   </td>
 
-                  <td className="py-4 px-5">
-                    <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                      item.statusType === 'winning'
-                        ? 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20'
-                        : 'bg-amber-500/15 text-amber-400 border-amber-500/20 animate-pulse'
-                    }`}>
+                  <td className="py-3.5 px-4">
+                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-medium uppercase border bg-[#18181b] text-white border-[#27272a]">
                       {item.difference}
                     </span>
                   </td>
 
-                  <td className="py-4 px-5 text-right">
+                  <td className="py-3.5 px-4 text-right">
                     <button
                       onClick={() => handleTriggerCounterCall(item.provider)}
-                      className="px-3 py-1.5 rounded-xl text-xs font-bold bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white shadow-sm transition flex items-center gap-1.5 ml-auto cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-md text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition flex items-center gap-1.5 ml-auto cursor-pointer"
                     >
-                      <PhoneCall className="w-3.5 h-3.5" />
+                      <Phone className="w-3.5 h-3.5 text-black" />
                       <span>Launch Counter Call</span>
                     </button>
                   </td>
@@ -299,3 +272,4 @@ export function CompetitorMonitoringSection({ onRefreshData }) {
     </div>
   );
 }
+

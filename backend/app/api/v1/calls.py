@@ -26,25 +26,26 @@ def make_call(request: MakeCallRequest):
     DataRepository.ensure_contact_exists(name, phone)
 
     # ── 1. Find or create a feedback record so we have a customer_id ──────────
-    customer_id = None
-    all_fb = DataRepository.get_feedback_and_tickets()
-    existing = next(
-        (f for f in all_fb["feedback_entries"] if format_phone_number(f["phone"]) == phone),
-        None
-    )
-    if existing:
-        customer_id = existing["id"]
-    else:
-        fb_id, _ = DataRepository.save_feedback(
-            customer_name=name,
-            phone=phone,
-            rating=5,
-            feedback_text="Calling customer for feedback...",
-            sentiment="neutral",
-            category="general",
-            followup_needed=False
+    customer_id = str(request.customer_id) if getattr(request, "customer_id", None) else None
+    if not customer_id:
+        all_fb = DataRepository.get_feedback_and_tickets()
+        existing = next(
+            (f for f in all_fb["feedback_entries"] if format_phone_number(f.get("phone", "")) == phone),
+            None
         )
-        customer_id = fb_id
+        if existing:
+            customer_id = existing["id"]
+        else:
+            fb_id, _ = DataRepository.save_feedback(
+                customer_name=name,
+                phone=phone,
+                rating=5,
+                feedback_text="Calling customer for feedback...",
+                sentiment="neutral",
+                category="general",
+                followup_needed=False
+            )
+            customer_id = fb_id
 
     # ── 2. Prepare initial transcript with the AI greeting ───────────────────
     agent_info = get_active_agent_info()

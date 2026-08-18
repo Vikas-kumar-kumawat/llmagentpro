@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import { makeOutboundCall } from '../../services/apiService';
 
 function formatPhoneNumber(val) {
@@ -13,9 +12,6 @@ function formatPhoneNumber(val) {
 }
 
 export function MakeCallSection({ onRefreshData }) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
-
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [customMsg, setCustomMsg] = useState('');
@@ -50,12 +46,12 @@ export function MakeCallSection({ onRefreshData }) {
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-['Plus_Jakarta_Sans',sans-serif] text-white">
       <form onSubmit={handleMakeCall} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Customer Name <span className="text-cyan-500">*</span>
+            <label className="block text-xs font-medium text-[#a1a1aa] mb-1">
+              Customer Name *
             </label>
             <input
               type="text"
@@ -63,15 +59,13 @@ export function MakeCallSection({ onRefreshData }) {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. John Doe"
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-cyan-500 transition ${
-                isDark ? 'bg-[#171717] border-[#2f2f2f] text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
-              }`}
+              className="w-full px-3.5 py-2.5 rounded-lg border border-[#27272a] bg-[#000000] text-white text-xs focus:border-white focus:outline-none transition"
             />
           </div>
 
           <div>
-            <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
-              Customer Phone Number <span className="text-cyan-500">*</span>
+            <label className="block text-xs font-medium text-[#a1a1aa] mb-1">
+              Customer Phone Number *
             </label>
             <input
               type="tel"
@@ -80,15 +74,13 @@ export function MakeCallSection({ onRefreshData }) {
               onChange={(e) => setPhone(e.target.value)}
               onBlur={() => phone.trim() && setPhone(formatPhoneNumber(phone))}
               placeholder="e.g. 9876543210"
-              className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-cyan-500 transition ${
-                isDark ? 'bg-[#171717] border-[#2f2f2f] text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
-              }`}
+              className="w-full px-3.5 py-2.5 rounded-lg border border-[#27272a] bg-[#000000] text-white text-xs focus:border-white focus:outline-none transition"
             />
           </div>
         </div>
 
         <div>
-          <label className={`block text-xs font-semibold mb-1.5 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+          <label className="block text-xs font-medium text-[#a1a1aa] mb-1">
             Greeting Voice Script (Optional):
           </label>
           <input
@@ -96,40 +88,33 @@ export function MakeCallSection({ onRefreshData }) {
             value={customMsg}
             onChange={(e) => setCustomMsg(e.target.value)}
             placeholder="Custom TwiML speech script..."
-            className={`w-full px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:border-cyan-500 transition ${
-              isDark ? 'bg-[#171717] border-[#2f2f2f] text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
-            }`}
+            className="w-full px-3.5 py-2.5 rounded-lg border border-[#27272a] bg-[#000000] text-white text-xs focus:border-white focus:outline-none transition"
           />
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-white font-bold text-sm shadow-lg shadow-cyan-500/20 transition duration-200 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer"
+          className="w-full py-2.5 px-4 rounded-lg bg-white text-black font-semibold text-xs transition duration-150 disabled:opacity-50 flex items-center justify-center gap-2 cursor-pointer border border-white hover:bg-zinc-200"
         >
           <span>{loading ? 'Initiating Call...' : '📞 Make Call Now'}</span>
         </button>
       </form>
 
       {callResult && (
-        <div className={`p-4 rounded-xl text-xs space-y-1.5 border ${
-          callResult.success 
-            ? isDark ? 'bg-emerald-950/40 border-emerald-500/40 text-emerald-200' : 'bg-emerald-50 border-emerald-300 text-emerald-800'
-            : callResult.status === 'configuration_error'
-            ? isDark ? 'bg-amber-950/40 border-amber-500/40 text-amber-200' : 'bg-amber-50 border-amber-300 text-amber-800'
-            : isDark ? 'bg-rose-950/40 border-rose-500/40 text-rose-200' : 'bg-rose-50 border-rose-300 text-rose-800'
-        }`}>
-          <div className="flex justify-between font-bold text-sm">
+        <div className="p-4 rounded-xl text-xs space-y-1.5 border border-[#27272a] bg-[#09090b] text-white">
+          <div className="flex justify-between font-semibold text-sm">
             <span>
               {callResult.success ? '✅ Call Placed' : callResult.status === 'configuration_error' ? '⚠️ Contact Stored (Twilio Pending)' : '❌ Call Failed'}
             </span>
             {callResult.call_sid && (
-              <span className="font-mono text-xs opacity-80">SID: {callResult.call_sid}</span>
+              <span className="font-mono text-xs text-[#a1a1aa]">SID: {callResult.call_sid}</span>
             )}
           </div>
-          <p className="leading-relaxed">{callResult.message}</p>
+          <p className="leading-relaxed text-[#a1a1aa]">{callResult.message}</p>
         </div>
       )}
     </div>
   );
 }
+

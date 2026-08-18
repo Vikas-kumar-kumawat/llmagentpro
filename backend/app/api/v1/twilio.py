@@ -97,80 +97,89 @@ def twilio_voice_webhook(request: Request, customer_id: Optional[str] = None):
 @router.api_route("/twilio/feedback", methods=["GET", "POST"])
 async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] = None):
     """Processes customer speech result / keypress digits and renders conversational response TwiML."""
-    form_data = await request.form()
-    speech_result = form_data.get("SpeechResult", "").strip()
-    digits = form_data.get("Digits", "").strip()
+    try:
+        form_data = await request.form()
+        speech_result = form_data.get("SpeechResult", "").strip()
+        digits = form_data.get("Digits", "").strip()
 
-    host_url = str(request.base_url).rstrip("/")
-    cid_param = f"?customer_id={customer_id}" if customer_id else ""
-    feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
+        public_url = settings.base_url
+        host_url = public_url if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127.") else str(request.base_url).rstrip("/")
+        cid_param = f"?customer_id={customer_id}" if customer_id else ""
+        feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
 
-    customer_data = None
-    customer_name = "Customer"
-    existing_transcript = []
+        customer_data = None
+        customer_name = "Customer"
+        existing_transcript = []
 
-    if customer_id:
-        customer_data = DataRepository.get_feedback_by_id(customer_id)
-        if customer_data:
-            customer_name = customer_data.get("customer_name", "Customer")
-            if customer_data.get("transcript"):
-                try:
-                    existing_transcript = json.loads(customer_data["transcript"])
-                except Exception:
-                    pass
+        if customer_id:
+            customer_data = DataRepository.get_feedback_by_id(customer_id)
+            if customer_data:
+                customer_name = customer_data.get("customer_name", "Customer")
+                if customer_data.get("transcript"):
+                    try:
+                        existing_transcript = json.loads(customer_data["transcript"])
+                    except Exception:
+                        pass
 
-    user_input = speech_result or (f"Pressed key {digits} for feedback" if digits else "")
+        user_input = speech_result or (f"Pressed key {digits} for feedback" if digits else "")
 
-    if user_input and customer_id:
-        rating = None
-        if digits and digits.isdigit() and 1 <= int(digits) <= 5:
-            rating = int(digits)
+        if user_input and customer_id:
+            rating = None
+            if digits and digits.isdigit() and 1 <= int(digits) <= 5:
+                rating = int(digits)
 
-        if not rating and user_input:
-            nums = re.findall(r"\b([1-5])\b", user_input)
-            if nums:
-                rating = int(nums[0])
+            if not rating and user_input:
+                nums = re.findall(r"\b([1-5])\b", user_input)
+                if nums:
+                    rating = int(nums[0])
 
-        pos_words = ["good", "great", "excellent", "amazing", "wonderful", "awesome", "fast", "love", "nice", "5", "4", "बढ़िया", "सही", "चोखो", "बढिया", "ठीक"]
-        neg_words = ["bad", "poor", "terrible", "horrible", "slow", "delay", "worst", "hate", "1", "2", "खराब", "धीमी", "बेकार", "परेशानी", "बंद"]
-        lower = user_input.lower()
-        if any(w in lower for w in pos_words):
-            sentiment = "positive"
-        elif any(w in lower for w in neg_words):
-            sentiment = "negative"
-        else:
-            sentiment = "neutral"
+            pos_words = ["good", "great", "excellent", "amazing", "wonderful", "awesome", "fast", "love", "nice", "5", "4", "बढ़िया", "सही", "चोखो", "बढिया", "ठीक"]
+            neg_words = ["bad", "poor", "terrible", "horrible", "slow", "delay", "worst", "hate", "1", "2", "खराब", "धीमी", "बेकार", "परेशानी", "बंद"]
+            lower = user_input.lower()
+            if any(w in lower for w in pos_words):
+                sentiment = "positive"
+            elif any(w in lower for w in neg_words):
+                sentiment = "negative"
+            else:
+                sentiment = "neutral"
 
-        ai_response_text = generate_ai_response(user_input, customer_data)
+            ai_response_text = generate_ai_response(user_input, customer_data)
 
-        new_entries = [
-            {
-                "speaker": "customer",
-                "name": customer_name,
-                "time": datetime.now().strftime("%I:%M %p"),
-                "text": user_input
-            },
-            {
-                "speaker": "agent",
-                "name": "AI Voice Collector",
-                "time": datetime.now().strftime("%I:%M %p"),
-                "text": ai_response_text
-            }
-        ]
+            new_entries = [
+                {
+                    "speaker": "customer",
+                    "name": customer_name,
+                    "time": datetime.now().strftime("%I:%M %p"),
+                    "text": user_input
+                },
+                {
+                    "speaker": "agent",
+                    "name": "AI Voice Collector",
+                    "time": datetime.now().strftime("%I:%M %p"),
+                    "text": ai_response_text
+                }
+            ]
 
-        full_transcript = existing_transcript + new_entries
+            full_transcript = existing_transcript + new_entries
 
-        DataRepository.update_feedback_transcript_and_data(
-            feedback_id=customer_id,
-            feedback_text=user_input,
-            rating=rating or (customer_data.get("rating") if customer_data else 5),
-            sentiment=sentiment,
-            transcript_json=json.dumps(full_transcript),
-            status="completed"
-        )
+            DataRepository.update_feedback_transcript_and_data(
+                feedback_id=customer_id,
+                feedback_text=user_input,
+                rating=rating or (customer_data.get("rating") if customer_data else 5),
+                sentiment=sentiment,
+                transcript_json=json.dumps(full_transcript),
+                status="completed"
+            )
 
-    xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url)
-    return Response(content=xml_twiml, media_type="application/xml")
+        xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url)
+        return Response(content=xml_twiml, media_type="application/xml")
+    except Exception as e:
+        print(f"[Twilio Feedback Webhook Error] {e}")
+        from twilio.twiml.voice_response import VoiceResponse
+        res = VoiceResponse()
+        res.say("Thank you for your feedback! Have a wonderful day. Goodbye.")
+        res.hangup()
+        return Response(content=str(res), media_type="application/xml")
 
 @router.post("/twilio/status")
 async def twilio_status_webhook(request: Request, customer_id: Optional[str] = None):

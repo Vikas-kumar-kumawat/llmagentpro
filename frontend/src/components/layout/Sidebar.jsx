@@ -1,90 +1,93 @@
 import React from 'react';
-import { useTheme } from '../../context/ThemeContext';
 import {
-  MessageSquare,
-  PhoneCall,
   Brain,
-  Ticket,
-  PanelLeft,
+  MessageSquare,
   Zap,
   Gift,
-  TrendingDown
+  TrendingDown,
+  Headset,
+  PanelLeft
 } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
-export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollapsed, onLogout }) {
-  const { theme, toggleTheme } = useTheme();
+export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollapsed }) {
+  const { theme } = useTheme();
   const isDark = theme === 'dark';
 
   const agents = [
-    { id: 'chatbot', name: 'BFibernet AI', icon: <Brain className="w-4 h-4 text-cyan-400" /> },
-    { id: 'feedback', name: 'Feedback Collector', icon: <MessageSquare className="w-4 h-4 text-purple-400" /> },
-    { id: 'recharge', name: 'Recharge Reminder', icon: <Zap className="w-4 h-4 text-amber-400" /> },
-    { id: 'offers', name: 'New Offers Call', icon: <Gift className="w-4 h-4 text-pink-400" /> },
-    { id: 'competitor', name: 'Competitor Price Monitor', icon: <TrendingDown className="w-4 h-4 text-orange-400" /> },
-    { id: 'outbound', name: 'Direct Voice Call', icon: <PhoneCall className="w-4 h-4 text-emerald-400" /> },
-    { id: 'history', name: 'Logs & Tickets', icon: <Ticket className="w-4 h-4 text-blue-400" /> },
+    { id: 'chatbot', name: 'BFibernet AI', icon: Brain },
+    { id: 'feedback', name: 'Feedback Collector', icon: MessageSquare },
+    { id: 'recharge', name: 'Recharge Reminder', icon: Zap },
+    { id: 'offers', name: 'New Offers Call', icon: Gift, badge: 'Beta' },
+    { id: 'competitor', name: 'Competitor Price Monitor', icon: TrendingDown },
+    { id: 'outbound', name: 'Customer Support Agent', icon: Headset },
   ];
 
   return (
     <aside
-      className={`h-screen transition-all duration-300 flex flex-col justify-between select-none ${isCollapsed ? 'w-16' : 'w-64'
-        } ${isDark ? 'bg-[#050505] border-r border-[#161616] text-[#f4f4f5]' : 'bg-white border-r border-slate-200 text-slate-800 shadow-sm'
-        }`}
+      className={`h-screen transition-all duration-200 flex flex-col justify-between select-none ${
+        isCollapsed ? 'w-16' : 'w-64'
+      } bg-[#000000] border-r border-[#27272a] text-[#ffffff] font-['Plus_Jakarta_Sans',sans-serif] shrink-0`}
     >
       {/* Top Section */}
-      <div className="flex flex-col gap-1">
-        {/* BFibernet Brand Logo Header */}
+      <div className="flex flex-col">
+        {/* Header Logo Branding & Collapse Toggle */}
         {!isCollapsed ? (
-          <div className="p-3 flex items-center justify-between gap-2">
+          <div className="p-3.5 flex items-center justify-between gap-2 border-b border-[#27272a] bg-[#000000]">
             <div
-              className="flex items-center gap-2 cursor-pointer group flex-1"
+              className="flex items-center gap-2.5 cursor-pointer group flex-1"
               onClick={() => setActiveAgent('chatbot')}
               title="BFibernet AI Dashboard"
             >
-              <img
-                src="/bfibernet_logo.png"
-                alt="BFibernet Logo"
-                className="h-12 object-contain rounded-xl bg-white px-2.5 py-1 shadow-sm border border-slate-200/90 transition-transform group-hover:scale-105"
-              />
+              <div className={`px-2 py-1 rounded-lg border transition-all duration-200 group-hover:scale-105 ${
+                isDark
+                  ? 'bg-white border-[#27272a] shadow-sm'
+                  : 'bg-[#09090b] border-slate-200 shadow-sm'
+              }`}>
+                <img
+                  src="/bfibernet_logo.png"
+                  alt="BFibernet Logo"
+                  className="h-7 object-contain"
+                />
+              </div>
             </div>
+
             <button
               onClick={() => setIsCollapsed(true)}
-              title="Minimize Sidebar"
-              className={`p-2 rounded-xl transition cursor-pointer border shrink-0 ${
-                isDark
-                  ? 'bg-[#121212] hover:bg-[#1c1c1c] text-zinc-300 border-[#222222] hover:text-white'
-                  : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200'
-              }`}
+              title="Collapse Sidebar"
+              className="p-1.5 rounded-lg transition cursor-pointer border bg-[#09090b] hover:bg-[#18181b] text-[#a1a1aa] hover:text-white border-[#27272a] shrink-0"
             >
               <PanelLeft className="w-4 h-4" />
             </button>
           </div>
         ) : (
-          <div className="py-3 flex flex-col items-center gap-2.5 w-full">
-            <div
-              className="cursor-pointer group flex items-center justify-center"
+          <div className="py-3 flex flex-col items-center gap-3 w-full border-b border-[#27272a] bg-[#000000]">
+            <button
               onClick={() => setIsCollapsed(false)}
-              title="Click logo to expand sidebar"
+              className="cursor-pointer group flex items-center justify-center p-1 rounded-lg transition"
+              title="Expand Sidebar"
             >
-              <img
-                src="/bfibernet_logo.png"
-                alt="BFibernet Logo"
-                className="w-10 h-10 object-contain rounded-xl bg-white p-1 shadow-sm border border-slate-200/90 transition-transform group-hover:scale-105"
-              />
-            </div>
+              <div className={`p-1.5 rounded-lg border transition-transform group-hover:scale-105 ${
+                isDark
+                  ? 'bg-white border-[#27272a]'
+                  : 'bg-[#09090b] border-slate-200'
+              }`}>
+                <img
+                  src="/bfibernet_logo.png"
+                  alt="BFibernet Logo"
+                  className="w-6 h-6 object-contain"
+                />
+              </div>
+            </button>
           </div>
         )}
 
-        {/* Navigation Items Directory */}
-        <div className={`py-2 space-y-1.5 ${isCollapsed ? 'flex flex-col items-center px-1' : 'px-2.5'}`}>
-          {!isCollapsed && (
-            <p className={`px-2 py-1 text-[10px] font-bold uppercase tracking-wider ${isDark ? 'text-zinc-600' : 'text-slate-400'}`}>
-              Navigation
-            </p>
-          )}
-
+        {/* Navigation Items */}
+        <div className={`py-4 space-y-1 ${isCollapsed ? 'px-2 flex flex-col items-center' : 'px-3'}`}>
           {agents.map((agent) => {
             const isActive = activeAgent === agent.id;
+            const IconComponent = agent.icon;
+
             return (
               <button
                 key={agent.id}
@@ -95,33 +98,38 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                   }
                 }}
                 title={agent.name}
-                className={`transition-all duration-200 flex items-center cursor-pointer text-xs group ${isCollapsed
-                    ? `w-10 h-10 justify-center rounded-xl border ${isActive
-                      ? isDark
-                        ? 'bg-[#141414] text-white border-[#282828] shadow-sm'
-                        : 'bg-slate-100 text-slate-900 font-bold border-slate-300'
-                      : isDark
-                        ? 'hover:bg-[#111111] text-zinc-400 hover:text-white border-transparent'
-                        : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-transparent'
-                    }`
-                    : `w-full py-2 px-2.5 rounded-xl justify-start ${isActive
-                      ? isDark
-                        ? 'bg-[#141414] text-white font-semibold border border-[#282828] shadow-sm'
-                        : 'bg-slate-100 text-slate-900 font-bold border border-slate-300/80 shadow-2xs'
-                      : isDark
-                        ? 'hover:bg-[#111111] text-zinc-400 hover:text-white border-transparent'
-                        : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border-transparent'
-                    }`
-                  }`}
+                className={`w-full transition-all duration-150 flex items-center cursor-pointer text-[14px] font-medium group rounded-lg ${
+                  isCollapsed
+                    ? `h-10 w-10 justify-center ${
+                        isActive
+                          ? 'bg-[#18181b] text-white border border-[#27272a]'
+                          : 'hover:bg-[#121215] text-[#a1a1aa] hover:text-white border border-transparent'
+                      }`
+                    : `py-2.5 px-3 justify-between ${
+                        isActive
+                          ? 'bg-[#18181b] text-white border border-[#27272a]'
+                          : 'hover:bg-[#121215] text-[#a1a1aa] hover:text-white border border-transparent'
+                      }`
+                }`}
               >
-                <div className="flex items-center gap-2.5 overflow-hidden justify-center">
-                  <span className="shrink-0 transition-transform group-hover:scale-105">{agent.icon}</span>
+                <div className="flex items-center gap-3 overflow-hidden">
+                  <IconComponent
+                    className={`w-[18px] h-[18px] shrink-0 transition-colors ${
+                      isActive ? 'text-white' : 'text-[#a1a1aa] group-hover:text-white'
+                    }`}
+                  />
                   {!isCollapsed && (
-                    <span className="truncate text-xs font-semibold">
+                    <span className="truncate tracking-tight font-medium text-[14px]">
                       {agent.name}
                     </span>
                   )}
                 </div>
+
+                {!isCollapsed && agent.badge && (
+                  <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-[#18181b] text-white border border-[#27272a] ml-2 shrink-0">
+                    {agent.badge}
+                  </span>
+                )}
               </button>
             );
           })}
