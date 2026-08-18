@@ -122,3 +122,12 @@ export async function getCustomerById(customer_id) {
   const res = await fetch(`${API_BASE_URL}/api/v1/customers/${customer_id}`);
   return await res.json();
 }
+
+export async function queryRagKnowledgeBase(question) {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rag/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  return await res.json();
+}

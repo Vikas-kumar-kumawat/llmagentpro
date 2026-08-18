@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useTheme } from '../../context/ThemeContext';
+import { queryRagKnowledgeBase } from '../../services/apiService';
 import {
   MessageSquare,
   Zap,
@@ -19,7 +20,7 @@ export function ChatbotSection({ onSwitchTab }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault();
     if (!input.trim()) return;
 
@@ -33,32 +34,30 @@ export function ChatbotSection({ onSwitchTab }) {
     setMessages((prev) => [...prev, userMsg]);
     setInput('');
 
-    setTimeout(() => {
-      let replyText = `Hello Vikas! I am your BFibernet AI Assistant. `;
-      const lower = userQuery.toLowerCase();
-
-      if (lower.includes('feedback') || lower.includes('rating') || lower.includes('sentiment')) {
-        replyText += `You can execute our Feedback Collector Agent from the sidebar.`;
-      } else if (lower.includes('recharge') || lower.includes('reminder') || lower.includes('expiry')) {
-        replyText += `You can trigger automated Recharge Expiry Reminder calls & SMS notifications.`;
-      } else if (lower.includes('offer') || lower.includes('discount') || lower.includes('promo')) {
-        replyText += `You can launch the New Offers Promotional Broadcast Call Agent for fiber upgrades.`;
-      } else if (lower.includes('competitor') || lower.includes('price') || lower.includes('rival')) {
-        replyText += `You can monitor rival ISP pricing & trigger counter-offer call campaigns.`;
-      } else {
-        replyText += `How can I assist you with your broadband service, AI voice agents, or call operations today?`;
-      }
-
+    try {
+      const res = await queryRagKnowledgeBase(userQuery);
+      const replyText = res.answer || "I am connected to the official BFibernet enterprise knowledge base. How can I help you today?";
       setMessages((prev) => [
         ...prev,
         { 
           id: Date.now() + 1, 
           sender: 'agent', 
           text: replyText, 
+          sources: res.sources || [],
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
         }
       ]);
-    }, 400);
+    } catch (err) {
+      setMessages((prev) => [
+        ...prev,
+        { 
+          id: Date.now() + 1, 
+          sender: 'agent', 
+          text: `Hello Vikas! I am your BFibernet AI Assistant. How can I assist you with your broadband service today?`, 
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+        }
+      ]);
+    }
   };
 
   const handleAgentLaunch = (targetTab) => {
