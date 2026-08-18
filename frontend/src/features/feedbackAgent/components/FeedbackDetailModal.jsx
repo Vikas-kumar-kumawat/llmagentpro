@@ -93,13 +93,14 @@ export function FeedbackDetailModal({
 
   // Generate conversation transcript thread based on customer feedback entry
   const getTranscriptThread = (item) => {
+    let thread = [];
     if (item?.transcript) {
       try {
         const parsed = typeof item.transcript === 'string' ? JSON.parse(item.transcript) : item.transcript;
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(t => ({
+          thread = parsed.map(t => ({
             speaker: t.speaker || (t.role === 'user' ? 'customer' : 'agent'),
-            name: t.name || (t.speaker === 'agent' || t.speaker === 'ai' ? 'AI Voice Collector' : item.customer_name),
+            name: t.name || (t.speaker === 'agent' || t.speaker === 'ai' ? 'AI Voice Collector' : (item.customer_name || 'Customer')),
             time: t.time || 'Live',
             text: t.text || t.content || ''
           }));
@@ -109,33 +110,48 @@ export function FeedbackDetailModal({
       }
     }
 
-    const isPos = item?.sentiment === 'positive';
-    const isNeg = item?.sentiment === 'negative';
+    if (thread.length === 0) {
+      const isPos = item?.sentiment === 'positive';
+      const isNeg = item?.sentiment === 'negative';
 
-    return [
-      {
-        speaker: 'agent',
-        name: 'AI Voice Collector',
-        time: 'Just now',
-        text: `Hello ${item?.customer_name || 'Customer'}! I am calling from BFibernet customer service regarding your internet connection. How is your experience?`
-      },
-      {
+      return [
+        {
+          speaker: 'agent',
+          name: 'AI Voice Collector',
+          time: 'Just now',
+          text: `Hello ${item?.customer_name || 'Customer'}! I am calling from BFibernet customer service regarding your internet connection. How is your experience?`
+        },
+        {
+          speaker: 'customer',
+          name: item?.customer_name || 'Customer',
+          time: 'Just now',
+          text: item?.feedback_text || 'Connecting...'
+        },
+        {
+          speaker: 'agent',
+          name: 'AI Voice Collector',
+          time: 'Just now',
+          text: isPos 
+            ? `Thank you so much for your positive feedback! We have recorded your experience.`
+            : isNeg
+            ? `We apologize for the inconvenience. Our technical support team has been notified.`
+            : `Thank you for sharing your feedback with BFibernet!`
+        }
+      ];
+    }
+
+    // Ensure customer message is present if feedback_text exists but hasn't been added to transcript array
+    const hasCustomerMessage = thread.some(t => t.speaker === 'customer');
+    if (!hasCustomerMessage && item?.feedback_text && item.feedback_text !== 'Calling customer...') {
+      thread.push({
         speaker: 'customer',
         name: item?.customer_name || 'Customer',
-        time: 'Just now',
-        text: item?.feedback_text || 'Connecting...'
-      },
-      {
-        speaker: 'agent',
-        name: 'AI Voice Collector',
-        time: 'Just now',
-        text: isPos 
-          ? `Thank you so much for your positive feedback! We have recorded your experience.`
-          : isNeg
-          ? `We apologize for the inconvenience. Our technical support team has been notified.`
-          : `Thank you for sharing your feedback with BFibernet!`
-      }
-    ];
+        time: 'Recorded Feedback',
+        text: item.feedback_text
+      });
+    }
+
+    return thread;
   };
 
   const transcriptThread = getTranscriptThread(activeFeedback);
@@ -233,6 +249,34 @@ export function FeedbackDetailModal({
 
         {/* Modal Scrollable Body */}
         <div className="p-6 overflow-y-auto space-y-6">
+          {/* Recorded Customer Feedback Highlight Card */}
+          <div className={`p-4.5 rounded-2xl border transition-all ${
+            isDark ? 'bg-[#161616] border-[#2a2a2a]' : 'bg-cyan-50/60 border-cyan-200/70 shadow-xs'
+          }`}>
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-4 h-4 text-cyan-500" />
+                <span className="font-bold text-xs uppercase tracking-wider text-cyan-500">
+                  Recorded Customer Feedback
+                </span>
+              </div>
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase border ${
+                activeFeedback?.sentiment === 'positive'
+                  ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                  : activeFeedback?.sentiment === 'negative'
+                  ? 'bg-rose-500/10 text-rose-400 border-rose-500/20'
+                  : 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+              }`}>
+                {activeFeedback?.sentiment || 'Neutral'}
+              </span>
+            </div>
+            <p className={`text-sm italic font-medium leading-relaxed ${
+              isDark ? 'text-zinc-200' : 'text-slate-800'
+            }`}>
+              "{activeFeedback?.feedback_text || activeFeedback?.notes || 'No customer feedback text recorded yet.'}"
+            </p>
+          </div>
+
           {/* Audio Player & Waveform Box */}
           <div className={`p-4 rounded-2xl border transition-all ${
             isDark ? 'bg-[#151515] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100 shadow-sm'

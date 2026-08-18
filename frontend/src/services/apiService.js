@@ -24,11 +24,11 @@ export async function getContactsAndLogs() {
   return await res.json();
 }
 
-export async function makeOutboundCall(name, phone, message) {
+export async function makeOutboundCall(name, phone, message, customer_id) {
   const res = await fetch(`${API_BASE_URL}/api/v1/make-call`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone, message: message || undefined })
+    body: JSON.stringify({ name, phone, message: message || undefined, customer_id: customer_id || undefined })
   });
   return await res.json();
 }

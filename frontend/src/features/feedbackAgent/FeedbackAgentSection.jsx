@@ -164,7 +164,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     setCallingState({ loading: true, phone: customerPhone, msg: `Calling ${customerName}...` });
 
     try {
-      const res = await makeOutboundCall(customerName, customerPhone, "Following up on your feedback inquiry.");
+      const res = await makeOutboundCall(customerName, customerPhone, "Following up on your feedback inquiry.", item.id);
       // Store call_sid so Cancel Call button can terminate the call via Twilio
       const sid = res.call_sid || res.contact?.call_sid || null;
       setRowCallStatuses(prev => ({
@@ -245,7 +245,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
 
       try {
         const speechScript = `Hello ${item.customer_name}, this is BFibernet AI Feedback Collector calling to record your experience. Press 1 to speak with an agent.`;
-        const res = await makeOutboundCall(item.customer_name, phone, speechScript);
+        const res = await makeOutboundCall(item.customer_name, phone, speechScript, item.id);
 
         if (cancelBatchRef.current) {
           logs.push(`🛑 Batch Calling Campaign Cancelled by User.`);
