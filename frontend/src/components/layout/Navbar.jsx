@@ -1,14 +1,23 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Sun, Moon, LogOut, User } from 'lucide-react';
+import { Sun, Moon, LogOut, User, Menu } from 'lucide-react';
 
-export function Navbar({ onLogout }) {
+export function Navbar({ onLogout, onToggleSidebar }) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === 'dark';
 
   return (
-    <header className="w-full h-14 px-6 flex items-center justify-between border-b border-[#27272a] bg-[#000000] text-white select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif]">
-      <div></div>
+    <header className="w-full h-14 px-3 sm:px-6 flex items-center justify-between border-b border-[#27272a] bg-[#000000] text-white select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif]">
+      {/* Left side - Mobile Menu Toggle */}
+      <div className="flex items-center gap-2">
+        <button
+          onClick={onToggleSidebar}
+          title="Toggle Navigation Menu"
+          className="md:hidden p-2 rounded-lg border border-[#27272a] bg-[#09090b] hover:bg-[#18181b] text-white cursor-pointer transition-colors"
+        >
+          <Menu className="w-4 h-4 text-white" />
+        </button>
+      </div>
 
       {/* Right side - Controls */}
       <div className="flex items-center gap-3">

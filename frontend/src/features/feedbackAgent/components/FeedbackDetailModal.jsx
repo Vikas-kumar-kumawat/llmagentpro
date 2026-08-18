@@ -243,20 +243,21 @@ export function FeedbackDetailModal({
           </div>
         </div>
 
-        {/* Modal Action Controls Footer */}
-        <div className="p-4 sm:p-6 border-t flex flex-wrap items-center justify-between gap-3 bg-[#000000] border-[#27272a] shrink-0">
+        {/* Modal Action Footer */}
+        <div className="p-3.5 sm:p-5 border-t border-[#27272a] bg-[#000000] flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 shrink-0">
           <button
             onClick={() => handleClearFeedback && handleClearFeedback(selectedFeedback.id)}
-            className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a] transition cursor-pointer flex items-center gap-2 shrink-0"
+            title="Remove previous feedback transcript & clear rating for this customer"
+            className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a] transition cursor-pointer flex items-center justify-center gap-2 shrink-0"
           >
             <RotateCw className="w-3.5 h-3.5 text-white" />
             <span>Clear Previous Feedback</span>
           </button>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center justify-end gap-2.5 w-full sm:w-auto">
             <button
               onClick={() => setSelectedFeedback(null)}
-              className="px-5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer border bg-[#18181b] hover:bg-[#27272a] text-white border-[#27272a]"
+              className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold cursor-pointer border bg-[#18181b] hover:bg-[#27272a] text-white border-[#27272a] flex-1 sm:flex-none text-center"
             >
               Close
             </button>
@@ -265,7 +266,7 @@ export function FeedbackDetailModal({
               <button
                 onClick={handleCancelCall}
                 disabled={isCancelling}
-                className="px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center gap-2 cursor-pointer transition bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a]"
+                className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition bg-[#18181b] hover:bg-[#27272a] text-white border border-[#27272a] flex-1 sm:flex-none"
               >
                 <PhoneOff className="w-4 h-4" />
                 <span>{isCancelling ? 'Cancelling...' : 'Cancel Call'}</span>
@@ -278,7 +279,7 @@ export function FeedbackDetailModal({
                   handleTriggerCall(selectedFeedback.customer_name, selectedFeedback.phone);
                   setSelectedFeedback(null);
                 }}
-                className="px-5 py-2.5 rounded-lg text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition cursor-pointer flex items-center gap-2"
+                className="px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition cursor-pointer flex items-center justify-center gap-2 flex-1 sm:flex-none"
               >
                 <Phone className="w-4 h-4" />
                 <span>Call Customer</span>
@@ -290,6 +291,4 @@ export function FeedbackDetailModal({
     </div>
   );
 }
-
-
 

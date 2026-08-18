@@ -19,7 +19,7 @@ function MainAppLayout({ onLogout }) {
   const isDark = theme === 'dark';
 
   const [activeAgent, setActiveAgent] = useState('chatbot');
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [_twilioConfigured, setTwilioConfigured] = useState(false);
 
   const [contacts, setContacts] = useState([]);
@@ -65,7 +65,10 @@ function MainAppLayout({ onLogout }) {
       {/* Main BFibernet Workspace */}
       <main className="flex-1 flex flex-col h-screen overflow-y-auto bg-[#000000]">
         {/* Top Navbar Header with Admin Badge */}
-        <Navbar onLogout={onLogout} />
+        <Navbar 
+          onLogout={onLogout} 
+          onToggleSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
+        />
 
         {/* Dynamic Agent Workspace View — Notion Document Centered Layout */}
         <div className={`flex-1 w-full ${['feedback', 'recharge', 'offers', 'competitor'].includes(activeAgent) ? 'max-w-6xl mx-auto p-4 md:p-8' : 'max-w-4xl mx-auto p-4 md:p-8'}`}>
