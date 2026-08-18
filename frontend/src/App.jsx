@@ -71,7 +71,7 @@ function MainAppLayout({ onLogout }) {
         />
 
         {/* Dynamic Agent Workspace View — Notion Document Centered Layout */}
-        <div className={`flex-1 w-full ${['feedback', 'recharge', 'offers', 'competitor'].includes(activeAgent) ? 'max-w-6xl mx-auto p-4 md:p-8' : 'max-w-4xl mx-auto p-4 md:p-8'}`}>
+        <div className={`flex-1 w-full ${['feedback', 'recharge', 'offers', 'competitor'].includes(activeAgent) ? 'max-w-6xl mx-auto p-2 sm:p-4 md:p-8' : 'max-w-4xl mx-auto p-2 sm:p-4 md:p-8'}`}>
           {activeAgent === 'chatbot' && (
             <ChatbotSection onSwitchTab={(tab) => setActiveAgent(tab)} />
           )}

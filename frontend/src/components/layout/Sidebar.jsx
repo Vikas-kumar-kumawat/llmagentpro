@@ -38,7 +38,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
       <aside
         className={`h-screen transition-all duration-300 ease-in-out flex flex-col justify-between select-none ${
           isCollapsed
-            ? 'max-md:-translate-x-full md:w-16'
+            ? 'max-md:hidden max-md:w-0 md:w-16'
             : 'max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[84vw] max-md:max-w-[320px] max-md:shadow-2xl max-md:rounded-r-2xl w-64'
         } bg-[#09090b] border-r border-[#27272a] text-[#ffffff] font-['Plus_Jakarta_Sans',sans-serif] shrink-0`}
       >
