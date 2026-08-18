@@ -1,0 +1,72 @@
+# ==========================================
+# SECRETS & ENVIRONMENT — NEVER COMMIT THESE
+# ==========================================
+.env
+.env.*
+!.env.example
+*.env
+secrets.json
+credentials.json
+service_account.json
+new.env
+
+# ==========================================
+# DATABASE FILES
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+app.db
+
+# ==========================================
+# PYTHON CACHE & BUILD ARTIFACTS
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+
+# ==========================================
+# VIRTUAL ENVIRONMENTS
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+.env.bak
+virtualenv/
+
+# ==========================================
+# TESTING & COVERAGE
+# ==========================================
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.cover
+.tox/
+
+# ==========================================
+# IDE / EDITOR FILES
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# ==========================================
+# LOGS
+# ==========================================
+*.log
+logs/

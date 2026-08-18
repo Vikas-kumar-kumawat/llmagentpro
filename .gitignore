@@ -1,0 +1,87 @@
+# ==========================================
+# SECRETS & ENVIRONMENT — NEVER COMMIT THESE
+# ==========================================
+.env
+.env.*
+!.env.example
+*.env
+new.env
+secrets.json
+credentials.json
+service_account.json
+
+# ==========================================
+# DATABASE FILES
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+backend/app.db
+backend/*.db
+
+# ==========================================
+# PYTHON CACHE & BUILD ARTIFACTS
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+dist/
+*.egg
+*.egg-info/
+.eggs/
+
+# ==========================================
+# VIRTUAL ENVIRONMENTS
+# ==========================================
+venv/
+.venv/
+env/
+ENV/
+virtualenv/
+
+# ==========================================
+# NODE / FRONTEND
+# ==========================================
+node_modules/
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+.npm/
+
+# ==========================================
+# TESTING & COVERAGE
+# ==========================================
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+*.cover
+.tox/
+jest.config.js.bak
+
+# ==========================================
+# IDE / EDITOR FILES
+# ==========================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==========================================
+# OS FILES
+# ==========================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==========================================
+# LOGS
+# ==========================================
+*.log
+logs/
