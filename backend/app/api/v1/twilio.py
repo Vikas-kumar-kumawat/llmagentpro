@@ -64,7 +64,8 @@ from app.services.voice_service import get_active_agent_info, generate_ai_respon
 @router.api_route("/twilio/voice", methods=["GET", "POST"])
 def twilio_voice_webhook(request: Request, customer_id: Optional[str] = None):
     """Initial TwiML entry point when Twilio call connects."""
-    host_url = str(request.base_url).rstrip("/")
+    public_url = settings.base_url
+    host_url = public_url if public_url and not public_url.startswith("http://localhost") else str(request.base_url).rstrip("/")
     cid_param = f"?customer_id={customer_id}" if customer_id else ""
     feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
 

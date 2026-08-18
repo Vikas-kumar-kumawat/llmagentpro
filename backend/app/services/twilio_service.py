@@ -91,15 +91,25 @@ def build_twilio_voice_entry_twiml(customer_name: str, feedback_url: str) -> str
         )
         closing_text = "Thank you for your feedback! Goodbye."
 
-    gather = response.gather(
-        input="speech dtmf",
-        action=feedback_url,
-        method="POST",
-        speech_timeout="auto",
-        language=stt_lang,
-        num_digits=1,
+    # Validate that feedback_url is a real public HTTPS URL (e.g., Cloudflare Tunnel / ngrok)
+    is_valid_public_url = bool(
+        feedback_url
+        and not feedback_url.startswith("http://localhost")
+        and not feedback_url.startswith("http://127.")
     )
-    gather.say(greeting_text, voice=v)
+
+    if is_valid_public_url:
+        gather = response.gather(
+            input="speech dtmf",
+            action=feedback_url,
+            method="POST",
+            speech_timeout="auto",
+            language=stt_lang,
+            num_digits=1,
+        )
+        gather.say(greeting_text, voice=v)
+    else:
+        response.say(greeting_text, voice=v)
 
     response.say(closing_text, voice=v)
     response.hangup()
@@ -113,16 +123,25 @@ def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Opti
     is_marwari = is_marwari_accent_active()
     stt_lang = "hi-IN" if is_marwari else "en-IN"
 
+    is_valid_public_url = bool(
+        feedback_url
+        and not feedback_url.startswith("http://localhost")
+        and not feedback_url.startswith("http://127.")
+    )
+
     if not customer_text:
         no_speech_text = "जी, आपकी आवाज़ थोड़ी साफ़ नहीं आ रही है। एक बार फिर से बताइए।" if is_marwari else "I didn't quite catch that. Could you please tell me about your experience?"
-        gather = response.gather(
-            input="speech",
-            action=feedback_url,
-            method="POST",
-            speech_timeout="auto",
-            language=stt_lang,
-        )
-        gather.say(no_speech_text, voice=v)
+        if is_valid_public_url:
+            gather = response.gather(
+                input="speech",
+                action=feedback_url,
+                method="POST",
+                speech_timeout="auto",
+                language=stt_lang,
+            )
+            gather.say(no_speech_text, voice=v)
+        else:
+            response.say(no_speech_text, voice=v)
         return str(response)
 
     ai_text = generate_ai_response(customer_text, customer_data)

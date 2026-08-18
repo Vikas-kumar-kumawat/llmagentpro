@@ -1,0 +1,10 @@
+{
+  "name": "calling-agent-platform",
+  "version": "2.0.0",
+  "description": "BFibernet Multi-Agent Voice Platform",
+  "private": true,
+  "scripts": {
+    "build": "chmod +x build.sh && ./build.sh",
+    "start": "gunicorn --chdir backend app.main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT"
+  }
+}

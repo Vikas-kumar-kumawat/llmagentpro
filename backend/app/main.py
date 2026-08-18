@@ -1,5 +1,8 @@
-from fastapi import FastAPI
+import os
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from app.core.config import settings
 from app.db.session import init_db
 from app.agents.registry import agent_registry
@@ -23,6 +26,16 @@ def create_application() -> FastAPI:
         description="Enterprise Multi-Agent Platform powered by FastAPI, LangGraph, and Twilio Voice"
     )
 
+    @app.on_event("startup")
+    def startup_event():
+        # Start Cloudflare Tunnel only if running locally and BASE_URL is not set
+        if not os.getenv("RENDER") and not os.getenv("RENDER_EXTERNAL_URL"):
+            try:
+                from app.services.tunnel_service import start_cloudflare_tunnel
+                start_cloudflare_tunnel(port=int(os.getenv("PORT", 8000)))
+            except Exception as e:
+                print(f"[Startup Warning] Could not start Cloudflare Tunnel: {e}")
+
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
@@ -31,25 +44,49 @@ def create_application() -> FastAPI:
         allow_headers=["*"],
     )
 
-    # Include Versioned API v1 Router (/api/v1)
+    # Include Versioned API v1 Router (/api/v1 and /api)
     app.include_router(api_router)
-
-    # Backward compatibility router prefix (/api)
     app.include_router(api_router, prefix="/api")
 
-    @app.get("/")
-    def read_root():
+    @app.get("/api/health")
+    def health_check():
         return {
             "service": settings.PROJECT_NAME,
             "status": "online",
             "version": settings.VERSION,
             "twilio_configured": settings.is_twilio_configured(),
+            "base_url": settings.base_url,
             "active_agents": agent_registry.list_agents()
         }
 
-    @app.get("/api/hello")
-    def hello_world():
-        return {"message": "Hello World from BCT AI Support Multi-Agent Platform!"}
+    # Mount Frontend Static Files if frontend/dist exists (Render / Production single deployment)
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    project_root = os.path.dirname(os.path.dirname(app_dir))
+    frontend_dist = os.path.join(project_root, "frontend", "dist")
+
+    if os.path.exists(frontend_dist):
+        assets_dir = os.path.join(frontend_dist, "assets")
+        if os.path.exists(assets_dir):
+            app.mount("/assets", StaticFiles(directory=assets_dir), name="assets")
+
+        @app.get("/{full_path:path}")
+        async def serve_spa(request: Request, full_path: str):
+            if full_path.startswith("api") or full_path.startswith("docs") or full_path.startswith("openapi.json"):
+                return None
+            target_file = os.path.join(frontend_dist, full_path)
+            if os.path.exists(target_file) and os.path.isfile(target_file):
+                return FileResponse(target_file)
+            return FileResponse(os.path.join(frontend_dist, "index.html"))
+    else:
+        @app.get("/")
+        def read_root():
+            return {
+                "service": settings.PROJECT_NAME,
+                "status": "online",
+                "version": settings.VERSION,
+                "twilio_configured": settings.is_twilio_configured(),
+                "active_agents": agent_registry.list_agents()
+            }
 
     return app
 

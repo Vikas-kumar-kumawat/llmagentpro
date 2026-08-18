@@ -51,8 +51,12 @@ class Settings:
 
     @property
     def base_url(self) -> str:
+        if hasattr(self, "_base_url_override") and self._base_url_override:
+            return self._base_url_override.rstrip("/")
         load_dotenv(override=True)
-        return os.getenv("BASE_URL", "").strip().rstrip("/")
+        env_url = os.getenv("BASE_URL", "").strip().rstrip("/")
+        render_url = os.getenv("RENDER_EXTERNAL_URL", "").strip().rstrip("/")
+        return env_url or render_url
 
     def is_twilio_configured(self) -> bool:
         sid = self.twilio_account_sid

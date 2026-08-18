@@ -46,6 +46,15 @@ def create_customer(request: CreateCustomerRequest):
 
     return {"success": True, "id": fb_id, "customer_name": name, "phone": phone}
 
+@router.get("/{customer_id}")
+def get_customer(customer_id: str):
+    """Gets a single customer feedback record by ID (includes live transcript)."""
+    entry = DataRepository.get_feedback_by_id(customer_id)
+    if not entry:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    return entry
+
+
 @router.put("/{customer_id}")
 def update_customer(customer_id: str, request: UpdateCustomerRequest):
     """Updates a customer feedback entry by ID."""

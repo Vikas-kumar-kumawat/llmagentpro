@@ -1,4 +1,18 @@
-const API_BASE_URL = 'http://localhost:8000';
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_BASE_URL) {
+    return import.meta.env.VITE_API_BASE_URL.replace(/\/$/, '');
+  }
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return 'http://localhost:8000';
+    }
+    return window.location.origin;
+  }
+  return 'http://localhost:8000';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function getServiceStatus() {
   const res = await fetch(`${API_BASE_URL}/`);
@@ -101,5 +115,10 @@ export async function cancelActiveCall(call_sid) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ call_sid })
   });
+  return await res.json();
+}
+
+export async function getCustomerById(customer_id) {
+  const res = await fetch(`${API_BASE_URL}/api/v1/customers/${customer_id}`);
   return await res.json();
 }
