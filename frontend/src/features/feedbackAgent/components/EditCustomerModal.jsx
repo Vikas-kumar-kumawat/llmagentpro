@@ -48,8 +48,8 @@ export function EditCustomerModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
-      <div className={`w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden transition-all duration-200 ${
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+      <div className={`w-full max-w-lg rounded-t-3xl sm:rounded-2xl border shadow-2xl overflow-hidden transition-all duration-200 ${
         isDark ? 'bg-[#212121] border-[#2f2f2f] text-[#ececec]' : 'bg-white border-slate-100 text-slate-900'
       }`}>
         {/* Header */}

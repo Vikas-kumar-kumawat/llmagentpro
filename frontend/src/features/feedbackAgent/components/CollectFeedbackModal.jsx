@@ -23,8 +23,8 @@ export function CollectFeedbackModal({
   if (!showCollectModal) return null;
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-center justify-center p-4 animate-fadeIn">
-      <div className={`w-full max-w-lg rounded-2xl p-6 border shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto transition-all ${
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
+      <div className={`w-full max-w-lg rounded-t-3xl sm:rounded-2xl p-4 sm:p-6 border shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto transition-all ${
         isDark ? 'bg-[#1e1e1e] border-[#2c2c2c] text-[#ececec]' : 'bg-white border-slate-200 text-slate-800'
       }`}>
         <div className="flex justify-between items-center border-b pb-3 border-slate-100 dark:border-[#2d2d2d]">

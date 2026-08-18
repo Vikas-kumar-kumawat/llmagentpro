@@ -198,29 +198,29 @@ export function FeedbackDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-center justify-center p-4 animate-fadeIn">
-      <div className={`w-full max-w-3xl rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[92vh] ${
+    <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-md flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn">
+      <div className={`w-full max-w-3xl rounded-t-3xl sm:rounded-3xl border shadow-2xl overflow-hidden flex flex-col max-h-[95vh] sm:max-h-[90vh] ${
         isDark ? 'bg-[#1a1a1a] border-[#2c2c2c] text-[#ececec]' : 'bg-white border-slate-200 text-slate-900'
       }`}>
         {/* Card Header Banner */}
-        <div className={`p-5 border-b flex items-center justify-between gap-3 ${
+        <div className={`p-4 sm:p-5 border-b flex items-center justify-between gap-3 ${
           isLiveCalling 
             ? 'bg-amber-500/15 border-amber-500/20' 
             : isDark ? 'bg-[#222222] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
         }`}>
-          <div className="flex items-center gap-3.5">
-            <div className={`w-12 h-12 rounded-2xl ${activeFeedback?.avatarBg || 'bg-gradient-to-tr from-cyan-600 to-blue-600'} text-white font-extrabold text-base flex items-center justify-center shadow-lg shrink-0`}>
+          <div className="flex items-center gap-3">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl ${activeFeedback?.avatarBg || 'bg-gradient-to-tr from-cyan-600 to-blue-600'} text-white font-extrabold text-sm sm:text-base flex items-center justify-center shadow-lg shrink-0`}>
               {activeFeedback?.avatar || (activeFeedback?.customer_name || '?').slice(0,2).toUpperCase()}
             </div>
             <div>
-              <div className="flex flex-wrap items-center gap-2">
-                <h3 className={`font-black text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-950'}`}>{activeFeedback?.customer_name || 'Customer'}</h3>
+              <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                <h3 className={`font-black text-base sm:text-lg tracking-tight ${isDark ? 'text-white' : 'text-slate-950'}`}>{activeFeedback?.customer_name || 'Customer'}</h3>
                 {isLiveCalling ? (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse flex items-center gap-1">
+                  <span className="px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/40 animate-pulse flex items-center gap-1">
                     <Activity className="w-3 h-3 animate-spin" /> LIVE CALLING
                   </span>
                 ) : (
-                  <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold border capitalize ${
+                  <span className={`px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] font-bold border capitalize ${
                     activeFeedback?.sentiment === 'positive'
                       ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
                       : activeFeedback?.sentiment === 'negative'
@@ -231,7 +231,7 @@ export function FeedbackDetailModal({
                   </span>
                 )}
               </div>
-              <p className="text-xs text-slate-500 font-mono flex items-center gap-2 mt-0.5">
+              <p className="text-[11px] sm:text-xs text-slate-500 font-mono flex items-center gap-2 mt-0.5">
                 <span>{activeFeedback?.phone || ''}</span> • <span>{activeFeedback?.created_at || ''}</span>
               </p>
             </div>
@@ -239,7 +239,7 @@ export function FeedbackDetailModal({
 
           <button 
             onClick={() => setSelectedFeedback(null)} 
-            className={`p-2 rounded-xl transition cursor-pointer ${
+            className={`p-2 rounded-xl transition cursor-pointer shrink-0 ${
               isDark ? 'text-slate-400 hover:text-white hover:bg-[#2c2c2c]' : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/50'
             }`}
           >
@@ -248,9 +248,9 @@ export function FeedbackDetailModal({
         </div>
 
         {/* Modal Scrollable Body */}
-        <div className="p-6 overflow-y-auto space-y-6">
+        <div className="p-4 sm:p-6 overflow-y-auto space-y-4 sm:space-y-6">
           {/* Recorded Customer Feedback Highlight Card */}
-          <div className={`p-4.5 rounded-2xl border transition-all ${
+          <div className={`p-3.5 sm:p-4.5 rounded-2xl border transition-all ${
             isDark ? 'bg-[#161616] border-[#2a2a2a]' : 'bg-cyan-50/60 border-cyan-200/70 shadow-xs'
           }`}>
             <div className="flex items-center justify-between mb-2">
@@ -270,7 +270,7 @@ export function FeedbackDetailModal({
                 {activeFeedback?.sentiment || 'Neutral'}
               </span>
             </div>
-            <p className={`text-sm italic font-medium leading-relaxed ${
+            <p className={`text-xs sm:text-sm italic font-medium leading-relaxed ${
               isDark ? 'text-zinc-200' : 'text-slate-800'
             }`}>
               "{activeFeedback?.feedback_text || activeFeedback?.notes || 'No customer feedback text recorded yet.'}"
@@ -278,26 +278,26 @@ export function FeedbackDetailModal({
           </div>
 
           {/* Audio Player & Waveform Box */}
-          <div className={`p-4 rounded-2xl border transition-all ${
+          <div className={`p-3.5 sm:p-4 rounded-2xl border transition-all ${
             isDark ? 'bg-[#151515] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100 shadow-sm'
           }`}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Mic className="w-4 h-4 text-cyan-500" />
-                <span className="font-bold text-xs uppercase tracking-wider text-cyan-500">
+                <span className="font-bold text-[11px] sm:text-xs uppercase tracking-wider text-cyan-500">
                   Voice Call Recording & Synthesis Player
                 </span>
               </div>
 
-              <span className="text-xs font-mono text-slate-400">
+              <span className="text-[10px] sm:text-xs font-mono text-slate-400">
                 {isPlayingAudio ? 'Playing...' : '0:42 / 1:15'}
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <button
                 onClick={handleToggleAudio}
-                className={`w-11 h-11 rounded-2xl flex items-center justify-center text-white transition cursor-pointer shrink-0 shadow-md ${
+                className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center text-white transition cursor-pointer shrink-0 shadow-md ${
                   isPlayingAudio
                     ? 'bg-amber-600 hover:bg-amber-500 animate-pulse'
                     : 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500'
@@ -308,7 +308,7 @@ export function FeedbackDetailModal({
 
               {/* Animated Waveform Visualization */}
               <div className="flex-1 space-y-1.5">
-                <div className="flex items-center gap-1 h-8">
+                <div className="flex items-center gap-1 h-7 sm:h-8">
                   {[25, 45, 75, 20, 90, 60, 30, 85, 50, 95, 30, 70, 45, 80, 20, 65, 90, 40, 75, 25, 85, 40, 60, 35, 75].map((h, i) => (
                     <div
                       key={i}
@@ -331,7 +331,7 @@ export function FeedbackDetailModal({
           </div>
 
           {/* Conversation Transcript Thread */}
-          <div className="space-y-4">
+          <div className="space-y-3 sm:space-y-4">
             {/* Header */}
             <div className="flex items-center justify-between pb-1 border-b border-slate-100 dark:border-zinc-800">
               <h4 className="font-bold text-xs uppercase tracking-wider text-slate-400 flex items-center gap-2">
@@ -341,7 +341,7 @@ export function FeedbackDetailModal({
               {isLiveCalling ? (
                 <span className="flex items-center gap-1.5 text-[10px] font-bold text-rose-400 animate-pulse">
                   <Radio className="w-3 h-3" />
-                  LIVE · Updating every 2s
+                  LIVE
                 </span>
               ) : (
                 <span className="text-[10px] text-slate-500 font-mono">Recorded by LangGraph AI</span>
@@ -351,16 +351,16 @@ export function FeedbackDetailModal({
             {/* Live status bar */}
             {isLiveCalling && (
               <div className="flex items-center gap-2 px-3 py-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs font-semibold">
-                <span className="relative flex h-2 w-2">
+                <span className="relative flex h-2 w-2 shrink-0">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-rose-500"></span>
                 </span>
-                Call in progress — transcript updates automatically as the conversation happens
+                <span>Call in progress — transcript updates automatically</span>
               </div>
             )}
 
             {/* Transcript messages */}
-            <div className="space-y-5 max-h-[340px] overflow-y-auto pr-1 scrollbar-thin">
+            <div className="space-y-4 max-h-[300px] sm:max-h-[340px] overflow-y-auto pr-1 scrollbar-thin">
               {transcriptThread.map((chat, index) => {
                 const isAgent = chat.speaker === 'agent';
                 const isLastMsg = index === transcriptThread.length - 1;
@@ -368,12 +368,12 @@ export function FeedbackDetailModal({
                 return (
                   <div
                     key={index}
-                    className={`flex gap-3 items-start ${isAgent ? 'flex-row' : 'flex-row-reverse'} ${
+                    className={`flex gap-2.5 sm:gap-3 items-start ${isAgent ? 'flex-row' : 'flex-row-reverse'} ${
                       isLiveCalling && isLastMsg ? 'animate-fadeIn' : ''
                     }`}
                   >
                     {/* Speaker Avatar */}
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow ${
+                    <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow ${
                       isAgent 
                         ? 'bg-cyan-500/10 text-cyan-400 border border-cyan-500/20' 
                         : 'bg-blue-600/10 text-blue-400 border border-blue-500/20'
@@ -382,17 +382,17 @@ export function FeedbackDetailModal({
                     </div>
 
                     <div className={`flex-1 flex flex-col ${isAgent ? 'items-start' : 'items-end'}`}>
-                      <div className="flex items-center gap-2 mb-1 px-1">
-                        <span className={`text-xs font-bold ${isAgent ? 'text-cyan-500' : 'text-blue-500'}`}>
+                      <div className="flex items-center gap-1.5 sm:gap-2 mb-1 px-1">
+                        <span className={`text-[11px] sm:text-xs font-bold ${isAgent ? 'text-cyan-500' : 'text-blue-500'}`}>
                           {chat.name}
                         </span>
-                        <span className="text-[10px] text-slate-500 font-mono">{chat.time}</span>
+                        <span className="text-[9px] sm:text-[10px] text-slate-500 font-mono">{chat.time}</span>
                         {isLiveCalling && isLastMsg && (
                           <span className="text-[9px] font-bold text-rose-400 animate-pulse">● LIVE</span>
                         )}
                       </div>
 
-                      <div className={`p-4 rounded-2xl max-w-[78%] text-[13px] md:text-sm leading-relaxed border shadow-xs ${
+                      <div className={`p-3 sm:p-4 rounded-2xl max-w-[88%] sm:max-w-[78%] text-xs sm:text-sm leading-relaxed border shadow-xs ${
                         isAgent
                           ? isDark 
                             ? 'bg-[#222222] border-[#2d2d2d] text-zinc-200 rounded-tl-none' 
@@ -408,10 +408,10 @@ export function FeedbackDetailModal({
                 );
               })}
 
-              {/* Typing indicator — shows while call is live and AI may be responding */}
+              {/* Typing indicator */}
               {isLiveCalling && !callWasCancelled && (
                 <div className="flex gap-3 items-start flex-row">
-                  <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs shrink-0 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
+                  <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20">
                     🤖
                   </div>
                   <div className={`p-3 rounded-2xl rounded-tl-none border ${
@@ -431,14 +431,13 @@ export function FeedbackDetailModal({
             </div>
           </div>
 
-
           {/* Call Metadata Grid */}
-          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl border ${
+          <div className={`grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 p-3.5 sm:p-4 rounded-2xl border ${
             isDark ? 'bg-[#151515] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
           }`}>
             <div>
               <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Rating Given</span>
-              <span className="font-extrabold text-amber-500 text-base">
+              <span className="font-extrabold text-amber-500 text-sm sm:text-base">
                 {'★'.repeat(Math.max(0, Math.min(5, parseInt(activeFeedback?.rating) || 0)))}
                 {'☆'.repeat(Math.max(0, 5 - Math.min(5, parseInt(activeFeedback?.rating) || 0)))}
                 {' '}<span className="text-xs text-slate-400 font-normal">({parseInt(activeFeedback?.rating) || 0}/5)</span>
@@ -447,12 +446,12 @@ export function FeedbackDetailModal({
 
             <div>
               <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Call Duration</span>
-              <span className="font-mono text-sm font-semibold text-zinc-300">1 min 15 sec</span>
+              <span className="font-mono text-xs sm:text-sm font-semibold text-zinc-300">1 min 15 sec</span>
             </div>
 
             <div>
               <span className="text-[10px] text-slate-500 font-bold block uppercase tracking-wider mb-0.5">Category Tag</span>
-              <span className="font-semibold text-sm text-cyan-400 capitalize">
+              <span className="font-semibold text-xs sm:text-sm text-cyan-400 capitalize">
                 {(activeFeedback?.category || 'general').replace('_', ' ')}
               </span>
             </div>
@@ -460,12 +459,12 @@ export function FeedbackDetailModal({
         </div>
 
         {/* Modal Action Controls Footer */}
-        <div className={`p-5 border-t flex items-center justify-between gap-3 ${
+        <div className={`p-4 sm:p-5 border-t flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 sm:gap-3 ${
           isDark ? 'bg-[#222222] border-[#2c2c2c]' : 'bg-slate-50 border-slate-100'
         }`}>
           <button
             onClick={handleToggleAudio}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 cursor-pointer border ${
+            className={`w-full sm:w-auto px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 cursor-pointer border ${
               isPlayingAudio
                 ? 'bg-amber-500 text-white border-amber-600 animate-pulse'
                 : isDark ? 'bg-[#2c2c2c] hover:bg-[#333] text-zinc-200 border-[#383838]' : 'bg-white text-slate-800 border-slate-200'
@@ -475,10 +474,10 @@ export function FeedbackDetailModal({
             <span>{isPlayingAudio ? 'Stop Audio' : 'Play Voice Recording'}</span>
           </button>
 
-          <div className="flex items-center gap-2.5">
+          <div className="flex flex-row items-center gap-2 w-full sm:w-auto">
             <button
               onClick={() => setSelectedFeedback(null)}
-              className={`px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer border ${
+              className={`flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-semibold cursor-pointer border ${
                 isDark ? 'bg-[#2c2c2c] text-zinc-300 border-[#383838]' : 'bg-slate-100 text-slate-700 border-slate-200'
               }`}
             >
@@ -490,7 +489,7 @@ export function FeedbackDetailModal({
               <button
                 onClick={handleCancelCall}
                 disabled={isCancelling}
-                className={`px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition shadow-md border ${
+                className={`flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 cursor-pointer transition shadow-md border ${
                   isCancelling
                     ? 'bg-rose-800/50 text-rose-300 border-rose-700/50 cursor-not-allowed'
                     : 'bg-rose-600 hover:bg-rose-500 text-white border-rose-700 animate-pulse'
@@ -503,7 +502,7 @@ export function FeedbackDetailModal({
 
             {/* Cancelled confirmation badge */}
             {callWasCancelled && (
-              <span className="px-4 py-2.5 rounded-xl text-xs font-bold bg-zinc-700/50 text-zinc-400 border border-zinc-600/40 flex items-center gap-2">
+              <span className="flex-1 sm:flex-none justify-center px-4 py-2.5 rounded-xl text-xs font-bold bg-zinc-700/50 text-zinc-400 border border-zinc-600/40 flex items-center gap-2">
                 <PhoneOff className="w-4 h-4" />
                 Call Cancelled
               </span>
@@ -516,10 +515,10 @@ export function FeedbackDetailModal({
                   handleTriggerCall(selectedFeedback.customer_name, selectedFeedback.phone);
                   setSelectedFeedback(null);
                 }}
-                className="px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md cursor-pointer flex items-center gap-2"
+                className="flex-1 sm:flex-none justify-center px-4 sm:px-5 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white shadow-md cursor-pointer flex items-center gap-2"
               >
                 <Phone className="w-4 h-4" />
-                <span>Call Customer Now</span>
+                <span>Call Customer</span>
               </button>
             )}
           </div>
