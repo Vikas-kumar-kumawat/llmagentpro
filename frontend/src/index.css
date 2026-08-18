@@ -116,8 +116,15 @@ html.light .bg-\[\#000000\] {
   background-color: transparent !important;
 }
 
-/* Sidebar, Navbar, Header & Main Container Cards (Elevated Pure White Surface with Visible Slate Borders) */
-html.light aside,
+/* Sidebar Container (100% Solid Opaque Pure White Surface) */
+html.light aside {
+  background-color: #ffffff !important;
+  opacity: 1 !important;
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.15) !important;
+  border-color: rgba(15, 23, 42, 0.25) !important;
+}
+
+/* Navbar, Header & Main Container Cards (Elevated Pure White Surface) */
 html.light header,
 html.light .bg-\[\#09090b\] {
   background-color: #ffffff !important;
@@ -172,17 +179,17 @@ html.light .text-white {
   color: #0f172a !important;
 }
 
-/* Secondary & Muted Text */
+/* High Contrast Inactive Menu Text & Options in Light Theme */
 html.light .text-\[\#a1a1aa\] {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
 html.light .text-\[\#71717a\] {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 html.light .text-zinc-600 {
-  color: #64748b !important;
+  color: #475569 !important;
 }
 
 /* Group Hover Text & Icons */
