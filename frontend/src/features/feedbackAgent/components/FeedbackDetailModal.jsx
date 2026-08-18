@@ -28,28 +28,27 @@ export function FeedbackDetailModal({
   const activeSid = rowCallStatuses[`${selectedFeedback?.id}_sid`];
 
   useEffect(() => {
-    if (!isLiveCalling || !selectedFeedback?.id) {
-      setLiveData(prev => (prev !== null ? null : prev));
-      return;
-    }
+    if (!selectedFeedback?.id) return;
 
     const fetchLiveData = async () => {
       try {
         const data = await getCustomerById(selectedFeedback.id);
-        if (data && !data.detail) setLiveData(data);
+        if (data && !data.detail) {
+          setLiveData(data);
+        }
       } catch (e) {}
     };
 
     fetchLiveData();
     const interval = setInterval(fetchLiveData, 2000);
     return () => clearInterval(interval);
-  }, [isLiveCalling, selectedFeedback?.id]);
+  }, [selectedFeedback?.id]);
 
   useEffect(() => {
     if (transcriptEndRef.current) {
       transcriptEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [liveData]);
+  }, [liveData, activeFeedback?.transcript]);
 
   const handleCancelCall = async () => {
     if (isCancelling) return;
@@ -70,6 +69,7 @@ export function FeedbackDetailModal({
   if (!selectedFeedback) return null;
 
   const getTranscriptThread = (item) => {
+    if (!item) return [];
     if (item?.cleared || item?.feedback_text === 'No previous feedback recorded.') {
       return [];
     }
@@ -77,7 +77,10 @@ export function FeedbackDetailModal({
     let thread = [];
     if (item?.transcript) {
       try {
-        const parsed = typeof item.transcript === 'string' ? JSON.parse(item.transcript) : item.transcript;
+        let parsed = typeof item.transcript === 'string' ? JSON.parse(item.transcript) : item.transcript;
+        if (typeof parsed === 'string') {
+          try { parsed = JSON.parse(parsed); } catch(e) {}
+        }
         if (Array.isArray(parsed) && parsed.length > 0) {
           thread = parsed.map(t => ({
             speaker: t.speaker || (t.role === 'user' ? 'customer' : 'agent'),
@@ -91,27 +94,27 @@ export function FeedbackDetailModal({
       }
     }
 
-    if (thread.length === 0) {
+    if (thread.length === 0 && item?.feedback_text) {
       const isPos = item?.sentiment === 'positive';
       const isNeg = item?.sentiment === 'negative';
 
-      return [
+      thread = [
         {
           speaker: 'agent',
           name: 'AI Voice Collector',
-          time: 'Just now',
+          time: 'Initial Call',
           text: `Hello ${item?.customer_name || 'Customer'}! I am calling from BFibernet customer service regarding your internet connection. How is your experience?`
         },
         {
           speaker: 'customer',
           name: item?.customer_name || 'Customer',
-          time: 'Just now',
+          time: 'Feedback',
           text: item?.feedback_text || 'Connecting...'
         },
         {
           speaker: 'agent',
           name: 'AI Voice Collector',
-          time: 'Just now',
+          time: 'Response',
           text: isPos 
             ? `Thank you so much for your positive feedback! We have recorded your experience.`
             : isNeg

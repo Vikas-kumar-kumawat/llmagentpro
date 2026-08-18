@@ -27,9 +27,12 @@ export function FeedbackVoiceBanner({ voicePersona, setVoicePersona, isPlayingDe
             onChange={(e) => setVoicePersona(e.target.value)}
             className="w-full sm:w-auto py-2 px-3 rounded-lg text-xs bg-[#000000] text-white border border-[#27272a] focus:border-white focus:outline-none transition cursor-pointer font-medium"
           >
-            <option value="ratan_singh">Ratan Singh (Rajasthani Accent - Male)</option>
-            <option value="priya_sharma">Priya Sharma (Neural Female - Hindi/English)</option>
-            <option value="arjun_kapoor">Arjun Kapoor (Professional Male - English)</option>
+            <option value="ratan_singh">Ratan Singh (Rajasthani & Marwari Warm Male)</option>
+            <option value="aarav_sharma">Aarav Sharma (Warm Natural Male - Hindi)</option>
+            <option value="ananya_verma">Ananya Verma (Soft Conversational Female - Hindi)</option>
+            <option value="priya_sharma">Priya Sharma (Neural Female - Indian English)</option>
+            <option value="rohan_kapoor">Rohan Kapoor (Professional Male - Indian English)</option>
+            <option value="gauri_devi">Gauri Devi (Warm Female - Rajasthani/Hindi)</option>
           </select>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">

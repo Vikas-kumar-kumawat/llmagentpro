@@ -116,15 +116,27 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     if ('speechSynthesis' in window) {
       window.speechSynthesis.cancel();
       let text = "Khamma Ghani! Main Ratan Singh hu, aapka AI voice assistant. Main aapki kya sahyog kar sakta hu?";
-      if (voicePersona === 'priya_sharma') {
-        text = "Namaste! Main Priya Sharma hu. Aapke feedback record kar ke help karti hu.";
-      } else if (voicePersona === 'arjun_kapoor') {
-        text = "Hello! I am Arjun, your AI Voice Sales and Support Assistant.";
+      if (voicePersona === 'aarav_sharma') {
+        text = "Namaste! Main Aarav Sharma baat kar raha hu BFibernet se. Aapki internet speed aur service kaisi chal rahi hai?";
+      } else if (voicePersona === 'ananya_verma') {
+        text = "Namaste! Main Ananya Verma hu, BFibernet customer care se. Aapka feedback hamare liye bahut aavashyak hai.";
+      } else if (voicePersona === 'priya_sharma') {
+        text = "Namaste! I am Priya Sharma. I deliver warm, polite, and natural human customer feedback calls.";
+      } else if (voicePersona === 'rohan_kapoor') {
+        text = "Hello! I am Rohan Kapoor, your AI Voice Support Specialist from BFibernet. How may I assist you today?";
+      } else if (voicePersona === 'gauri_devi') {
+        text = "Ram Ram sa! Main Gauri hu, BFibernet se aapka feedback lene ke liye call kar rahi hu.";
       }
       
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = 1.0;
-      utterance.pitch = 1.0;
+      utterance.rate = 0.95;
+      utterance.pitch = (voicePersona.includes('female') || voicePersona === 'priya_sharma' || voicePersona === 'ananya_verma' || voicePersona === 'gauri_devi') ? 1.1 : 0.95;
+      
+      // Try finding Indian English / Hindi voice if available
+      const voices = window.speechSynthesis.getVoices();
+      const match = voices.find(v => v.lang.includes('hi') || v.lang.includes('IN') || v.name.includes('India') || v.name.includes('Hindi'));
+      if (match) utterance.voice = match;
+
       utterance.onend = () => setIsPlayingDemo(false);
       utterance.onerror = () => setIsPlayingDemo(false);
       window.speechSynthesis.speak(utterance);

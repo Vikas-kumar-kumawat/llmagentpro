@@ -7,39 +7,46 @@ from app.core.config import settings
 
 VOICE_CATALOG: List[Dict[str, str]] = [
     {
-        "id": "Google.en-IN-Wavenet-D",
-        "name": "Priya (Wavenet Neural Female - India)",
-        "accent": "Indian English",
-        "gender": "Female",
-        "sample_text": "Namaste! I am Priya. I deliver warm, polite, and respectful customer feedback calls.",
-    },
-    {
-        "id": "Google.en-IN-Wavenet-B",
-        "name": "Rohan (Wavenet Neural Male - India)",
-        "accent": "Indian English",
-        "gender": "Male",
-        "sample_text": "Hello! I am Rohan. I bring a clear, polite, and professional Indian male voice persona.",
-    },
-    {
         "id": "Google.hi-IN-Wavenet-B",
-        "name": "Ratan Singh (Neural Male - Marwari, Rajasthani & Hindi)",
+        "name": "Ratan Singh (Neural Male - Marwari & Rajasthani)",
         "accent": "Rajasthani & Marwari Hindi",
         "gender": "Male",
         "sample_text": "राम राम सा! खम्मा घणी। मैं रतन सिंह, बीसीटी फ़ाइबरनेट से बात कर रहा हूँ।",
     },
     {
+        "id": "Google.hi-IN-Wavenet-D",
+        "name": "Aarav Sharma (Warm Natural Male - Hindi)",
+        "accent": "Conversational Hindi",
+        "gender": "Male",
+        "sample_text": "नमस्ते! मैं आरव शर्मा बात कर रहा हूँ बीसीटी फ़ाइबरनेट से। आपकी इंटरनेट सेवा कैसी चल रही है?",
+    },
+    {
+        "id": "Google.hi-IN-Wavenet-C",
+        "name": "Ananya Verma (Soft Conversational Female - Hindi)",
+        "accent": "Expressive Hindi",
+        "gender": "Female",
+        "sample_text": "नमस्ते! मैं अनन्या वर्मा बोल रही हूँ। आपकी सहायता के लिए बीसीटी फ़ाइबरनेट कस्टमर केयर।",
+    },
+    {
+        "id": "Google.en-IN-Wavenet-D",
+        "name": "Priya Sharma (Neural Female - Indian English)",
+        "accent": "Indian English",
+        "gender": "Female",
+        "sample_text": "Namaste! I am Priya Sharma. I deliver warm, polite, and natural human customer feedback calls.",
+    },
+    {
+        "id": "Google.en-IN-Wavenet-B",
+        "name": "Rohan Kapoor (Professional Male - Indian English)",
+        "accent": "Indian English",
+        "gender": "Male",
+        "sample_text": "Hello! I am Rohan Kapoor, your AI Voice Support Specialist from BFibernet.",
+    },
+    {
         "id": "Google.hi-IN-Wavenet-A",
-        "name": "Gauri (Neural Female - Marwari, Rajasthani & Hindi)",
+        "name": "Gauri Devi (Neural Female - Rajasthani & Hindi)",
         "accent": "Rajasthani & Marwari Hindi",
         "gender": "Female",
         "sample_text": "खम्मा घणी! राम राम सा। मैं गौरी हूँ, बीसीटी फ़ाइबरनेट सेवा फ़ीडबैक के लिए कॉलिंग।",
-    },
-    {
-        "id": "Polly.Aditi",
-        "name": "Aditi / Sarvam (Indic Voice - Marwari + Rajasthani)",
-        "accent": "Marwari + Rajasthani Dialect",
-        "gender": "Female",
-        "sample_text": "राम राम सा! खम्मा घणी हुकूम, बीसीटी फ़ाइबरनेट इंटरनेट सेवा री जानकारी दीजो।",
     },
 ]
 
