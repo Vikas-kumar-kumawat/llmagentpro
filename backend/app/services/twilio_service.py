@@ -107,7 +107,7 @@ def build_twilio_voice_entry_twiml(customer_name: str, feedback_url: str) -> str
 
     return str(response)
 
-def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Optional[Dict[str, Any]], feedback_url: str, ai_response_text: Optional[str] = None) -> str:
+def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Optional[Dict[str, Any]], feedback_url: str, ai_response_dict: Optional[Dict[str, Any]] = None) -> str:
     """Generates TwiML conversational reply & auto-hangup after SpeechResult."""
     response = VoiceResponse()
     v = get_twilio_voice(get_active_voice())
@@ -126,10 +126,15 @@ def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Opti
         gather.say(no_speech_text, voice=v)
         return str(response)
 
-    ai_text = ai_response_text if ai_response_text else generate_ai_response(customer_text, customer_data)
+    if not ai_response_dict:
+        ai_response_dict = generate_ai_response(customer_text, customer_data)
+        
+    ai_text = ai_response_dict.get("reply", "")
+    end_call = ai_response_dict.get("end_call", False)
+    
     bye_msg = "राम राम! आपका दिन अच्छा रहे। बीसीटी फ़ाइबरनेट को समय देने के लिए धन्यवाद।" if is_marwari else "Have a fantastic day! Goodbye."
 
-    if "?" in ai_text or "؟" in ai_text:
+    if not end_call:
         gather = response.gather(
             input="speech dtmf",
             action=feedback_url,
@@ -141,7 +146,9 @@ def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Opti
         gather.say(ai_text, voice=v)
     else:
         response.say(ai_text, voice=v)
-        response.say(bye_msg, voice=v)
+        # We only say bye_msg if it's not already in the ai_text to prevent sounding robotic
+        if "धन्यवाद" not in ai_text and "goodbye" not in ai_text.lower():
+            response.say(bye_msg, voice=v)
         response.hangup()
 
     return str(response)

@@ -95,35 +95,6 @@ export function FeedbackDetailModal({
       }
     }
 
-    if (thread.length === 0 && item?.feedback_text) {
-      const isPos = item?.sentiment === 'positive';
-      const isNeg = item?.sentiment === 'negative';
-
-      thread = [
-        {
-          speaker: 'agent',
-          name: 'AI Voice Collector',
-          time: 'Initial Call',
-          text: `Hello ${item?.customer_name || 'Customer'}! I am calling from BFibernet customer service regarding your internet connection. How is your experience?`
-        },
-        {
-          speaker: 'customer',
-          name: item?.customer_name || 'Customer',
-          time: 'Feedback',
-          text: item?.feedback_text || 'Connecting...'
-        },
-        {
-          speaker: 'agent',
-          name: 'AI Voice Collector',
-          time: 'Response',
-          text: isPos
-            ? `Thank you so much for your positive feedback! We have recorded your experience.`
-            : isNeg
-              ? `We apologize for the inconvenience. Our technical support team has been notified.`
-              : `Thank you for sharing your feedback with BFibernet!`
-        }
-      ];
-    }
 
     return thread;
   };

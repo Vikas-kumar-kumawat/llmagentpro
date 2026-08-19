@@ -23,8 +23,7 @@ export function CollectFeedbackModal({
       <div className="w-full max-w-lg rounded-xl border border-[#27272a] bg-[#09090b] text-white p-5 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
         <div className="flex justify-between items-center border-b border-[#27272a] pb-3">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-white animate-pulse" />
-            <h3 className="font-semibold text-sm text-white">Collect New Customer Feedback</h3>
+            <h3 className="font-semibold text-sm text-white">Add Customer Record</h3>
           </div>
           <button 
             onClick={() => setShowCollectModal(false)} 
@@ -59,37 +58,7 @@ export function CollectFeedbackModal({
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#a1a1aa] mb-1">Rating Score</label>
-            <div className="flex items-center gap-2">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <button
-                  type="button"
-                  key={star}
-                  onClick={() => setFbRating(star)}
-                  className={`w-9 h-9 rounded-lg text-xs font-semibold cursor-pointer transition border flex items-center justify-center ${
-                    fbRating >= star
-                      ? 'bg-white text-black border-white'
-                      : 'bg-[#000000] text-[#71717a] border-[#27272a] hover:bg-[#18181b]'
-                  }`}
-                >
-                  ★ {star}
-                </button>
-              ))}
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#a1a1aa] mb-1">Feedback Comments</label>
-            <textarea
-              rows={3}
-              required
-              value={fbText}
-              onChange={(e) => setFbText(e.target.value)}
-              placeholder="e.g. Speed is fast but technician installation was delayed."
-              className="w-full p-2.5 rounded-lg text-xs border border-[#27272a] bg-[#000000] text-white focus:border-white focus:outline-none transition"
-            />
-          </div>
 
           <div className="flex justify-end gap-2.5 pt-3 border-t border-[#27272a]">
             <button
@@ -104,7 +73,7 @@ export function CollectFeedbackModal({
               disabled={isSubmitting}
               className="px-4 py-2 rounded-lg text-xs font-semibold bg-white text-black border border-white hover:bg-zinc-200 transition cursor-pointer disabled:opacity-50 flex items-center gap-2"
             >
-              {isSubmitting ? 'Processing...' : 'Submit & Analyze'}
+              {isSubmitting ? 'Adding...' : 'Add Customer'}
             </button>
           </div>
         </form>

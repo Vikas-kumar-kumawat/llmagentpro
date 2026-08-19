@@ -179,7 +179,8 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
 
             sentiment = analysis.get("sentiment", "neutral")
 
-            ai_response_text = generate_ai_response(user_input, rating, sentiment)
+            ai_response_dict = generate_ai_response(user_input, rating, sentiment, existing_transcript)
+            ai_response_text = ai_response_dict.get("reply", "")
 
             new_entries = [
                 {
@@ -208,6 +209,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
             )
         elif customer_id:
             ai_response_text = "जी, आपकी आवाज़ थोड़ी साफ़ नहीं आ रही है। एक बार फिर से बताइए।" if is_marwari_accent_active() else "I didn't quite catch that. Could you please tell me about your experience?"
+            ai_response_dict = {"reply": ai_response_text, "end_call": False}
             
             new_entries = [
                 {
@@ -225,9 +227,9 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
                 status="in-progress"
             )
         else:
-            ai_response_text = None
+            ai_response_dict = None
 
-        xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url, ai_response_text)
+        xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url, ai_response_dict)
         return Response(content=xml_twiml, media_type="application/xml")
     except Exception as e:
         print(f"[Twilio Feedback Webhook Error] {e}")
