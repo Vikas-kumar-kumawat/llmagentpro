@@ -48,6 +48,13 @@ def create_application() -> FastAPI:
     app.include_router(api_router)
     app.include_router(api_router, prefix="/api")
 
+    # Mount /documents static directory for BCT Fibernet knowledge base images
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    documents_dir = os.path.join(app_dir, "documents")
+    if os.path.exists(documents_dir):
+        app.mount("/documents", StaticFiles(directory=documents_dir), name="documents")
+
+
     @app.get("/api/health")
     def health_check():
         return {

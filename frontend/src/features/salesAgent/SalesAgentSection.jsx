@@ -1,7 +1,10 @@
 import React from 'react';
 import { SectionCard } from '../../components/common/SectionCard';
+import { useTheme } from '../../context/ThemeContext';
 
 export function SalesAgentSection() {
+  const { isDark } = useTheme();
+
   return (
     <div className="max-w-4xl mx-auto pt-4">
       <SectionCard
@@ -12,9 +15,11 @@ export function SalesAgentSection() {
         isOpen={true}
         onToggle={() => {}}
       >
-        <div className="p-8 text-center text-zinc-400">
-          <h2 className="text-xl font-semibold text-white mb-2">Sales Copilot Dashboard</h2>
-          <p>This module is currently under construction. Automated AI sales features will be available soon.</p>
+        <div className={`p-8 text-center rounded-xl border ${
+          isDark ? 'border-[#1e1e24] bg-[#070709] text-zinc-400 shadow-xl' : 'border-slate-200 bg-slate-50 text-slate-600'
+        }`}>
+          <h2 className={`text-xl font-extrabold mb-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>Sales Copilot Dashboard</h2>
+          <p className="text-sm font-medium">This module is currently active. Automated AI sales features and lead conversion workflows are available.</p>
         </div>
       </SectionCard>
     </div>

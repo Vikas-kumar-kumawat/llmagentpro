@@ -1,80 +1,46 @@
 import React from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { Sun, Moon, LogOut, User, Menu } from 'lucide-react';
+import { Menu, Sun, Moon } from 'lucide-react';
 
-export function Navbar({ onLogout, onToggleSidebar }) {
-  const { theme, toggleTheme, isDark } = useTheme();
+export function Navbar({ onToggleSidebar }) {
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <header className={`w-full h-13 sm:h-14 px-3 sm:px-6 flex items-center justify-between select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif] transition-all duration-200 ${
+    <header className={`md:hidden w-full h-12 px-3 flex items-center justify-between select-none shrink-0 font-['Plus_Jakarta_Sans',sans-serif] transition-all duration-200 ${
       isDark
-        ? 'bg-[#09090b]/90 border-b border-[#27272a] text-white backdrop-blur-md'
-        : 'text-white' /* glass bg & border applied via index.css */
+        ? 'bg-[#070709] border-b border-[#1e1e26] text-white'
+        : 'bg-white border-b border-slate-200/90 text-slate-900 shadow-xs'
     }`}>
-      {/* Left side - Mobile Menu Toggle */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onToggleSidebar}
-          title="Toggle Navigation Menu"
-          className={`md:hidden p-2 rounded-lg border cursor-pointer transition-colors active:scale-95 ${
-            isDark
-              ? 'border-[#27272a] bg-[#09090b] hover:bg-[#18181b] text-white'
-              : 'border-white/20 bg-white/10 hover:bg-white/20 text-white'
-          }`}
-        >
-          <Menu className="w-4 h-4" />
-        </button>
-      </div>
+      {/* Mobile Menu Toggle */}
+      <button
+        onClick={onToggleSidebar}
+        title="Toggle Navigation Menu"
+        className={`p-1.5 rounded-lg border cursor-pointer transition-colors active:scale-95 ${
+          isDark
+            ? 'border-[#1e1e26] bg-[#0f0f14] text-white'
+            : 'border-slate-200 bg-slate-100 text-slate-800'
+        }`}
+      >
+        <Menu className="w-4 h-4" />
+      </button>
 
-      {/* Right side - Controls */}
-      <div className="flex items-center gap-2 sm:gap-3">
-        {/* User Info */}
-        <div
-          className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 rounded-lg border ${
-            isDark
-              ? 'bg-[#18181b] border-[#27272a] text-white'
-              : 'bg-white/10 border-white/20 text-white'
-          }`}
-          title="Logged in as vikas"
-        >
-          <div className={`w-5 h-5 rounded flex items-center justify-center text-xs font-mono border shrink-0 ${
-            isDark
-              ? 'bg-[#09090b] text-white border-[#27272a]'
-              : 'bg-white/20 text-white border-white/30'
-          }`}>
-            <User className="w-3.5 h-3.5" />
-          </div>
-          <span className="text-xs font-semibold">vikas</span>
-        </div>
+      <span className={`text-xs font-extrabold tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        BFibernet <span className="font-mono text-xs font-normal opacity-60">AI</span>
+      </span>
 
-        {/* Theme Switcher */}
-        <button
-          onClick={toggleTheme}
-          title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
-          className={`p-2 rounded-lg border transition cursor-pointer active:scale-95 ${
-            isDark
-              ? 'bg-[#18181b] hover:bg-[#27272a] text-amber-400 border-[#27272a]'
-              : 'bg-white/10 hover:bg-white/20 text-amber-300 border-white/20'
-          }`}
-        >
-          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-        </button>
-
-        {/* Logout */}
-        {onLogout && (
-          <button
-            onClick={onLogout}
-            title="Sign Out"
-            className={`p-2 rounded-lg border transition cursor-pointer active:scale-95 ${
-              isDark
-                ? 'bg-[#18181b] hover:bg-[#27272a] text-[#a1a1aa] hover:text-white border-[#27272a]'
-                : 'bg-white/10 hover:bg-white/20 text-white/80 hover:text-white border-white/20'
-            }`}
-          >
-            <LogOut className="w-4 h-4" />
-          </button>
-        )}
-      </div>
+      {/* Theme Toggle Button */}
+      <button
+        onClick={toggleTheme}
+        title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+        className={`p-1.5 rounded-lg border cursor-pointer transition-colors active:scale-95 ${
+          isDark
+            ? 'border-[#1e1e26] bg-[#0f0f14] text-amber-400'
+            : 'border-slate-200 bg-slate-100 text-amber-600'
+        }`}
+      >
+        {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+      </button>
     </header>
   );
 }
+

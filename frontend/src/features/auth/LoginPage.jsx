@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, User, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react';
+import { useTheme } from '../../context/ThemeContext';
 
 export function LoginPage({ onLoginSuccess }) {
+  const { isDark, toggleTheme } = useTheme();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -33,88 +35,109 @@ export function LoginPage({ onLoginSuccess }) {
   };
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden flex items-center justify-center p-4 font-['Plus_Jakarta_Sans',sans-serif] bg-[#000000] select-none">
-      {/* Sleek, Compact Black & White Login Card */}
-      <div className={`relative z-10 w-full max-w-[360px] p-6 sm:p-7 rounded-2xl border transition-all duration-300 shadow-2xl ${
-        errorMsg ? 'animate-shake border-white' : 'border-[#27272a]'
-      } bg-[#09090b] text-white`}>
-        
-        {/* Brand Header */}
-        <div className="flex flex-col items-center text-center mb-6">
-          <div className="px-3 py-1.5 rounded-xl bg-white flex items-center justify-center shadow-md mb-3">
-            <img 
-              src="/bfibernet_logo.png" 
-              alt="BFibernet Logo" 
-              className="h-8 object-contain"
-            />
+    <div className={`min-h-screen w-full flex items-center justify-center p-4 select-none font-['Plus_Jakarta_Sans',sans-serif] transition-colors duration-300 relative overflow-hidden ${
+      isDark ? 'bg-[#050507] text-white' : 'bg-[#f8fafc] text-slate-900'
+    }`}>
+      {/* Background Radial Purple Glow */}
+      <div className={`absolute inset-0 pointer-events-none ${
+        isDark 
+          ? 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/20 via-[#050507] to-[#050507]' 
+          : 'bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-100/40 via-[#f8fafc] to-[#f8fafc]'
+      }`} />
+
+      {/* Top Right Theme Toggle */}
+      <div className="absolute top-4 right-4 z-20">
+        <button
+          onClick={toggleTheme}
+          title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+          className={`p-2.5 rounded-xl border transition cursor-pointer active:scale-95 shadow-md flex items-center gap-2 text-xs font-bold ${
+            isDark
+              ? 'bg-[#0c0c0e] hover:bg-[#121218] text-amber-400 border-[#1e1e26]'
+              : 'bg-white hover:bg-slate-50 text-amber-600 border-slate-200'
+          }`}
+        >
+          {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          <span className="hidden sm:inline">{isDark ? 'Light' : 'Dark'} Mode</span>
+        </button>
+      </div>
+
+      {/* Card Container */}
+      <div className={`w-full max-w-md rounded-2xl border p-8 shadow-2xl relative z-10 backdrop-blur-md transition-all duration-300 ${
+        isDark
+          ? 'bg-[#0c0c0e]/95 border-[#1e1e26] text-white'
+          : 'bg-white/95 border-slate-200 text-slate-900'
+      }`}>
+        {/* Header Icon Branding */}
+        <div className="flex flex-col items-center text-center mb-8">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-4 border transition-transform duration-300 hover:scale-105 ${
+            isDark
+              ? 'bg-[#1a0f2e] border-[#a855f7]/40 text-[#c084fc] shadow-[0_0_20px_-3px_rgba(168,85,247,0.3)]'
+              : 'bg-purple-50 border-purple-200 text-purple-600 shadow-xs'
+          }`}>
+            <Wifi className="w-7 h-7 text-[#c084fc]" />
           </div>
-          <h2 className="text-base font-semibold tracking-tight text-white mt-1">
-            Admin Sign In
-          </h2>
-          <p className="text-xs text-[#a1a1aa] mt-0.5">BFibernet AI Agent Platform</p>
+
+          <h1 className={`text-2xl font-extrabold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            BFibernet <span className="text-[#c084fc]">.render</span>
+          </h1>
+          <p className={`text-xs font-medium mt-1 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
+            Sign in to access your Broadband AI Control Panel
+          </p>
         </div>
 
-        {/* Error Alert */}
         {errorMsg && (
-          <div className="mb-4 p-3 rounded-xl bg-[#18181b] border border-[#27272a] text-white text-xs font-medium flex items-center gap-2 animate-fadeIn">
-            <AlertCircle className="w-4 h-4 text-white shrink-0" />
+          <div className="mb-5 p-3.5 rounded-xl border border-rose-500/30 bg-rose-500/10 text-rose-400 text-xs font-medium flex items-center gap-2">
+            <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        {/* Success Alert */}
-        {isSuccess && (
-          <div className="mb-4 p-3 rounded-xl bg-[#18181b] border border-[#27272a] text-white text-xs font-semibold flex items-center gap-2 animate-pulse">
-            <CheckCircle2 className="w-4 h-4 text-white shrink-0" />
-            <span>Access Granted! Redirecting...</span>
-          </div>
-        )}
-
-        {/* Form Inputs */}
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Admin Name */}
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#a1a1aa] mb-1.5">
-              Admin Name
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Username Input */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold tracking-wide uppercase ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
+              Username
             </label>
             <div className="relative">
-              <User className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 required
                 value={username}
-                onChange={(e) => {
-                  setUsername(e.target.value);
-                  if (errorMsg) setErrorMsg('');
-                }}
-                placeholder="Enter admin username"
-                className="w-full pl-9 pr-3.5 py-2.5 rounded-xl text-xs bg-[#000000] border border-[#27272a] text-white placeholder-[#71717a] focus:outline-none focus:border-white transition-all"
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="e.g. vikas"
+                className={`w-full px-4 py-3 text-sm rounded-xl border outline-none transition-all ${
+                  isDark
+                    ? 'bg-[#0a0a0c] border-[#1e1e26] text-white placeholder-zinc-500 focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7]'
+                    : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                }`}
               />
             </div>
           </div>
 
-          {/* Password */}
-          <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-[#a1a1aa] mb-1.5">
+          {/* Password Input */}
+          <div className="space-y-1.5">
+            <label className={`text-xs font-bold tracking-wide uppercase ${isDark ? 'text-zinc-400' : 'text-slate-600'}`}>
               Password
             </label>
             <div className="relative">
-              <Lock className="w-4 h-4 text-[#a1a1aa] absolute left-3 top-1/2 -translate-y-1/2" />
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 required
                 value={password}
-                onChange={(e) => {
-                  setPassword(e.target.value);
-                  if (errorMsg) setErrorMsg('');
-                }}
-                placeholder="Enter password"
-                className="w-full pl-9 pr-10 py-2.5 rounded-xl text-xs bg-[#000000] border border-[#27272a] text-white placeholder-[#71717a] focus:outline-none focus:border-white transition-all"
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                className={`w-full px-4 py-3 text-sm rounded-xl border outline-none transition-all pr-10 ${
+                  isDark
+                    ? 'bg-[#0a0a0c] border-[#1e1e26] text-white placeholder-zinc-500 focus:border-[#a855f7] focus:ring-1 focus:ring-[#a855f7]'
+                    : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400 focus:border-purple-500 focus:ring-1 focus:ring-purple-500'
+                }`}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a1a1aa] hover:text-white transition cursor-pointer"
+                className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 cursor-pointer transition ${
+                  isDark ? 'text-zinc-500 hover:text-white' : 'text-slate-400 hover:text-slate-900'
+                }`}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -124,14 +147,14 @@ export function LoginPage({ onLoginSuccess }) {
           {/* Submit Button */}
           <button
             type="submit"
-            disabled={isSubmitting || isSuccess}
-            className="w-full mt-2 py-2.5 px-4 rounded-xl text-xs font-semibold bg-white text-black hover:bg-zinc-200 transition cursor-pointer border border-white disabled:opacity-50 flex items-center justify-center gap-1.5"
+            disabled={isSubmitting}
+            className="w-full py-3.5 px-4 rounded-xl bg-[#a855f7] hover:bg-[#9333ea] text-white font-extrabold text-sm tracking-wide transition-all duration-200 shadow-[0_0_20px_-3px_rgba(168,85,247,0.4)] active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
           >
             {isSubmitting ? (
-              <span className="flex items-center gap-1.5">
-                <Zap className="w-4 h-4 animate-spin text-black" />
-                Signing in...
-              </span>
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Authenticating...</span>
+              </>
             ) : (
               <span className="flex items-center gap-1.5">
                 <ShieldCheck className="w-4 h-4" />

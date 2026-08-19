@@ -9,13 +9,16 @@ import {
   PanelLeft,
   Wifi,
   X,
-  ShoppingBag
+  ShoppingBag,
+  Sun,
+  Moon,
+  LogOut,
+  User
 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
-export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollapsed }) {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
+export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollapsed, onLogout }) {
+  const { theme, toggleTheme, isDark } = useTheme();
 
   const agents = [
     { id: 'chatbot', name: 'BFibernet AI', icon: Brain },
@@ -44,19 +47,20 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
             : 'max-md:fixed max-md:inset-y-0 max-md:left-0 max-md:z-50 max-md:w-[84vw] max-md:max-w-[320px] max-md:shadow-2xl max-md:rounded-r-2xl w-64'
         } ${
           isDark
-            ? 'bg-[#09090b] border-r border-[#27272a] text-[#ffffff]'
-            : 'text-white' /* glass bg & border applied via index.css */
-        } font-['Plus_Jakarta_Sans',sans-serif] shrink-0`}
+            ? 'bg-[#050507] border-r border-[#1e1e24] text-white'
+            : 'bg-white border-r border-slate-200/90 text-slate-900 shadow-md'
+        } font-['Plus_Jakarta_Sans',sans-serif] shrink-0 z-30`}
       >
         {/* Top Section */}
-        <div className="flex flex-col">
+        <div className="flex flex-col flex-1 overflow-y-auto">
           {/* Header Logo Branding & Collapse Toggle */}
           {!isCollapsed ? (
-            <div className={`h-14 px-3.5 flex items-center justify-between gap-2 max-md:rounded-tr-2xl ${
+            <div className={`h-14 px-3.5 flex items-center justify-between gap-2 max-md:rounded-tr-2xl shrink-0 ${
               isDark
-                ? 'border-b border-[#27272a] bg-[#09090b]'
-                : 'border-b border-white/15'
+                ? 'border-b border-[#1e1e24] bg-[#050507]'
+                : 'border-b border-slate-200/90 bg-white'
             }`}>
+
               <div
                 className="flex items-center gap-2.5 cursor-pointer group flex-1 overflow-hidden"
                 onClick={() => {
@@ -65,15 +69,17 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 }}
                 title="BFibernet AI Dashboard"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-105 ${
                   isDark
-                    ? 'bg-[#18181b] border-[#27272a] text-white shadow-xs'
-                    : 'bg-white/20 border-white/40 text-white shadow-md'
+                    ? 'bg-[#121216] border-[#22222a] text-white shadow-xs'
+                    : 'bg-slate-100 border-slate-200 text-slate-900 shadow-xs'
                 }`}>
                   <Wifi className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-base tracking-tight truncate font-['Plus_Jakarta_Sans',sans-serif] transition-colors text-white">
-                  BFibernet
+                <span className={`font-extrabold text-base tracking-tight truncate transition-colors ${
+                  isDark ? 'text-white' : 'text-slate-900'
+                }`}>
+                  BFibernet <span className="text-xs font-mono font-normal text-zinc-400">AI</span>
                 </span>
               </div>
 
@@ -82,8 +88,8 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 title="Close Navigation"
                 className={`p-1.5 rounded-lg transition-all duration-200 cursor-pointer border hover:scale-105 shrink-0 ${
                   isDark
-                    ? 'bg-[#09090b] hover:bg-[#18181b] text-[#a1a1aa] hover:text-white border-[#27272a]'
-                    : 'bg-white/10 hover:bg-white/20 text-white/70 hover:text-white border-white/20'
+                    ? 'bg-[#0c0c0f] hover:bg-[#141418] text-zinc-400 hover:text-white border-[#22222a]'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-900 border-slate-200'
                 }`}
               >
                 <span className="hidden md:inline"><PanelLeft className="w-4 h-4" /></span>
@@ -91,18 +97,18 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
               </button>
             </div>
           ) : (
-            <div className={`h-14 flex flex-col items-center justify-center w-full ${
-              isDark ? 'border-b border-[#27272a] bg-[#09090b]' : 'border-b border-white/15'
+            <div className={`h-14 flex flex-col items-center justify-center w-full shrink-0 ${
+              isDark ? 'border-b border-[#1e1e24] bg-[#050507]' : 'border-b border-slate-200/90 bg-white'
             }`}>
               <button
                 onClick={() => setIsCollapsed(false)}
                 className="cursor-pointer group flex items-center justify-center p-1 rounded-lg transition"
                 title="Expand Sidebar"
               >
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3 ${
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-105 ${
                   isDark
-                    ? 'bg-[#18181b] border-[#27272a] text-white shadow-xs'
-                    : 'bg-white/20 border-white/40 text-white shadow-md'
+                    ? 'bg-[#121216] border-[#22222a] text-white shadow-xs'
+                    : 'bg-slate-100 border-slate-200 text-slate-900 shadow-xs'
                 }`}>
                   <Wifi className="w-4 h-4 text-white" />
                 </div>
@@ -126,25 +132,25 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                     }
                   }}
                   title={agent.name}
-                  className={`w-full transition-all duration-200 ease-out active:scale-95 flex items-center cursor-pointer text-[14px] font-medium group rounded-lg ${
+                  className={`w-full transition-all duration-200 ease-out active:scale-95 flex items-center cursor-pointer text-[14px] font-medium group rounded-xl ${
                     isCollapsed
                       ? `h-10 w-10 justify-center ${
                           isActive
                             ? isDark
-                              ? 'bg-[#18181b] text-white border border-[#27272a] shadow-sm'
-                              : 'bg-white/30 text-white border border-white/50 shadow-sm font-semibold'
+                              ? 'bg-white text-black border border-white font-extrabold shadow-sm'
+                              : 'bg-slate-900 text-white border border-slate-900 shadow-xs font-bold'
                             : isDark
-                              ? 'hover:bg-[#121215] text-[#a1a1aa] hover:text-white border border-transparent hover:scale-105'
-                              : 'hover:bg-white/15 text-white/70 hover:text-white border border-transparent hover:scale-105'
+                              ? 'hover:bg-[#0c0c0f] text-zinc-400 hover:text-white border border-transparent hover:scale-105'
+                              : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent hover:scale-105'
                         }`
                       : `py-3 px-3.5 sm:py-2.5 sm:px-3 justify-between ${
                           isActive
                             ? isDark
-                              ? 'bg-[#18181b] text-white border border-[#27272a] shadow-sm translate-x-0.5'
-                              : 'bg-white/30 text-white border border-white/45 shadow-sm translate-x-0.5 font-semibold'
+                              ? 'bg-white text-black border border-white shadow-sm translate-x-0.5 font-extrabold'
+                              : 'bg-slate-900 text-white border border-slate-900 shadow-xs translate-x-0.5 font-bold'
                             : isDark
-                              ? 'hover:bg-[#121215] text-[#a1a1aa] hover:text-white border border-transparent hover:translate-x-1'
-                              : 'hover:bg-white/15 text-white/75 hover:text-white border border-transparent hover:translate-x-1'
+                              ? 'hover:bg-[#0c0c0f] text-zinc-400 hover:text-white border border-transparent hover:translate-x-1'
+                              : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent hover:translate-x-1'
                         }`
                   }`}
                 >
@@ -152,8 +158,8 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                     <IconComponent
                       className={`w-[18px] h-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                         isActive
-                          ? isDark ? 'text-white scale-105' : 'text-white scale-105'
-                          : isDark ? 'text-[#a1a1aa] group-hover:text-white' : 'text-white/65 group-hover:text-white'
+                          ? isDark ? 'text-black scale-105' : 'text-white scale-105'
+                          : isDark ? 'text-zinc-400 group-hover:text-white' : 'text-slate-500 group-hover:text-slate-900'
                       }`}
                     />
                     {!isCollapsed && (
@@ -164,10 +170,10 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                   </div>
 
                   {!isCollapsed && agent.badge && (
-                    <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ml-2 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
-                      isDark
-                        ? 'bg-[#18181b] text-white border-[#27272a]'
-                        : 'bg-white/20 text-white border-white/35 font-semibold'
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded-full border ml-2 shrink-0 transition-transform duration-200 group-hover:scale-105 ${
+                      isActive
+                        ? isDark ? 'bg-zinc-200 text-black border-zinc-300 font-bold' : 'bg-slate-800 text-white border-slate-700'
+                        : isDark ? 'bg-[#18181c] text-zinc-300 border-[#282832] font-bold' : 'bg-slate-200 text-slate-800 border-slate-300 font-bold'
                     }`}>
                       {agent.badge}
                     </span>
@@ -177,7 +183,98 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
             })}
           </div>
         </div>
+
+        {/* Bottom Section - User Info, Theme Switcher & Logout */}
+        <div className={`p-3 border-t shrink-0 transition-colors ${
+          isDark ? 'border-[#1e1e24] bg-[#050507]' : 'border-slate-200/90 bg-white'
+        }`}>
+
+          {!isCollapsed ? (
+            <div className="flex items-center justify-between gap-2">
+              {/* User Badge */}
+              <div
+                className={`flex items-center gap-2 px-3 py-2 rounded-xl border flex-1 min-w-0 ${
+                  isDark
+                    ? 'bg-[#0c0c0f] border-[#22222a] text-white'
+                    : 'bg-slate-50 border-slate-200 text-slate-900'
+                }`}
+                title="Logged in as vikas"
+              >
+                <div className={`w-6 h-6 rounded-lg flex items-center justify-center text-xs font-mono border shrink-0 ${
+                  isDark
+                    ? 'bg-[#18181c] text-white border-[#282832]'
+                    : 'bg-white text-slate-900 border-slate-200 shadow-xs'
+                }`}>
+                  <User className="w-3.5 h-3.5" />
+                </div>
+                <span className="text-xs font-bold truncate">vikas</span>
+              </div>
+
+              {/* Theme Switcher */}
+              <button
+                onClick={toggleTheme}
+                title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+                className={`p-2.5 rounded-xl border transition cursor-pointer active:scale-95 shrink-0 ${
+                  isDark
+                    ? 'bg-[#0c0c0f] hover:bg-[#141418] text-amber-400 border-[#22222a]'
+                    : 'bg-slate-100 hover:bg-slate-200 text-amber-600 border-slate-200'
+                }`}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
+              {/* Logout */}
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Sign Out"
+                  className={`p-2.5 rounded-xl border transition cursor-pointer active:scale-95 shrink-0 ${
+                    isDark
+                      ? 'bg-[#0c0c0f] hover:bg-[#141418] text-zinc-400 hover:text-white border-[#22222a]'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border-slate-200'
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-2">
+              <div
+                className={`w-9 h-9 rounded-xl border flex items-center justify-center ${
+                  isDark ? 'bg-[#0c0c0f] border-[#22222a] text-white' : 'bg-slate-100 border-slate-200 text-slate-900'
+                }`}
+                title="Logged in as vikas"
+              >
+                <User className="w-4 h-4 text-white" />
+              </div>
+
+              <button
+                onClick={toggleTheme}
+                title={`Switch to ${isDark ? 'Light' : 'Dark'} mode`}
+                className={`w-9 h-9 rounded-xl border flex items-center justify-center transition cursor-pointer active:scale-95 ${
+                  isDark ? 'bg-[#0c0c0f] hover:bg-[#141418] text-amber-400 border-[#22222a]' : 'bg-slate-100 hover:bg-slate-200 text-amber-600 border-slate-200'
+                }`}
+              >
+                {isDark ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+              </button>
+
+              {onLogout && (
+                <button
+                  onClick={onLogout}
+                  title="Sign Out"
+                  className={`w-9 h-9 rounded-xl border flex items-center justify-center transition cursor-pointer active:scale-95 ${
+                    isDark ? 'bg-[#0c0c0f] hover:bg-[#141418] text-zinc-400 hover:text-white border-[#22222a]' : 'bg-slate-100 hover:bg-slate-200 text-slate-600 border-slate-200'
+                  }`}
+                >
+                  <LogOut className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </aside>
     </>
   );
 }
+

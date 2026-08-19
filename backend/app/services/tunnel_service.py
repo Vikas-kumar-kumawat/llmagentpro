@@ -46,9 +46,13 @@ def start_cloudflare_tunnel(port: int = 8000) -> str:
     # Check if BASE_URL is already set to a valid public URL
     existing_url = settings.base_url
     if existing_url and not existing_url.startswith("http://localhost") and not existing_url.startswith("http://127."):
-        print(f"[Cloudflare Tunnel] Using existing BASE_URL from config: {existing_url}")
-        _tunnel_url = existing_url
-        return existing_url
+        # Do not reuse ephemeral Cloudflare quick tunnels across restarts
+        if "trycloudflare.com" not in existing_url:
+            print(f"[Cloudflare Tunnel] Using existing BASE_URL from config: {existing_url}")
+            _tunnel_url = existing_url
+            return existing_url
+        else:
+            print("[Cloudflare Tunnel] Found ephemeral trycloudflare.com URL in config. Starting a new tunnel...")
 
     # Locate cloudflared executable in project root or system PATH
     project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))

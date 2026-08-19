@@ -131,3 +131,37 @@ export async function queryRagKnowledgeBase(question) {
   });
   return await res.json();
 }
+
+export async function getRagDocuments() {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rag/documents`);
+  return await res.json();
+}
+
+export async function uploadRagDocument(file, targetRag = 'customer') {
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('target_rag', targetRag);
+  const res = await fetch(`${API_BASE_URL}/api/v1/rag/upload`, {
+    method: 'POST',
+    body: formData
+  });
+  return await res.json();
+}
+
+
+export async function deleteRagDocument(filename) {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rag/documents/${encodeURIComponent(filename)}`, {
+    method: 'DELETE'
+  });
+  return await res.json();
+}
+
+export async function testRagSearch(query, top_k = 5) {
+  const res = await fetch(`${API_BASE_URL}/api/v1/rag/test-search`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query, top_k })
+  });
+  return await res.json();
+}
+
