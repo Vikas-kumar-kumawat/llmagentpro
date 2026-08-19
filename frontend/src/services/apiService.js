@@ -12,7 +12,7 @@ const getApiBaseUrl = () => {
   return 'http://localhost:8000';
 };
 
-const API_BASE_URL = getApiBaseUrl();
+export const API_BASE_URL = getApiBaseUrl();
 
 export async function getServiceStatus() {
   const res = await fetch(`${API_BASE_URL}/`);

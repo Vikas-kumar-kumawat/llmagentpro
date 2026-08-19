@@ -473,13 +473,15 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
       />
 
       {/* 8. Feedback Detail View Modal */}
-      <FeedbackDetailModal
-        selectedFeedback={selectedFeedback}
-        setSelectedFeedback={setSelectedFeedback}
-        handleTriggerCall={handleTriggerCall}
-        handleClearFeedback={handleClearFeedback}
-        rowCallStatuses={rowCallStatuses}
-      />
+      {selectedFeedback && (
+        <FeedbackDetailModal
+          selectedFeedback={selectedFeedback}
+          setSelectedFeedback={setSelectedFeedback}
+          handleTriggerCall={handleTriggerCall}
+          handleClearFeedback={handleClearFeedback}
+          rowCallStatuses={rowCallStatuses}
+        />
+      )}
     </div>
   );
 }

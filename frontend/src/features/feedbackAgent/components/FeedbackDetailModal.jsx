@@ -1,22 +1,22 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  X, 
-  Phone, 
+import {
+  X,
+  Phone,
   PhoneOff,
-  MessageSquare, 
+  MessageSquare,
   Activity,
   Radio,
   Star,
   RotateCw
 } from 'lucide-react';
-import { cancelActiveCall, getCustomerById } from '../../../services/apiService';
+import { cancelActiveCall, getCustomerById, API_BASE_URL } from '../../../services/apiService';
 
-export function FeedbackDetailModal({ 
-  selectedFeedback, 
-  setSelectedFeedback, 
+export function FeedbackDetailModal({
+  selectedFeedback,
+  setSelectedFeedback,
   handleTriggerCall,
   handleClearFeedback,
-  rowCallStatuses = {} 
+  rowCallStatuses = {}
 }) {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelledSids, setCancelledSids] = useState(new Set());
@@ -28,6 +28,7 @@ export function FeedbackDetailModal({
   const activeSid = rowCallStatuses[`${selectedFeedback?.id}_sid`];
 
   useEffect(() => {
+    setLiveData(null);
     if (!selectedFeedback?.id) return;
 
     const fetchLiveData = async () => {
@@ -36,7 +37,7 @@ export function FeedbackDetailModal({
         if (data && !data.detail) {
           setLiveData(data);
         }
-      } catch (e) {}
+      } catch (e) { }
     };
 
     fetchLiveData();
@@ -79,7 +80,7 @@ export function FeedbackDetailModal({
       try {
         let parsed = typeof item.transcript === 'string' ? JSON.parse(item.transcript) : item.transcript;
         if (typeof parsed === 'string') {
-          try { parsed = JSON.parse(parsed); } catch(e) {}
+          try { parsed = JSON.parse(parsed); } catch (e) { }
         }
         if (Array.isArray(parsed) && parsed.length > 0) {
           thread = parsed.map(t => ({
@@ -115,11 +116,11 @@ export function FeedbackDetailModal({
           speaker: 'agent',
           name: 'AI Voice Collector',
           time: 'Response',
-          text: isPos 
+          text: isPos
             ? `Thank you so much for your positive feedback! We have recorded your experience.`
             : isNeg
-            ? `We apologize for the inconvenience. Our technical support team has been notified.`
-            : `Thank you for sharing your feedback with BFibernet!`
+              ? `We apologize for the inconvenience. Our technical support team has been notified.`
+              : `Thank you for sharing your feedback with BFibernet!`
         }
       ];
     }
@@ -130,14 +131,20 @@ export function FeedbackDetailModal({
   const transcriptThread = getTranscriptThread(activeFeedback);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fadeIn font-['Plus_Jakarta_Sans',sans-serif]">
-      <div className="w-full max-w-4xl rounded-t-2xl sm:rounded-2xl border border-[#27272a] bg-[#09090b] text-white shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[95vh]">
-        
+    <div 
+      onClick={() => setSelectedFeedback(null)} 
+      className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6 animate-fadeIn font-['Plus_Jakarta_Sans',sans-serif]"
+    >
+      <div 
+        onClick={(e) => e.stopPropagation()} 
+        className="w-full max-w-4xl rounded-t-2xl sm:rounded-2xl border border-[#27272a] bg-[#09090b] text-white shadow-2xl overflow-hidden flex flex-col h-[94vh] sm:h-[88vh] max-h-[95vh]"
+      >
+
         {/* Card Header Banner */}
         <div className="p-3.5 sm:p-6 border-b flex items-center justify-between gap-2 bg-[#000000] border-[#27272a] shrink-0">
           <div className="flex items-center gap-2.5 sm:gap-3.5 overflow-hidden">
             <div className="w-8 h-8 sm:w-11 sm:h-11 rounded-full border border-[#27272a] bg-[#18181b] text-white font-semibold text-xs sm:text-base flex items-center justify-center shrink-0 shadow-sm">
-              {activeFeedback?.avatar || (activeFeedback?.customer_name || '?').slice(0,2).toUpperCase()}
+              {activeFeedback?.avatar || (activeFeedback?.customer_name || '?').slice(0, 2).toUpperCase()}
             </div>
             <div className="overflow-hidden">
               <div className="flex items-center gap-2 flex-wrap">
@@ -158,8 +165,8 @@ export function FeedbackDetailModal({
             </div>
           </div>
 
-          <button 
-            onClick={() => setSelectedFeedback(null)} 
+          <button
+            onClick={() => setSelectedFeedback(null)}
             className="p-2 rounded-lg transition cursor-pointer text-[#a1a1aa] hover:text-white hover:bg-[#18181b] border border-[#27272a]"
           >
             <X className="w-5 h-5" />
@@ -188,7 +195,7 @@ export function FeedbackDetailModal({
             {activeFeedback?.recording_url && (
               <div className="mt-3 pt-3 border-t border-[#27272a]">
                 <p className="text-[10px] uppercase font-semibold text-[#a1a1aa] mb-2 tracking-wider">Call Recording</p>
-                <audio controls className="w-full h-8" src={activeFeedback.recording_url}>
+                <audio controls className="w-full h-8" src={`${API_BASE_URL}/api/v1/twilio/proxy-recording?url=${encodeURIComponent(activeFeedback.recording_url)}`}>
                   Your browser does not support the audio element.
                 </audio>
               </div>
@@ -236,11 +243,10 @@ export function FeedbackDetailModal({
                           <span className="text-[10px] text-[#71717a] font-mono">{chat.time}</span>
                         </div>
 
-                        <div className={`py-2 px-3 rounded-lg max-w-[78%] text-xs leading-normal border ${
-                          isAgent
-                            ? 'bg-[#000000] border-[#27272a] text-white rounded-tl-none' 
+                        <div className={`py-2 px-3 rounded-lg max-w-[78%] text-xs leading-normal border ${isAgent
+                            ? 'bg-[#000000] border-[#27272a] text-white rounded-tl-none'
                             : 'bg-white text-black border-white rounded-tr-none font-medium'
-                        }`}>
+                          }`}>
                           {chat.text}
                         </div>
                       </div>

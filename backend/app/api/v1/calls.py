@@ -34,9 +34,9 @@ def simulate_call_feedback_thread(customer_id: str, customer_name: str):
             "sentiment": "positive"
         },
         {
-            "text": "Hello! The internet connection is working very good. Download speeds are fast and stable. 5 star rating from me!",
-            "rating": 5,
-            "sentiment": "positive"
+            "text": "Hello, the service is not good at all. Connection drops frequently and speed is very slow. 1 star rating.",
+            "rating": 1,
+            "sentiment": "negative"
         },
         {
             "text": "Hi! Internet speed is good, but I noticed slight ping delay yesterday evening. Overall service is satisfactory, rating 4 stars.",

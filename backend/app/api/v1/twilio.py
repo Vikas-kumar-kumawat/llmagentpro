@@ -19,6 +19,7 @@ from app.services.twilio_service import (
 from app.services.voice_service import (
     get_active_agent_info, 
     generate_ai_response, 
+    analyze_customer_feedback_with_gemini,
     is_marwari_accent_active,
     get_twilio_voice,
     get_active_voice,
@@ -167,24 +168,16 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
         user_input = speech_result or (f"Pressed key {digits} for feedback" if digits else "")
 
         if user_input and customer_id:
-            rating = None
+            # Use Gemini LLM to analyze the customer speech feedback for sentiment and rating
+            analysis = analyze_customer_feedback_with_gemini(user_input)
+            
+            # Keypad digits (DTMF) override explicit rating if pressed by customer
             if digits and digits.isdigit() and 1 <= int(digits) <= 5:
                 rating = int(digits)
-
-            if not rating and user_input:
-                nums = re.findall(r"\b([1-5])\b", user_input)
-                if nums:
-                    rating = int(nums[0])
-
-            pos_words = ["good", "great", "excellent", "amazing", "wonderful", "awesome", "fast", "love", "nice", "5", "4", "बढ़िया", "सही", "चोखो", "बढिया", "ठीक"]
-            neg_words = ["bad", "poor", "terrible", "horrible", "slow", "delay", "worst", "hate", "1", "2", "खराब", "धीमी", "बेकार", "परेशानी", "बंद"]
-            lower = user_input.lower()
-            if any(w in lower for w in pos_words):
-                sentiment = "positive"
-            elif any(w in lower for w in neg_words):
-                sentiment = "negative"
             else:
-                sentiment = "neutral"
+                rating = analysis.get("rating")
+
+            sentiment = analysis.get("sentiment", "neutral")
 
             ai_response_text = generate_ai_response(user_input, customer_data)
 
@@ -208,7 +201,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
             DataRepository.update_feedback_transcript_and_data(
                 feedback_id=customer_id,
                 feedback_text=user_input,
-                rating=rating or (customer_data.get("rating") if customer_data else 5),
+                rating=rating or 3,
                 sentiment=sentiment,
                 transcript_json=json.dumps(full_transcript),
                 status="in-progress"
@@ -269,3 +262,28 @@ async def twilio_status_webhook(request: Request, customer_id: Optional[str] = N
                 recording_url=recording_url
             )
     return Response(content="OK", media_type="text/plain")
+
+@router.get("/twilio/proxy-recording")
+async def proxy_recording(url: str):
+    import requests
+    from fastapi.responses import StreamingResponse
+    from fastapi import HTTPException
+    
+    if not url.startswith("https://api.twilio.com/"):
+        raise HTTPException(status_code=400, detail="Invalid URL")
+    
+    # Ensure the URL requests the .mp3 format
+    if not url.endswith(".mp3"):
+        url = f"{url}.mp3"
+        
+    auth = (settings.twilio_account_sid, settings.twilio_auth_token)
+    
+    def iterfile():
+        with requests.get(url, auth=auth, stream=True) as r:
+            if r.status_code != 200:
+                print(f"[Twilio Proxy] Failed to fetch recording: {r.status_code} {r.text}")
+                return
+            for chunk in r.iter_content(chunk_size=8192):
+                yield chunk
+                
+    return StreamingResponse(iterfile(), media_type="audio/mpeg")

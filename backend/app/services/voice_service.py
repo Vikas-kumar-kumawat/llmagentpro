@@ -113,6 +113,62 @@ def is_marwari_accent_active() -> bool:
     accent = info.get("info", {}).get("accent", "")
     return any(k in v for k in ["hi-IN", "Neural2", "Sarvam", "Bulbul", "Aditi", "Kajal"]) or "Rajasthani" in accent or "Marwari" in accent or "Hindi" in accent
 
+def analyze_customer_feedback_with_gemini(customer_text: str) -> Dict[str, Any]:
+    """Uses Gemini LLM to accurately analyze customer feedback sentiment and rating."""
+    rating = None
+    sentiment = "neutral"
+    
+    if settings.gemini_api_key:
+        try:
+            from google import genai
+            client = genai.Client(api_key=settings.gemini_api_key)
+            prompt = (
+                f'Analyze this customer response regarding internet service feedback: "{customer_text}"\n\n'
+                "Strict rules:\n"
+                "1. If customer says service is not good, bad, poor, slow, has issues, or expresses dissatisfaction, sentiment MUST be 'negative' and rating MUST be 1 or 2.\n"
+                "2. If customer says service is good, great, excellent, working well, sentiment MUST be 'positive' and rating MUST be 4 or 5.\n"
+                "3. If rating is explicitly mentioned (e.g., '1 star', '5 stars'), use that number.\n\n"
+                "Respond ONLY with a JSON object matching this schema:\n"
+                '{"rating": <number 1-5>, "sentiment": "<positive|negative|neutral>"}'
+            )
+            model_name = settings.gemini_model or "gemini-3.6-flash"
+            res = client.models.generate_content(model=model_name, contents=prompt)
+            if res and res.text:
+                clean = res.text.strip().replace("```json", "").replace("```", "").strip()
+                data = json.loads(clean)
+                if isinstance(data, dict):
+                    if data.get("rating") in [1, 2, 3, 4, 5]:
+                        rating = int(data["rating"])
+                    if data.get("sentiment") in ["positive", "negative", "neutral"]:
+                        sentiment = str(data["sentiment"])
+                    return {"rating": rating, "sentiment": sentiment}
+        except Exception as ex:
+            print(f"[Gemini Sentiment Analysis Error] {ex}")
+
+    # Fallback rule-based analysis (Check negative phrases FIRST!)
+    lower = customer_text.lower()
+    neg_phrases = ["not good", "no good", "not working", "bad", "poor", "terrible", "horrible", "slow", "delay", "worst", "hate", "1", "2", "kharab", "bekar", "खराब", "धीमी", "बेकार", "परेशानी", "बंद", "अच्छा नहीं", "सही नहीं"]
+    pos_phrases = ["good", "great", "excellent", "amazing", "wonderful", "awesome", "fast", "love", "nice", "5", "4", "बढ़िया", "सही", "चोखो", "बढिया", "अच्छा"]
+    
+    nums = re.findall(r"\b([1-5])\b", customer_text)
+    if nums:
+        rating = int(nums[0])
+
+    if any(p in lower for p in neg_phrases):
+        sentiment = "negative"
+        if not rating:
+            rating = 1 if any(w in lower for w in ["worst", "terrible", "horrible", "1"]) else 2
+    elif any(p in lower for p in pos_phrases):
+        sentiment = "positive"
+        if not rating:
+            rating = 5 if any(w in lower for w in ["excellent", "amazing", "5"]) else 4
+    else:
+        sentiment = "neutral"
+        if not rating:
+            rating = 3
+            
+    return {"rating": rating, "sentiment": sentiment}
+
 def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] = None) -> str:
     ai_text = ""
     lower = customer_text.lower()
@@ -132,11 +188,10 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
                     "EXACT DIALOGUE SCRIPT & STYLE RULES:\n"
                     "1. MUST RESPOND IN HINDI SCRIPT (Devanagari). DO NOT OUTPUT ENGLISH LETTERS.\n"
                     "2. Start with 'राम राम सा!' when appropriate.\n"
-                    "3. If customer says service is good/fine: say 'अच्छा, ये सुनकर अच्छा लगा। इंटरनेट की स्पीड भी ठीक मिल रही है?' or ask for 1 to 5 star rating.\n"
-                    "4. If customer has issues/problems: say 'अच्छा, समझ गया। आपको किस तरह की परेशानी आ रही है? थोड़ा बताइए?' or 'ठीक है, आपकी बात नोट कर लेते हैं।'\n"
+                    "3. If customer says service is NOT good/has issues: apologize sincerely and say 'अरेरे, आपकी परेशानी नोट कर ली है। हमारी टीम तुरंत जांच करेगी।'\n"
+                    "4. If customer says service is good/fine: say 'अच्छा, ये सुनकर अच्छा लगा।'\n"
                     "5. Keep replies super concise (maximum 15 words).\n"
-                    "6. Output ONLY plain text without markdown, quotes, or internal labels.\n"
-                    "7. IMPORTANT: If you want the customer to reply, you MUST end your sentence with a question mark (?). If you are thanking them and ending the conversation, DO NOT use a question mark."
+                    "6. Output ONLY plain text without markdown, quotes, or internal labels."
                 )
             else:
                 prompt = (
@@ -144,13 +199,13 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
                     f'The customer said: "{customer_text}"\n\n'
                     "Rules:\n"
                     "1. MUST RESPOND IN ENGLISH ONLY.\n"
-                    "2. Acknowledge their feedback about BFibernet internet service naturally.\n"
-                    "3. If they haven't given a 1 to 5 star rating yet, ask for a star rating out of 5.\n"
+                    "2. If customer says service is NOT good/has issues, apologize sincerely and state that technical support will inspect it.\n"
+                    "3. If customer says service is good, thank them warmly.\n"
                     "4. Keep your reply super concise (maximum 15 words).\n"
-                    "5. Speak naturally without markdown or internal labels.\n"
-                    "6. IMPORTANT: If you want the customer to reply, you MUST end your sentence with a question mark (?). If you are thanking them and ending the conversation, DO NOT use a question mark."
+                    "5. Speak naturally without markdown or internal labels."
                 )
-            res = client.models.generate_content(model=settings.gemini_model, contents=prompt)
+            model_name = settings.gemini_model or "gemini-3.6-flash"
+            res = client.models.generate_content(model=model_name, contents=prompt)
             if res and res.text:
                 ai_text = res.text.strip()
         except Exception as ex:
@@ -168,15 +223,15 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
             ai_text = "राम राम सा! आपकी इंटरनेट स्पीड और सेवा कैसी चल रही है? 1 से 5 स्टार रेटिंग दीजिए।" if is_rajasthani_hindi else "Hello! How is your BFibernet fiber internet working today? Could you rate your experience from 1 to 5 stars?"
         elif any(w in lower for w in bye_words):
             ai_text = "राम राम! आपका दिन अच्छा रहे। बीसीटी फ़ाइबरनेट को समय देने के लिए धन्यवाद।" if is_rajasthani_hindi else "Thank you so much for your valuable feedback! Have a wonderful day. Goodbye!"
+        elif any(w in lower for w in ["not good", "no good", "not working", "bad", "poor", "slow", "worst", "terrible", "issue", "delay", "खराब", "धीमी", "बंद", "अच्छा नहीं"]):
+            ai_text = "आपकी परेशानी हमने नोट कर ली है। हमारी टीम जल्द सुधार करेगी।" if is_rajasthani_hindi else "We apologize for the poor service. Our technical support team will look into this immediately."
+        elif any(w in lower for w in ["good", "great", "excellent", "awesome", "amazing", "wonderful", "nice", "happy", "बढ़िया", "सही", "चोखो", "ठीक", "अच्छा"]):
+            ai_text = "बहुत बढ़िया! आपकी प्रतिक्रिया के लिए धन्यवाद।" if is_rajasthani_hindi else "That is so wonderful to hear! Thank you for your feedback."
         elif rating_num:
             if rating_num >= 4:
                 ai_text = f"अच्छा, ये सुनकर अच्छा लगा। {rating_num} स्टार देने के लिए धन्यवाद।" if is_rajasthani_hindi else f"Thank you so much for giving us {rating_num} stars! We are delighted to hear your feedback."
             else:
                 ai_text = f"ठीक है, आपकी बात नोट कर लेते हैं। {rating_num} स्टार रेटिंग के लिए धन्यवाद।" if is_rajasthani_hindi else f"Thank you for your {rating_num} star rating. We sincerely apologize for any inconvenience."
-        elif any(w in lower for w in ["good", "great", "excellent", "awesome", "amazing", "wonderful", "nice", "happy", "बढ़िया", "सही", "चोखो", "ठीक", "अच्छा"]):
-            ai_text = "बहुत बढ़िया! आपकी प्रतिक्रिया के लिए धन्यवाद।" if is_rajasthani_hindi else "That is so wonderful to hear! Thank you for your feedback."
-        elif any(w in lower for w in ["bad", "poor", "slow", "worst", "terrible", "issue", "delay", "not good", "खराब", "धीमी", "बंद"]):
-            ai_text = "आपकी परेशानी हमने नोट कर ली है। हमारी टीम जल्द सुधार करेगी।" if is_rajasthani_hindi else "We have noted your concern and will work to improve our service immediately."
         else:
             ai_text = "आपकी प्रतिक्रिया के लिए बीसीटी फ़ाइबरनेट की ओर से बहुत-बहुत धन्यवाद!" if is_rajasthani_hindi else "Thank you for sharing your valuable feedback with BFibernet!"
 
