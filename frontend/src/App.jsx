@@ -8,6 +8,7 @@ import { MakeCallSection } from './features/outboundCalls/MakeCallSection';
 import { RechargeReminderSection } from './features/rechargeAgent/RechargeReminderSection';
 import { NewOffersSection } from './features/offersAgent/NewOffersSection';
 import { CompetitorMonitoringSection } from './features/competitorAgent/CompetitorMonitoringSection';
+import { SalesAgentSection } from './features/salesAgent/SalesAgentSection';
 import { HistorySection } from './features/history/HistorySection';
 import { LoginPage } from './features/auth/LoginPage';
 import { getServiceStatus, getContactsAndLogs, getFeedbackAndTickets } from './services/apiService';
@@ -92,18 +93,7 @@ function MainAppLayout({ onLogout }) {
           )}
 
           {activeAgent === 'sales' && (
-            <div className="max-w-6xl mx-auto pt-2">
-              <SectionCard
-                icon="🛍️"
-                title="Sales AI Agent"
-                subtitle="Automated outbound sales lead conversion, fiber plan upsells & promotional calls"
-                tag="Sales Copilot v2.4"
-                isOpen={true}
-                onToggle={() => { }}
-              >
-                <NewOffersSection onRefreshData={loadAllData} />
-              </SectionCard>
-            </div>
+            <SalesAgentSection />
           )}
 
           {activeAgent === 'feedback' && (
