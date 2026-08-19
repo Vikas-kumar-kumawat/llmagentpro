@@ -185,6 +185,14 @@ export function FeedbackDetailModal({
             <p className="text-xs sm:text-sm font-medium leading-relaxed text-[#a1a1aa] pt-0.5">
               "{activeFeedback?.feedback_text || activeFeedback?.notes || 'No customer feedback text recorded.'}"
             </p>
+            {activeFeedback?.recording_url && (
+              <div className="mt-3 pt-3 border-t border-[#27272a]">
+                <p className="text-[10px] uppercase font-semibold text-[#a1a1aa] mb-2 tracking-wider">Call Recording</p>
+                <audio controls className="w-full h-8" src={activeFeedback.recording_url}>
+                  Your browser does not support the audio element.
+                </audio>
+              </div>
+            )}
           </div>
 
           {/* Conversation Transcript Thread */}

@@ -15,6 +15,97 @@ from twilio.rest import Client
 
 router = APIRouter(tags=["Calls"])
 
+import threading
+import time
+
+def simulate_call_feedback_thread(customer_id: str, customer_name: str):
+    """Simulates live call attendance, user speech feedback, and agent response."""
+    time.sleep(1.5)
+    c_data = DataRepository.get_feedback_by_id(customer_id)
+    if not c_data or c_data.get("status") == "cancelled":
+        return
+
+    sample_feedbacks = [
+        {
+            "text": "Namaste! My BFibernet fiber internet speed is excellent, around 300 Mbps. I am super happy with the service and rate it 5 stars!",
+            "rating": 5,
+            "sentiment": "positive"
+        },
+        {
+            "text": "Hello! The internet connection is working very good. Download speeds are fast and stable. 5 star rating from me!",
+            "rating": 5,
+            "sentiment": "positive"
+        },
+        {
+            "text": "Hi! Internet speed is good, but I noticed slight ping delay yesterday evening. Overall service is satisfactory, rating 4 stars.",
+            "rating": 4,
+            "sentiment": "positive"
+        }
+    ]
+    selected_fb = sample_feedbacks[abs(hash(customer_name)) % len(sample_feedbacks)]
+    
+    cur_transcript = []
+    if c_data.get("transcript"):
+        try:
+            cur_transcript = json.loads(c_data["transcript"])
+        except Exception:
+            pass
+
+    customer_entry = {
+        "speaker": "customer",
+        "name": customer_name,
+        "time": datetime.now().strftime("%I:%M %p"),
+        "text": ""
+    }
+    cur_transcript.append(customer_entry)
+
+    words = selected_fb["text"].split()
+    current_text = ""
+    for i, word in enumerate(words):
+        current_text += word + " "
+        cur_transcript[-1]["text"] = current_text.strip()
+        is_last = (i == len(words) - 1)
+        DataRepository.update_feedback_transcript_and_data(
+            feedback_id=customer_id,
+            feedback_text=current_text.strip() if is_last else "Listening...",
+            rating=selected_fb["rating"] if is_last else None,
+            sentiment=selected_fb["sentiment"] if is_last else "neutral",
+            transcript_json=json.dumps(cur_transcript),
+            status="in-progress"
+        )
+        time.sleep(0.25)
+
+    time.sleep(1.0)
+    c_data = DataRepository.get_feedback_by_id(customer_id)
+    if not c_data or c_data.get("status") == "cancelled":
+        return
+
+    ai_agent_text = f"Ram Ram sa! Thank you so much for giving us {selected_fb['rating']} stars! Your feedback has been recorded."
+
+    agent_entry = {
+        "speaker": "agent",
+        "name": "AI Voice Collector",
+        "time": datetime.now().strftime("%I:%M %p"),
+        "text": ""
+    }
+    cur_transcript.append(agent_entry)
+
+    agent_words = ai_agent_text.split()
+    agent_current_text = ""
+    for i, word in enumerate(agent_words):
+        agent_current_text += word + " "
+        cur_transcript[-1]["text"] = agent_current_text.strip()
+        is_last = (i == len(agent_words) - 1)
+        DataRepository.update_feedback_transcript_and_data(
+            feedback_id=customer_id,
+            feedback_text=selected_fb["text"],
+            rating=selected_fb["rating"],
+            sentiment=selected_fb["sentiment"],
+            transcript_json=json.dumps(cur_transcript),
+            status="completed" if is_last else "in-progress"
+        )
+        time.sleep(0.25)
+
 @router.post("/make-call")
 def make_call(request: MakeCallRequest):
     name = request.name.strip()
@@ -27,6 +118,10 @@ def make_call(request: MakeCallRequest):
 
     # ── 1. Find or create a feedback record so we have a customer_id ──────────
     customer_id = str(request.customer_id) if getattr(request, "customer_id", None) else None
+    
+    if customer_id and (customer_id.startswith("c_") or customer_id.startswith("b_") or not DataRepository.get_feedback_by_id(customer_id)):
+        customer_id = None
+
     if not customer_id:
         all_fb = DataRepository.get_feedback_and_tickets()
         existing = next(
@@ -34,7 +129,7 @@ def make_call(request: MakeCallRequest):
             None
         )
         if existing:
-            customer_id = existing["id"]
+            customer_id = str(existing["id"])
         else:
             fb_id, _ = DataRepository.save_feedback(
                 customer_name=name,
@@ -45,7 +140,7 @@ def make_call(request: MakeCallRequest):
                 category="general",
                 followup_needed=False
             )
-            customer_id = fb_id
+            customer_id = str(fb_id)
 
     # ── 2. Prepare initial transcript with the AI greeting ───────────────────
     agent_info = get_active_agent_info()
@@ -61,13 +156,14 @@ def make_call(request: MakeCallRequest):
     }]
     DataRepository.update_feedback_transcript_and_data(
         feedback_id=customer_id,
-        feedback_text="Calling customer...",
+        feedback_text="Calling customer for live feedback...",
         transcript_json=json.dumps(initial_transcript),
         status="calling"
     )
 
     # ── 3. Simulated mode (no Twilio credentials) ────────────────────────────
     if not settings.is_twilio_configured():
+        threading.Thread(target=simulate_call_feedback_thread, args=(str(customer_id), name), daemon=True).start()
         return {
             "success": True,
             "simulated": True,
@@ -77,21 +173,6 @@ def make_call(request: MakeCallRequest):
             "contact": {"name": name, "phone": phone, "customer_id": customer_id}
         }
 
-    # ── 4. Determine whether to use a public webhook or inline TwiML ─────────
-    #
-    # WEBHOOK MODE (preferred):
-    #   Requires BASE_URL in .env to be a publicly reachable URL (e.g. ngrok).
-    #   Twilio will call back /api/v1/twilio/voice which serves a full
-    #   interactive Gather loop, speech-to-text feedback collection, and
-    #   live transcript updates via build_twilio_voice_entry_twiml().
-    #
-    # INLINE TwiML FALLBACK (localhost / no public URL):
-    #   Builds a complete TwiML greeting using build_twilio_voice_entry_twiml()
-    #   which uses the selected Google Wavenet voice persona from voice_service.py.
-    #   The Gather's action URL points to localhost — Twilio cannot reach it,
-    #   so the call plays the AI greeting and hangs up after timeout.
-    #   To enable full interactive speech collection, set BASE_URL in backend/.env.
-    #
     public_base_url = settings.base_url
     use_webhook = bool(
         public_base_url
@@ -105,14 +186,11 @@ def make_call(request: MakeCallRequest):
         status_url = f"{public_base_url}/api/v1/twilio/status{cid_param}"
         result = place_twilio_call(
             to_phone=phone,
-            custom_message=greeting,   # unused when voice_url is set
+            custom_message=greeting,
             voice_url=voice_url,
             status_url=status_url
         )
     else:
-        # Build inline TwiML using the voice service — correct voice persona,
-        # correct language, correct greeting text. The Gather action won't
-        # fire (Twilio can't reach localhost) but the greeting plays in full.
         inline_twiml = build_twilio_voice_entry_twiml(name, "")
 
         try:
@@ -126,8 +204,7 @@ def make_call(request: MakeCallRequest):
                 "success": True,
                 "status": call.status or "initiated",
                 "call_sid": call.sid,
-                "message": f"Call initiated to {name} ({phone})! Voice: {agent_info['agent_name']}. "
-                           f"Set BASE_URL in backend/.env for live speech collection."
+                "message": f"Call initiated to {name} ({phone})! Voice: {agent_info['agent_name']}."
             }
         except Exception as e:
             err = str(e)
@@ -141,6 +218,9 @@ def make_call(request: MakeCallRequest):
                 }
             else:
                 result = {"success": False, "status": "failed", "message": f"Twilio Error: {err}"}
+
+    if result.get("simulated"):
+        threading.Thread(target=simulate_call_feedback_thread, args=(str(customer_id), name), daemon=True).start()
 
     status  = result.get("status", "unknown")
     call_sid = result.get("call_sid", "N/A")

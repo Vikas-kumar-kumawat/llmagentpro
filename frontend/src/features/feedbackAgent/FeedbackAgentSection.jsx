@@ -179,10 +179,17 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
       const res = await makeOutboundCall(customerName, customerPhone, "Following up on your feedback inquiry.", item.id);
       // Store call_sid so Cancel Call button can terminate the call via Twilio
       const sid = res.call_sid || res.contact?.call_sid || null;
+      const realId = res.contact?.customer_id || item.id;
+
+      if (realId !== item.id) {
+        setSelectedFeedback(prev => (prev && prev.id === item.id ? { ...prev, id: realId } : prev));
+        setLocalFeedbacks(prevList => prevList.map(f => f.id === item.id ? { ...f, id: realId } : f));
+      }
+
       setRowCallStatuses(prev => ({
         ...prev,
-        [item.id]: res.success ? 'calling' : 'failed',
-        [`${item.id}_sid`]: sid
+        [realId]: res.success ? 'calling' : 'failed',
+        [`${realId}_sid`]: sid
       }));
       setCallingState({ 
         loading: false, 
@@ -192,7 +199,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
 
       if (res.simulated) {
         setTimeout(() => {
-          setRowCallStatuses(prev => ({ ...prev, [item.id]: 'completed' }));
+          setRowCallStatuses(prev => ({ ...prev, [realId]: 'completed' }));
           if (onRefreshDataRef.current) onRefreshDataRef.current();
         }, 5000);
       } else if (onRefreshData) {

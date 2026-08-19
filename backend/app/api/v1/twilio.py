@@ -176,8 +176,10 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
     except Exception as e:
         print(f"[Twilio Feedback Webhook Error] {e}")
         from twilio.twiml.voice_response import VoiceResponse
+        from app.services.voice_service import get_twilio_voice, get_active_voice
         res = VoiceResponse()
-        res.say("Thank you for your feedback! Have a wonderful day. Goodbye.")
+        v = get_twilio_voice(get_active_voice())
+        res.say("Thank you for your feedback! Have a wonderful day. Goodbye.", voice=v)
         res.hangup()
         return Response(content=str(res), media_type="application/xml")
 
@@ -187,7 +189,8 @@ async def twilio_status_webhook(request: Request, customer_id: Optional[str] = N
     form_data = await request.form()
     call_status = form_data.get("CallStatus", "")
     call_sid = form_data.get("CallSid", "")
-    print(f"[Twilio Status Callback] Call {call_sid} (Customer: {customer_id}) Status: {call_status}")
+    recording_url = form_data.get("RecordingUrl", None)
+    print(f"[Twilio Status Callback] Call {call_sid} (Customer: {customer_id}) Status: {call_status}, Recording: {recording_url}")
     if customer_id:
         c = DataRepository.get_feedback_by_id(customer_id)
         if c:
@@ -195,6 +198,7 @@ async def twilio_status_webhook(request: Request, customer_id: Optional[str] = N
             DataRepository.update_feedback_transcript_and_data(
                 feedback_id=customer_id,
                 feedback_text=c.get("feedback_text", ""),
-                status=new_status
+                status=new_status,
+                recording_url=recording_url
             )
     return Response(content="OK", media_type="text/plain")

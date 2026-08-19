@@ -63,7 +63,7 @@ class DataRepository:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, created_at 
+            SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, recording_url, created_at 
             FROM feedback_entries ORDER BY id DESC LIMIT ?
         """, (limit,))
         feedback = [dict(row) for row in cursor.fetchall()]
@@ -81,7 +81,7 @@ class DataRepository:
     def get_feedback_by_id(feedback_id: str):
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, created_at FROM feedback_entries WHERE id = ?", (feedback_id,))
+        cursor.execute("SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, recording_url, created_at FROM feedback_entries WHERE id = ?", (feedback_id,))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
@@ -95,7 +95,7 @@ class DataRepository:
         conn.close()
 
     @staticmethod
-    def update_feedback_transcript_and_data(feedback_id: str, feedback_text: str, rating: int = None, sentiment: str = None, transcript_json: str = None, status: str = None):
+    def update_feedback_transcript_and_data(feedback_id: str, feedback_text: str, rating: int = None, sentiment: str = None, transcript_json: str = None, status: str = None, recording_url: str = None):
         conn = get_db()
         cursor = conn.cursor()
         query = "UPDATE feedback_entries SET feedback_text = ?"
@@ -113,6 +113,9 @@ class DataRepository:
         if status:
             query += ", status = ?"
             params.append(status)
+        if recording_url:
+            query += ", recording_url = ?"
+            params.append(recording_url)
 
         query += " WHERE id = ?"
         params.append(feedback_id)

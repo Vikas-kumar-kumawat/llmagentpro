@@ -60,6 +60,11 @@ def init_db():
     except Exception:
         pass
 
+    try:
+        cursor.execute("ALTER TABLE feedback_entries ADD COLUMN recording_url TEXT")
+    except Exception:
+        pass
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS support_tickets (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
