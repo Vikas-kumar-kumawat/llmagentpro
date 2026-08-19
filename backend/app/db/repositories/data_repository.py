@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Any
 from app.db.session import get_db
 
 class DataRepository:
@@ -47,7 +48,7 @@ class DataRepository:
         conn.close()
 
     @staticmethod
-    def add_call_log(name: str, phone: str, call_sid: str, status: str, details: str):
+    def add_call_log(name: str, phone: str, call_sid: str = "N/A", status: str = "initiated", details: str = ""):
         conn = get_db()
         cursor = conn.cursor()
         now_str = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -78,24 +79,49 @@ class DataRepository:
         return {"feedback_entries": feedback, "support_tickets": tickets}
 
     @staticmethod
-    def get_feedback_by_id(feedback_id: str):
+    def get_feedback_by_id(feedback_id: Any):
+        if feedback_id is None:
+            return None
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, recording_url, created_at FROM feedback_entries WHERE id = ?", (feedback_id,))
+        cursor.execute("SELECT id, customer_name, phone, rating, feedback_text, sentiment, category, followup_needed, transcript, status, recording_url, created_at FROM feedback_entries WHERE id = ?", (str(feedback_id),))
         row = cursor.fetchone()
         conn.close()
         return dict(row) if row else None
 
     @staticmethod
-    def update_feedback_text(feedback_id: str, new_text: str):
+    def find_or_create_feedback(name: str, phone: str) -> str:
+        """Finds existing feedback entry by phone number or creates a new entry, returning feedback_id as str."""
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("UPDATE feedback_entries SET feedback_text = ? WHERE id = ?", (new_text, feedback_id))
+        cursor.execute("SELECT id FROM feedback_entries WHERE phone = ? ORDER BY id DESC LIMIT 1", (phone,))
+        row = cursor.fetchone()
+        if row:
+            conn.close()
+            return str(row["id"])
+        
+        conn.close()
+        fb_id, _ = DataRepository.save_feedback(
+            customer_name=name,
+            phone=phone,
+            rating=5,
+            feedback_text="Calling customer for feedback...",
+            sentiment="neutral",
+            category="general",
+            followup_needed=False
+        )
+        return str(fb_id)
+
+    @staticmethod
+    def update_feedback_text(feedback_id: Any, new_text: str):
+        conn = get_db()
+        cursor = conn.cursor()
+        cursor.execute("UPDATE feedback_entries SET feedback_text = ? WHERE id = ?", (new_text, str(feedback_id)))
         conn.commit()
         conn.close()
 
     @staticmethod
-    def update_feedback_transcript_and_data(feedback_id: str, feedback_text: str, rating: int = None, sentiment: str = None, transcript_json: str = None, status: str = None, recording_url: str = None):
+    def update_feedback_transcript_and_data(feedback_id: Any, feedback_text: str, rating: int = None, sentiment: str = None, transcript_json: str = None, status: str = None, recording_url: str = None):
         conn = get_db()
         cursor = conn.cursor()
         query = "UPDATE feedback_entries SET feedback_text = ?"
@@ -118,7 +144,7 @@ class DataRepository:
             params.append(recording_url)
 
         query += " WHERE id = ?"
-        params.append(feedback_id)
+        params.append(str(feedback_id))
 
         cursor.execute(query, params)
         conn.commit()
@@ -151,24 +177,24 @@ class DataRepository:
         return feedback_id, ticket_id
 
     @staticmethod
-    def delete_feedback_entry(feedback_id: str) -> bool:
+    def delete_feedback_entry(feedback_id: Any) -> bool:
         conn = get_db()
         cursor = conn.cursor()
-        cursor.execute("DELETE FROM feedback_entries WHERE id = ?", (feedback_id,))
+        cursor.execute("DELETE FROM feedback_entries WHERE id = ?", (str(feedback_id),))
         rows = cursor.rowcount
         conn.commit()
         conn.close()
         return rows > 0
 
     @staticmethod
-    def update_feedback_entry(feedback_id: str, customer_name: str, phone: str, rating: int, feedback_text: str, sentiment: str) -> bool:
+    def update_feedback_entry(feedback_id: Any, customer_name: str, phone: str, rating: int, feedback_text: str, sentiment: str) -> bool:
         conn = get_db()
         cursor = conn.cursor()
         cursor.execute("""
             UPDATE feedback_entries 
             SET customer_name = ?, phone = ?, rating = ?, feedback_text = ?, sentiment = ?
             WHERE id = ?
-        """, (customer_name, phone, rating, feedback_text, sentiment, feedback_id))
+        """, (customer_name, phone, rating, feedback_text, sentiment, str(feedback_id)))
         rows = cursor.rowcount
         conn.commit()
         conn.close()

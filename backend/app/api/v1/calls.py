@@ -1,25 +1,27 @@
+import json
+import threading
+import time
 import urllib.parse
 from datetime import datetime
-import json
+
 from fastapi import APIRouter, HTTPException, Response
-from app.schemas import MakeCallRequest
-from app.utils.formatters import format_phone_number
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+
+from app.core.config import settings
 from app.db.repositories.data_repository import DataRepository
+from app.schemas import MakeCallRequest
 from app.services.twilio_service import (
     place_twilio_call,
     build_twilio_voice_entry_twiml
 )
-from app.core.config import settings
-from app.services.voice_service import get_active_agent_info
-from twilio.rest import Client
+from app.services.voice_service import get_active_agent_info, is_marwari_accent_active
+from app.utils.formatters import format_phone_number
 
 router = APIRouter(tags=["Calls"])
 
-import threading
-import time
-
 def simulate_call_feedback_thread(customer_id: str, customer_name: str):
-    """Simulates live call attendance, user speech feedback, and agent response."""
+    """Simulates live call attendance, user speech feedback, and agent response (converted from democode.py)."""
     time.sleep(1.5)
     c_data = DataRepository.get_feedback_by_id(customer_id)
     if not c_data or c_data.get("status") == "cancelled":
@@ -80,11 +82,16 @@ def simulate_call_feedback_thread(customer_id: str, customer_name: str):
     if not c_data or c_data.get("status") == "cancelled":
         return
 
-    ai_agent_text = f"Ram Ram sa! Thank you so much for giving us {selected_fb['rating']} stars! Your feedback has been recorded."
+    agent_info = get_active_agent_info()
+    ai_agent_text = (
+        f"राम राम सा! {selected_fb['rating']} स्टार देने के लिए आपका धन्यवाद।"
+        if is_marwari_accent_active()
+        else f"Thank you so much for giving us {selected_fb['rating']} stars! Your feedback has been recorded."
+    )
 
     agent_entry = {
         "speaker": "agent",
-        "name": "AI Voice Collector",
+        "name": f"AI Voice Collector ({agent_info['agent_name']})",
         "time": datetime.now().strftime("%I:%M %p"),
         "text": ""
     }
@@ -106,45 +113,28 @@ def simulate_call_feedback_thread(customer_id: str, customer_name: str):
         )
         time.sleep(0.25)
 
+
 @router.post("/make-call")
 def make_call(request: MakeCallRequest):
+    """Triggers outbound AI voice feedback call (converted from democode.py)."""
     name = request.name.strip()
     phone = format_phone_number(request.phone)
 
     if not name or not phone:
-        raise HTTPException(status_code=400, detail="Customer name and phone number are required.")
+        return JSONResponse(status_code=400, content={"success": False, "error": "Customer name and phone number are required."})
 
     DataRepository.ensure_contact_exists(name, phone)
 
     # ── 1. Find or create a feedback record so we have a customer_id ──────────
     customer_id = str(request.customer_id) if getattr(request, "customer_id", None) else None
-    
     if customer_id and (customer_id.startswith("c_") or customer_id.startswith("b_") or not DataRepository.get_feedback_by_id(customer_id)):
         customer_id = None
 
     if not customer_id:
-        all_fb = DataRepository.get_feedback_and_tickets()
-        existing = next(
-            (f for f in all_fb["feedback_entries"] if format_phone_number(f.get("phone", "")) == phone),
-            None
-        )
-        if existing:
-            customer_id = str(existing["id"])
-        else:
-            fb_id, _ = DataRepository.save_feedback(
-                customer_name=name,
-                phone=phone,
-                rating=5,
-                feedback_text="Calling customer for feedback...",
-                sentiment="neutral",
-                category="general",
-                followup_needed=False
-            )
-            customer_id = str(fb_id)
+        customer_id = DataRepository.find_or_create_feedback(name, phone)
 
     # ── 2. Prepare initial transcript with the AI greeting ───────────────────
     agent_info = get_active_agent_info()
-    from app.services.voice_service import is_marwari_accent_active
     if is_marwari_accent_active():
         greeting = "राम राम सा! मैं बीसीटी फ़ाइबरनेट से बोल रहा हूँ। आपकी इंटरनेट सेवा कैसी चल रही है? थोड़ा फीडबैक दीजिए।"
     else:
@@ -199,6 +189,7 @@ def make_call(request: MakeCallRequest):
         inline_twiml = build_twilio_voice_entry_twiml(name, "")
 
         try:
+            from twilio.rest import Client
             client = Client(settings.twilio_account_sid, settings.twilio_auth_token)
             call = client.calls.create(
                 to=phone,
@@ -238,21 +229,21 @@ def make_call(request: MakeCallRequest):
 
 @router.post("/twiml/voice")
 def twiml_voice_webhook():
+    """Generates default TwiML voice response."""
     xml_content = """<?xml version="1.0" encoding="UTF-8"?>
 <Response>
-    <Say voice="alice">Hello! This is BCT Fibernet AI Support Assistant calling. How can we help you today?</Say>
+    <Say voice="alice">Hello! This is BFibernet AI Support Assistant calling. How can we help you today?</Say>
 </Response>"""
     return Response(content=xml_content, media_type="application/xml")
 
 
-from pydantic import BaseModel as _BM
-
-class CancelCallRequest(_BM):
+class CancelCallRequest(BaseModel):
     call_sid: str
+
 
 @router.post("/cancel-call")
 def cancel_call(request: CancelCallRequest):
-    """Terminates an active Twilio call by its call SID."""
+    """Terminates an active Twilio call by its call SID (converted from democode.py)."""
     call_sid = request.call_sid.strip()
 
     if not call_sid or call_sid in ("SIMULATED_SID", "SIMULATED_TRIAL_SID", "N/A"):
@@ -281,7 +272,6 @@ def cancel_call(request: CancelCallRequest):
         }
     except Exception as e:
         err = str(e)
-        # If call already ended, treat it as success
         if "Call is not in-progress" in err or "21220" in err or "completed" in err.lower():
             return {"success": True, "message": "Call already ended."}
         raise HTTPException(status_code=500, detail=f"Failed to cancel call: {err}")

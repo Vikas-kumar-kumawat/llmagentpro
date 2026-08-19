@@ -1,590 +1,51 @@
 import os
-import re
 import time
-import json
-import subprocess
+import re
 import urllib.parse
 import urllib.request
-import threading
-from typing import Dict, Any, List, Optional
-from flask import Flask, request, jsonify, render_template, Response
-from dotenv import load_dotenv
+from typing import Optional, Dict, Any, List
 
-try:
-    from twilio.rest import Client
-    from twilio.twiml.voice_response import VoiceResponse
-except Exception as ex:
-    Client = None
-    VoiceResponse = None
-    print(f"[Twilio Package Warning] {ex}")
+from fastapi import FastAPI, Request, Response, Form, HTTPException, status
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.templating import Jinja2Templates
+from pydantic import BaseModel
 
-load_dotenv()
+# ASSUMPTION: You will need to import your existing functions and globals here:
+# from your_module import (
+#     gemini, GEMINI_MODEL, twilio, TWILIO_PHONE_NUMBER,
+#     VOICE_CATALOG, ACTIVE_VOICE, customers,
+#     get_active_voice, get_active_agent_info, get_base_url,
+#     get_active_agent_name, get_twilio_voice, is_public_host,
+#     normalize_phone_number, find_customer, save_customers_to_disk, load_customers_from_disk
+# )
+# from twilio.twiml.voice_response import VoiceResponse
 
-# Environment Detection
-IS_RENDER = bool(os.getenv("RENDER") or os.getenv("RENDER_EXTERNAL_HOSTNAME"))
-IS_VERCEL = bool(os.getenv("VERCEL") or os.getenv("VERCEL_ENV") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"))
-IS_CLOUD_PROD = IS_RENDER or IS_VERCEL or (os.name != "nt")
+# Environment checks
+IS_RENDER = os.getenv("RENDER") is not None
+IS_VERCEL = os.getenv("VERCEL") is not None
 
-# Client Initializations
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+app = FastAPI(title="BCT Fibernet AI Caller")
+templates = Jinja2Templates(directory="templates")
 
-gemini = None
-if GEMINI_API_KEY:
-    try:
-        from google import genai
-        gemini = genai.Client(api_key=GEMINI_API_KEY)
-    except Exception as ex:
-        print(f"[Gemini Init Warning] {ex}")
+# =========================
+# PYDANTIC MODELS
+# =========================
 
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+class VoiceRequest(BaseModel):
+    voice_id: Optional[str] = None
 
-twilio = None
-if TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN and Client:
-    try:
-        twilio = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-    except Exception as ex:
-        print(f"[Twilio Init Warning] {ex}")
+class CustomerRequest(BaseModel):
+    name: str
+    phone: str
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
-STATIC_DIR = os.path.join(BASE_DIR, "static")
-
-app = Flask(
-    __name__,
-    template_folder=TEMPLATE_DIR,
-    static_folder=STATIC_DIR,
-)
-
-
-@app.after_request
-def add_security_headers(response):
-    response.headers["ngrok-skip-browser-warning"] = "true"
-    response.headers["Bypass-Tunnel-Remainder"] = "true"
-    return response
-
-
-
+class CallRequest(BaseModel):
+    customer_id: Optional[str] = None
+    phone: Optional[str] = None
 
 
 # =========================
-# VOICE CATALOG & CONFIG
+# HELPER FUNCTIONS
 # =========================
-
-VOICE_CATALOG: List[Dict[str, str]] = [
-    # English Voices
-    {
-        "id": "Google.en-IN-Wavenet-D",
-        "name": "Priya (Wavenet Neural Female - India)",
-        "accent": "Indian English",
-        "gender": "Female",
-        "sample_text": "Namaste! I am Priya. I deliver warm, polite, and respectful customer feedback calls.",
-    },
-    {
-        "id": "Google.en-IN-Wavenet-B",
-        "name": "Rohan (Wavenet Neural Male - India)",
-        "accent": "Indian English",
-        "gender": "Male",
-        "sample_text": "Hello! I am Rohan. I bring a clear, polite, and professional Indian male voice persona.",
-    },
-    
-    # Marwari + Rajasthani + Hindi Voice Models (Twilio & Web Supported)
-    {
-        "id": "Google.hi-IN-Wavenet-B",
-        "name": "Ratan Singh (Neural Male - Marwari, Rajasthani & Hindi)",
-        "accent": "Rajasthani & Marwari Hindi",
-        "gender": "Male",
-        "sample_text": "राम राम सा! खम्मा घणी। मैं रतन सिंह, बीसीटी फ़ाइबरनेट से बात कर रहा हूँ।",
-    },
-    {
-        "id": "Google.hi-IN-Wavenet-A",
-        "name": "Gauri (Neural Female - Marwari, Rajasthani & Hindi)",
-        "accent": "Rajasthani & Marwari Hindi",
-        "gender": "Female",
-        "sample_text": "खम्मा घणी! राम राम सा। मैं गौरी हूँ, बीसीटी फ़ाइबरनेट सेवा फ़ीडबैक के लिए कॉलिंग।",
-    },
-    {
-        "id": "Polly.Aditi",
-        "name": "Aditi / Sarvam (Indic Voice - Marwari + Rajasthani)",
-        "accent": "Marwari + Rajasthani Dialect",
-        "gender": "Female",
-        "sample_text": "राम राम सा! खम्मा घणी हुकूम, बीसीटी फ़ाइबरनेट इंटरनेट सेवा री जानकारी दीजो।",
-    },
-]
-
-ACTIVE_VOICE = "Google.en-IN-Wavenet-B"
-
-
-def get_active_agent_info() -> Dict[str, Any]:
-    """Retrieves active voice catalog record and agent name."""
-    global ACTIVE_VOICE
-    v_info = next((v for v in VOICE_CATALOG if v["id"] == ACTIVE_VOICE), VOICE_CATALOG[0])
-    return {
-        "voice_id": ACTIVE_VOICE,
-        "agent_name": v_info["name"].split(" ")[0],
-        "info": v_info,
-    }
-
-
-def get_active_voice() -> str:
-    """Returns active voice identifier string."""
-    return ACTIVE_VOICE
-
-
-def get_active_agent_name() -> str:
-    """Returns active agent display name."""
-    return get_active_agent_info()["agent_name"]
-
-
-# =========================
-# DYNAMIC TUNNEL MANAGEMENT
-# =========================
-
-
-active_tunnel_url = ""
-
-
-def is_public_host(url: str) -> bool:
-    """Returns True if URL is a valid public domain (excluding localhost, private IPs, and broken tunnel landing hosts)."""
-    if not url:
-        return False
-    clean = url.replace("http://", "").replace("https://", "").strip()
-    clean_host = clean.split(":")[0]
-    if clean_host in ("localhost", "127.0.0.1", "0.0.0.0", "::1") or clean_host.endswith(".local"):
-        return False
-    if clean_host.startswith("192.168.") or clean_host.startswith("10."):
-        return False
-    if clean_host.startswith("172."):
-        parts = clean_host.split(".")
-        if len(parts) >= 2 and parts[1].isdigit() and 16 <= int(parts[1]) <= 31:
-            return False
-    if any(b in clean_host for b in ["loca.lt", "lhr.life", "serveo.net"]):
-        return False
-    return True
-
-
-def get_twilio_voice(voice_id: str) -> str:
-    """Safely maps voice identifier string to a valid Twilio <Say voice="..."> attribute value."""
-    if not voice_id:
-        return "Google.hi-IN-Wavenet-B"
-        
-    valid_twilio_voices = {
-        "Google.hi-IN-Wavenet-A",
-        "Google.hi-IN-Wavenet-B",
-        "Google.hi-IN-Wavenet-C",
-        "Google.hi-IN-Wavenet-D",
-        "Google.en-IN-Wavenet-A",
-        "Google.en-IN-Wavenet-B",
-        "Google.en-IN-Wavenet-C",
-        "Google.en-IN-Wavenet-D",
-        "Polly.Aditi",
-        "Polly.Kajal",
-        "alice",
-        "man",
-        "woman"
-    }
-    if voice_id in valid_twilio_voices:
-        return voice_id
-
-    # Fallback mapping for custom voice strings to guaranteed valid Twilio voices
-    if "Neural2-A" in voice_id or "Male" in voice_id:
-        return "Google.hi-IN-Wavenet-B"
-    if "Neural2-D" in voice_id or "Female" in voice_id or "Bulbul" in voice_id or "Sarvam" in voice_id:
-        return "Google.hi-IN-Wavenet-A"
-    if "hi-IN" in voice_id:
-        return "Google.hi-IN-Wavenet-B"
-
-    return "Google.hi-IN-Wavenet-B"
-
-
-def get_base_url() -> str:
-    """Returns live public HTTPS URL from request headers, cloud env, active tunnel, or BASE_URL."""
-    global active_tunnel_url
-    try:
-        if request and request.host:
-            req_proto = request.headers.get("X-Forwarded-Proto", "https")
-            req_host = request.headers.get("X-Forwarded-Host") or request.host
-            req_host = req_host.rstrip("/")
-            if is_public_host(req_host):
-                live_url = f"{req_proto}://{req_host}" if not req_host.startswith("http") else req_host
-                active_tunnel_url = live_url
-                return live_url
-    except Exception:
-        pass
-
-    r_host = os.getenv("RENDER_EXTERNAL_HOSTNAME")
-    if r_host:
-        r_host = r_host.rstrip("/")
-        return f"https://{r_host}" if not r_host.startswith("http") else r_host
-
-    v_url = os.getenv("VERCEL_URL")
-    if v_url:
-        v_url = v_url.rstrip("/")
-        return f"https://{v_url}" if not v_url.startswith("http") else v_url
-
-    if active_tunnel_url and is_public_host(active_tunnel_url):
-        return active_tunnel_url.rstrip("/")
-
-    # Check active tunnel or launch verified tunnel synchronously if missing
-    tunnel = ensure_tunnel()
-    if tunnel and is_public_host(tunnel):
-        return tunnel.rstrip("/")
-
-    base_env = os.getenv("BASE_URL", "").strip().rstrip("/")
-    if base_env and is_public_host(base_env):
-        return base_env
-
-    return "http://127.0.0.1:5000"
-
-
-def update_env_base_url(live_url: str) -> None:
-    """Auto-updates BASE_URL key in environment without triggering file reloader loops."""
-    if not live_url:
-        return
-    global active_tunnel_url
-    active_tunnel_url = live_url
-    os.environ["BASE_URL"] = live_url
-    print(f"[Auto-Env] Dynamic BASE_URL set in memory to {live_url}")
-
-
-def kill_zombie_cloudflared() -> None:
-    """Terminates lingering cloudflared processes on Windows."""
-    if os.name == "nt":
-        try:
-            subprocess.run(
-                ["taskkill", "/F", "/IM", "cloudflared.exe"],
-                stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL,
-            )
-        except Exception:
-            pass
-
-
-def _drain_process_stdout(proc: subprocess.Popen) -> None:
-    """Reads stdout continuously in background to prevent buffer fill deadlock."""
-    try:
-        while proc.poll() is None and proc.stdout:
-            line = proc.stdout.readline()
-            if not line:
-                break
-    except Exception:
-        pass
-
-
-
-
-
-import ssl
-
-def verify_tunnel_url(url: str) -> bool:
-    """Verifies that a public tunnel URL actually routes HTTP requests to Flask app."""
-    if not url or not is_public_host(url):
-        return False
-    clean_url = url.rstrip("/") + "/api/health"
-    try:
-        req = urllib.request.Request(
-            clean_url,
-            headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-                "ngrok-skip-browser-warning": "true",
-                "Bypass-Tunnel-Remainder": "true",
-            },
-        )
-        ctx = ssl._create_unverified_context()
-        with urllib.request.urlopen(req, timeout=3, context=ctx) as resp:
-            if resp.status == 200:
-                body = resp.read().decode("utf-8")
-                if '"status": "ok"' in body or '"status":"ok"' in body:
-                    return True
-    except Exception as ex:
-        print(f"[Tunnel Verify Check for {url}] {ex}")
-    return False
-
-
-def start_local_cloudflare_tunnel() -> Optional[str]:
-    """Launches local Cloudflare Free Tunnel via cloudflared.exe with robust health verification."""
-    global active_tunnel_url
-    if IS_CLOUD_PROD:
-        return None
-
-    cf_bin = os.path.join(os.path.dirname(__file__), "cloudflared.exe")
-    if not os.path.exists(cf_bin):
-        return None
-
-    kill_zombie_cloudflared()
-    time.sleep(1)
-
-    try:
-        proc = subprocess.Popen(
-            [cf_bin, "tunnel", "--url", "http://127.0.0.1:5000"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
-        )
-        start_t = time.time()
-        found_url = None
-        while time.time() - start_t < 20:
-            line = proc.stdout.readline()
-            if not line:
-                break
-            if any(err in line for err in ["429", "Too Many Requests", "error code: 1015"]):
-                try:
-                    proc.kill()
-                except Exception:
-                    pass
-                return None
-            if "trycloudflare.com" in line:
-                match = re.search(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com", line)
-                if match:
-                    found_url = match.group(0)
-                    print(f"[Cloudflare Tunnel Found] {found_url}. Waiting for DNS & QUIC propagation...")
-                    
-                    # Drain process stdout in background to prevent buffer stall
-                    threading.Thread(target=_drain_process_stdout, args=(proc,), daemon=True).start()
-
-                    # Wait up to 12 seconds for Cloudflare edge propagation
-                    verified = False
-                    for attempt in range(1, 13):
-                        time.sleep(1)
-                        if verify_tunnel_url(found_url):
-                            verified = True
-                            print(f"[CLOUDFLARE TUNNEL READY & VERIFIED ON ATTEMPT {attempt}] {found_url}")
-                            break
-
-                    if verified:
-                        active_tunnel_url = found_url
-                        update_env_base_url(found_url)
-                        return found_url
-                    else:
-                        print(f"[Cloudflare Tunnel Failed 12s Verification] {found_url}")
-                        try:
-                            proc.kill()
-                        except Exception:
-                            pass
-                        return None
-    except Exception as err:
-        print(f"[Auto-Tunnel Error] {err}")
-
-    return None
-
-
-def get_ngrok_tunnel_url() -> Optional[str]:
-    """Queries running ngrok local inspection endpoint (http://127.0.0.1:4040/api/tunnels)."""
-    try:
-        req = urllib.request.Request("http://127.0.0.1:4040/api/tunnels")
-        with urllib.request.urlopen(req, timeout=2) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            tunnels = data.get("tunnels", [])
-            for t in tunnels:
-                pub = t.get("public_url", "")
-                if pub and pub.startswith("https://") and "ngrok" in pub:
-                    return pub.rstrip("/")
-    except Exception:
-        pass
-    return None
-
-
-def start_local_ngrok_tunnel() -> Optional[str]:
-    """Launches ngrok HTTP tunnel fallback if cloudflared is rate-limited (429)."""
-    existing = get_ngrok_tunnel_url()
-    if existing:
-        update_env_base_url(existing)
-        return existing
-    try:
-        subprocess.Popen(
-            ["ngrok", "http", "5000", "--log=stdout"],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
-        for _ in range(8):
-            time.sleep(1)
-            url = get_ngrok_tunnel_url()
-            if url:
-                update_env_base_url(url)
-                print(f"[NGROK FALLBACK TUNNEL READY] {url}")
-                return url
-    except Exception as e:
-        print(f"[Ngrok Auto-Tunnel Exception] {e}")
-    return None
-
-
-def ensure_tunnel() -> str:
-    """Master auto-tunnel initializer: Cloudflare -> Ngrok -> BASE_URL fallback."""
-    global active_tunnel_url
-    if IS_CLOUD_PROD:
-        return os.getenv("BASE_URL", "")
-
-    if active_tunnel_url and is_public_host(active_tunnel_url):
-        return active_tunnel_url
-
-    # Check if ngrok is already running
-    ngrok_url = get_ngrok_tunnel_url()
-    if ngrok_url:
-        active_tunnel_url = ngrok_url
-        update_env_base_url(ngrok_url)
-        return ngrok_url
-
-    # Try Cloudflare tunnel
-    cf_url = start_local_cloudflare_tunnel()
-    if cf_url:
-        return cf_url
-
-    # Cloudflare was rate-limited or failed -> launch Ngrok tunnel automatically
-    ngrok_fallback = start_local_ngrok_tunnel()
-    if ngrok_fallback:
-        return ngrok_fallback
-
-    fallback = os.getenv("BASE_URL", "").strip().rstrip("/")
-    if fallback and is_public_host(fallback):
-        active_tunnel_url = fallback
-        return fallback
-
-    return fallback
-
-
-# Start tunnel asynchronously on local dev to prevent blocking Flask server boot
-if not IS_CLOUD_PROD and (os.environ.get("WERKZEUG_RUN_MAIN") == "true" or os.environ.get("FLASK_ENV") != "development"):
-    threading.Thread(target=ensure_tunnel, daemon=True).start()
-
-
-
-# =========================
-# DATA STORAGE & HELPERS
-# =========================
-
-
-
-
-
-def get_initial_seed_data() -> List[Dict[str, Any]]:
-    """Returns initial seed customer records."""
-    return [
-        {
-            "id": "c101",
-            "name": "Vikas Kumar",
-            "phone": "+919057262630",
-            "status": "completed",
-            "feedback": [
-                "The service was wonderful! Quick delivery and friendly staff.",
-                "I would rate it 5 stars.",
-            ],
-            "rating": 5,
-            "sentiment": "Positive",
-            "transcript": [
-                {
-                    "speaker": "ai",
-                    "text": "Hello! This is Sarah calling from Feedback Ops. How was your experience with our service?",
-                },
-                {
-                    "speaker": "customer",
-                    "text": "The service was wonderful! Quick delivery and friendly staff.",
-                },
-                {
-                    "speaker": "ai",
-                    "text": "That is so great to hear! How many stars out of 5 would you give us?",
-                },
-                {"speaker": "customer", "text": "I would rate it 5 stars."},
-                {
-                    "speaker": "ai",
-                    "text": "Thank you so much for your feedback! Have a lovely day. Goodbye.",
-                },
-            ],
-            "created_at": time.strftime("%Y-%m-%d %H:%M"),
-            "last_call": "10:17 AM",
-        }
-    ]
-
-
-DB_FILE_PATH = os.path.join("/tmp" if IS_VERCEL else os.path.dirname(__file__), "customers_store.json")
-
-
-def load_customers_from_disk() -> List[Dict[str, Any]]:
-    """Loads customer dataset from JSON storage file or seed fallback."""
-    if os.path.exists(DB_FILE_PATH):
-        try:
-            with open(DB_FILE_PATH, "r", encoding="utf-8") as f:
-                data = json.load(f)
-                if isinstance(data, list) and len(data) > 0:
-                    return data
-        except Exception as e:
-            print(f"[Storage Load Error] {e}")
-    return get_initial_seed_data()
-
-
-def save_customers_to_disk() -> None:
-    """Saves active customer dataset to JSON storage file."""
-    try:
-        with open(DB_FILE_PATH, "w", encoding="utf-8") as f:
-            json.dump(customers, f, indent=2)
-    except Exception as e:
-        print(f"[Storage Save Error] {e}")
-
-
-customers: List[Dict[str, Any]] = load_customers_from_disk()
-
-
-def normalize_phone_number(phone: Any) -> str:
-    """Normalizes phone numbers to standard E.164 format (+91XXXXXXXXXX)."""
-    if not phone:
-        return ""
-    cleaned = re.sub(r"[^\d+]", "", str(phone).strip())
-    if not cleaned:
-        return ""
-    if cleaned.startswith("+"):
-        return cleaned
-    if cleaned.startswith("00"):
-        return "+" + cleaned[2:]
-    if cleaned.startswith("0") and len(cleaned) == 11:
-        cleaned = cleaned[1:]
-    if len(cleaned) == 10:
-        return f"+91{cleaned}"
-    if len(cleaned) == 12 and cleaned.startswith("91"):
-        return f"+{cleaned}"
-    return f"+{cleaned}"
-
-
-def find_customer(
-    customer_id: Optional[str] = None, phone: Optional[str] = None
-) -> Optional[Dict[str, Any]]:
-    """Searches customer records by ID or phone number."""
-    if customer_id:
-        c = next((item for item in customers if item["id"] == customer_id), None)
-        if c:
-            return c
-    if phone:
-        norm_phone = normalize_phone_number(phone)
-        clean_target = re.sub(r"\D", "", str(phone))
-        for item in customers:
-            item_phone = item.get("phone", "")
-            if item_phone == norm_phone:
-                return item
-            clean_item = re.sub(r"\D", "", str(item_phone))
-            if clean_item and (clean_item.endswith(clean_target) or clean_target.endswith(clean_item)):
-                return item
-    return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] = None) -> str:
     """Generates conversational AI response via Gemini API with smart fallback."""
@@ -650,56 +111,62 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
     return ai_text
 
 
+def is_marwari_accent_active() -> bool:
+    """Checks if the currently active voice is a Marwari / Rajasthani / Hindi accent voice."""
+    v = get_active_voice()
+    info = get_active_agent_info()
+    accent = info.get("info", {}).get("accent", "")
+    return any(k in v for k in ["hi-IN", "Neural2", "Sarvam", "Bulbul", "Aditi", "Kajal"]) or "Rajasthani" in accent or "Marwari" in accent or "Hindi" in accent
+
+
 # =========================
 # WEB ROUTES & ENDPOINTS
 # =========================
 
-
-
-@app.route("/")
-@app.route("/api/index")
-@app.route("/api/index.py")
-def index():
+@app.get("/", response_class=HTMLResponse)
+@app.get("/api/index", response_class=HTMLResponse)
+@app.get("/api/index.py", response_class=HTMLResponse)
+async def index(request: Request):
     """Serves main dashboard SPA."""
-    return render_template("index.html")
+    return templates.TemplateResponse("index.html", {"request": request})
 
 
-
-@app.route("/api/health")
+@app.get("/api/health")
 def health():
     """Returns application health and environment info."""
     env_name = "Render Production" if IS_RENDER else ("Vercel Production" if IS_VERCEL else "Local Development")
-    return jsonify({
+    return {
         "status": "ok",
         "engine": "Gemini 2.5 Flash + Twilio Voice",
         "active_voice": get_active_voice(),
         "environment": env_name,
         "base_url": get_base_url(),
-    })
+    }
 
 
+@app.get("/api/voices")
+def get_voices():
+    """Fetches catalog of AI voices."""
+    return {"success": True, "active_voice": ACTIVE_VOICE, "voices": VOICE_CATALOG}
 
-@app.route("/api/voices", methods=["GET", "POST"])
-def manage_voices():
-    """Fetches catalog or updates active AI voice."""
+
+@app.post("/api/voices")
+def update_voice(data: VoiceRequest):
+    """Updates active AI voice."""
     global ACTIVE_VOICE
-    if request.method == "POST":
-        data = request.get_json(force=True, silent=True) or {}
-        voice_id = data.get("voice_id")
-        found = next((v for v in VOICE_CATALOG if v["id"] == voice_id), None)
-        if not found:
-            return jsonify({"success": False, "error": f"Voice ID '{voice_id}' not found in catalog"}), 400
-        ACTIVE_VOICE = voice_id
-        return jsonify({"success": True, "active_voice": ACTIVE_VOICE, "voice_info": found})
-
-    return jsonify({"success": True, "active_voice": ACTIVE_VOICE, "voices": VOICE_CATALOG})
+    voice_id = data.voice_id
+    found = next((v for v in VOICE_CATALOG if v["id"] == voice_id), None)
+    if not found:
+        return JSONResponse(status_code=400, content={"success": False, "error": f"Voice ID '{voice_id}' not found in catalog"})
+    
+    ACTIVE_VOICE = voice_id
+    return {"success": True, "active_voice": ACTIVE_VOICE, "voice_info": found}
 
 
-
-@app.route("/api/demo-audio", methods=["GET"])
-def stream_voice_demo():
+@app.get("/api/demo-audio")
+def stream_voice_demo(voice_id: Optional[str] = None):
     """Streams sample audio voice preview."""
-    voice_id = request.args.get("voice_id") or get_active_voice()
+    voice_id = voice_id or get_active_voice()
     v_info = next((v for v in VOICE_CATALOG if v["id"] == voice_id), VOICE_CATALOG[0])
     text = v_info.get("sample_text", "Hello! I am your AI Voice Assistant.")
     
@@ -710,81 +177,87 @@ def stream_voice_demo():
     try:
         req = urllib.request.Request(tts_url, headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"})
         with urllib.request.urlopen(req, timeout=5) as resp:
-            return Response(resp.read(), mimetype="audio/mpeg")
+            return Response(content=resp.read(), media_type="audio/mpeg")
     except Exception as e:
         print(f"[Demo Audio Stream Error] {e}")
-        return jsonify({"error": "Failed to stream audio"}), 500
+        return JSONResponse(status_code=500, content={"error": "Failed to stream audio"})
 
 
-
-@app.route("/api/customers", methods=["GET", "POST"])
-def handle_customers():
-    """Lists all customers or creates a new customer task."""
-    if request.method == "POST":
-        data = request.get_json(force=True, silent=True) or {}
-        name = str(data.get("name", "")).strip()
-        raw_phone = str(data.get("phone", "")).strip()
-
-        if not name or not raw_phone:
-            return jsonify({"success": False, "error": "Name and phone number are required"}), 400
-
-        phone = normalize_phone_number(raw_phone)
-        existing = find_customer(phone=phone)
-        if existing:
-            return jsonify({"success": False, "error": f"Customer with phone {phone} already exists ({existing['name']})"}), 400
-
-        customer = {
-            "id": f"c{int(time.time() % 100000)}",
-            "name": name,
-            "phone": phone,
-            "status": "pending",
-            "feedback": [],
-            "rating": None,
-            "sentiment": "Neutral",
-            "transcript": [],
-            "created_at": time.strftime("%Y-%m-%d %H:%M"),
-            "last_call": None,
-        }
-        customers.append(customer)
-        save_customers_to_disk()
-        return jsonify({"success": True, "customer": customer}), 201
-
-    customers = load_customers_from_disk()
-    return jsonify(customers)
+@app.get("/api/customers")
+def get_customers():
+    """Lists all customers."""
+    customers_data = load_customers_from_disk()
+    return customers_data
 
 
+@app.post("/api/customers")
+def create_customer(data: CustomerRequest):
+    """Creates a new customer task."""
+    name = data.name.strip()
+    raw_phone = data.phone.strip()
 
-@app.route("/api/customers/<customer_id>", methods=["GET", "DELETE"])
-def handle_customer_by_id(customer_id):
-    """Retrieves or deletes a single customer record."""
+    if not name or not raw_phone:
+        return JSONResponse(status_code=400, content={"success": False, "error": "Name and phone number are required"})
+
+    phone = normalize_phone_number(raw_phone)
+    existing = find_customer(phone=phone)
+    if existing:
+        return JSONResponse(status_code=400, content={"success": False, "error": f"Customer with phone {phone} already exists ({existing['name']})"})
+
+    customer = {
+        "id": f"c{int(time.time() % 100000)}",
+        "name": name,
+        "phone": phone,
+        "status": "pending",
+        "feedback": [],
+        "rating": None,
+        "sentiment": "Neutral",
+        "transcript": [],
+        "created_at": time.strftime("%Y-%m-%d %H:%M"),
+        "last_call": None,
+    }
+    customers.append(customer)
+    save_customers_to_disk()
+    return JSONResponse(status_code=201, content={"success": True, "customer": customer})
+
+
+@app.get("/api/customers/{customer_id}")
+def get_customer_by_id(customer_id: str):
+    """Retrieves a single customer record."""
+    c = find_customer(customer_id=customer_id)
+    if not c:
+        return JSONResponse(status_code=404, content={"success": False, "error": "Customer not found"})
+    return {"success": True, "customer": c}
+
+
+@app.delete("/api/customers/{customer_id}")
+def delete_customer(customer_id: str):
+    """Deletes a single customer record."""
     global customers
     c = find_customer(customer_id=customer_id)
     if not c:
-        return jsonify({"success": False, "error": "Customer not found"}), 404
-
-    if request.method == "DELETE":
-        customers = [item for item in customers if item["id"] != customer_id]
-        save_customers_to_disk()
-        return jsonify({"success": True, "message": "Customer deleted successfully"})
-
-    return jsonify({"success": True, "customer": c})
+        return JSONResponse(status_code=404, content={"success": False, "error": "Customer not found"})
+        
+    customers = [item for item in customers if item["id"] != customer_id]
+    save_customers_to_disk()
+    return {"success": True, "message": "Customer deleted successfully"}
 
 
-
-@app.route("/api/customers/<customer_id>/feedback", methods=["DELETE"])
-def delete_customer_feedback(customer_id):
+@app.delete("/api/customers/{customer_id}/feedback")
+def delete_customer_feedback(customer_id: str):
     """Clears feedback history for a specific customer."""
     c = find_customer(customer_id=customer_id)
     if not c:
-        return jsonify({"success": False, "error": "Customer not found"}), 404
+        return JSONResponse(status_code=404, content={"success": False, "error": "Customer not found"})
+    
     c.update({"feedback": [], "rating": None, "sentiment": "Neutral", "transcript": []})
     if c.get("status") == "completed":
         c["status"] = "pending"
     save_customers_to_disk()
-    return jsonify({"success": True, "message": "Customer feedback cleared successfully", "customer": c})
+    return {"success": True, "message": "Customer feedback cleared successfully", "customer": c}
 
 
-@app.route("/api/seed", methods=["POST"])
+@app.post("/api/seed")
 def reset_seed_data():
     """Resets customer store back to initial sample dataset."""
     global customers
@@ -834,41 +307,40 @@ def reset_seed_data():
         },
     ])
     save_customers_to_disk()
-    return jsonify({"success": True, "message": "Sample data reset successfully", "customers": customers})
-
+    return {"success": True, "message": "Sample data reset successfully", "customers": customers}
 
 
 # =========================
 # CALL CONTROL & TWILIO API
 # =========================
 
-
-
-@app.route("/api/call", methods=["POST"])
-def make_call():
+@app.post("/api/call")
+def make_call(data: CallRequest):
     """Triggers outbound AI voice feedback call."""
-    data = request.get_json(force=True, silent=True) or {}
-    customer_id = data.get("customer_id")
-    phone = data.get("phone")
+    customer_id = data.customer_id
+    phone = data.phone
 
     customer = find_customer(customer_id=customer_id, phone=phone)
     if customer_id and not customer:
-        return jsonify({"success": False, "error": "Customer ID not found"}), 404
+        return JSONResponse(status_code=404, content={"success": False, "error": "Customer ID not found"})
 
     raw_target = customer["phone"] if customer else phone
     target_phone = normalize_phone_number(raw_target)
     if not target_phone:
-        return jsonify({"success": False, "error": "Phone number or valid customer_id is required"}), 400
+        return JSONResponse(status_code=400, content={"success": False, "error": "Phone number or valid customer_id is required"})
 
     if customer:
         customer["phone"] = target_phone
 
     base = get_base_url()
     if not is_public_host(base):
-        return jsonify({
-            "success": False,
-            "error": "No active public HTTPS tunnel connected. Cloudflare quick tunnel is currently rate-limited (429). Please set a valid public BASE_URL in .env (e.g. ngrok http 5000) or wait for Cloudflare cooldown."
-        }), 400
+        return JSONResponse(
+            status_code=400, 
+            content={
+                "success": False,
+                "error": "No active public HTTPS tunnel connected. Cloudflare quick tunnel is currently rate-limited (429). Please set a valid public BASE_URL in .env (e.g. ngrok http 5000) or wait for Cloudflare cooldown."
+            }
+        )
 
     cid_param = f"?customer_id={customer['id']}" if customer else f"?phone={urllib.parse.quote(target_phone)}"
     voice_url = f"{base}/api/twilio/voice{cid_param}"
@@ -879,11 +351,11 @@ def make_call():
     if not twilio:
         if customer:
             customer["status"] = "calling"
-        return jsonify({
+        return {
             "success": True,
             "simulated": True,
             "message": f"Twilio client not initialized with real SID/Token, simulated call status for {target_phone}.",
-        })
+        }
 
     try:
         call = twilio.calls.create(
@@ -901,33 +373,27 @@ def make_call():
             customer["call_sid"] = call.sid
             customer["last_call"] = time.strftime("%H:%M:%S")
 
-        return jsonify({
+        return {
             "success": True,
             "call_id": call.sid,
             "status": call.status,
             "message": f"AI call initiated to {customer['name'] if customer else target_phone}",
-        })
+        }
     except Exception as e:
         print(f"[Call Exception] {e}")
         if customer:
             customer["status"] = "failed"
-        return jsonify({"success": False, "error": str(e)}), 500
+        return JSONResponse(status_code=500, content={"success": False, "error": str(e)})
 
 
-def is_marwari_accent_active() -> bool:
-    """Checks if the currently active voice is a Marwari / Rajasthani / Hindi accent voice."""
-    v = get_active_voice()
-    info = get_active_agent_info()
-    accent = info.get("info", {}).get("accent", "")
-    return any(k in v for k in ["hi-IN", "Neural2", "Sarvam", "Bulbul", "Aditi", "Kajal"]) or "Rajasthani" in accent or "Marwari" in accent or "Hindi" in accent
-
-
-@app.route("/api/twilio/voice", methods=["POST", "GET"])
-def twilio_voice():
+@app.api_route("/api/twilio/voice", methods=["GET", "POST"])
+async def twilio_voice(request: Request, customer_id: Optional[str] = None, phone: Optional[str] = None):
     """Initial TwiML entry point when call connects."""
-    customer_id = request.args.get("customer_id")
-    phone = request.args.get("phone") or request.form.get("To") or request.form.get("From")
-    customer = find_customer(customer_id=customer_id, phone=phone)
+    form_data = await request.form()
+    # Twilio sends `To` and `From` as form data in POST webhooks
+    request_phone = phone or form_data.get("To") or form_data.get("From")
+    
+    customer = find_customer(customer_id=customer_id, phone=request_phone)
 
     if customer:
         customer["status"] = "calling"
@@ -970,15 +436,16 @@ def twilio_voice():
     response.say(closing_text, voice=v)
     response.hangup()
 
-    return Response(str(response), status=200, content_type="text/xml")
+    return Response(content=str(response), status_code=200, media_type="text/xml")
 
 
-@app.route("/api/twilio/feedback", methods=["POST"])
-def twilio_feedback():
+@app.post("/api/twilio/feedback")
+async def twilio_feedback(request: Request, customer_id: Optional[str] = None):
     """Processes customer speech result and renders conversational response."""
-    customer_id = request.args.get("customer_id")
-    called_phone = request.form.get("To") or request.form.get("From")
-    customer_text = request.form.get("SpeechResult", "").strip()
+    form_data = await request.form()
+    called_phone = form_data.get("To") or form_data.get("From")
+    customer_text = form_data.get("SpeechResult", "").strip()
+    
     customer = find_customer(customer_id=customer_id, phone=called_phone)
 
     response = VoiceResponse()
@@ -999,7 +466,7 @@ def twilio_feedback():
             language=stt_lang,
         )
         gather.say(no_speech_text, voice=v)
-        return Response(str(response), status=200, content_type="text/xml")
+        return Response(content=str(response), status_code=200, media_type="text/xml")
 
     if customer:
         customer.setdefault("feedback", []).append(customer_text)
@@ -1035,15 +502,15 @@ def twilio_feedback():
         customer["status"] = "completed"
         save_customers_to_disk()
 
-    return Response(str(response), status=200, content_type="text/xml")
+    return Response(content=str(response), status_code=200, media_type="text/xml")
 
 
-@app.route("/api/twilio/status", methods=["POST"])
-def twilio_status():
+@app.post("/api/twilio/status")
+async def twilio_status(request: Request, customer_id: Optional[str] = None):
     """Webhook for Twilio call state transitions."""
-    customer_id = request.args.get("customer_id")
-    call_status = request.form.get("CallStatus", "")
-    phone = request.form.get("To", "") or request.form.get("From", "")
+    form_data = await request.form()
+    call_status = form_data.get("CallStatus", "")
+    phone = form_data.get("To", "") or form_data.get("From", "")
 
     customer = find_customer(customer_id=customer_id, phone=phone)
     if customer:
@@ -1055,9 +522,9 @@ def twilio_status():
             customer["status"] = "calling"
         save_customers_to_disk()
 
-    return Response("OK", status=200)
-
+    return Response(content="OK", status_code=200)
 
 if __name__ == "__main__":
+    import uvicorn
     port = int(os.getenv("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    uvicorn.run(app, host="0.0.0.0", port=port)

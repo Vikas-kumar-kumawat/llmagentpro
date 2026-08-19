@@ -73,6 +73,9 @@ def get_active_agent_info() -> Dict[str, Any]:
         "info": v_info,
     }
 
+def get_active_agent_name() -> str:
+    return get_active_agent_info()["agent_name"]
+
 def get_twilio_voice(voice_id: str) -> str:
     if not voice_id:
         return "Google.hi-IN-Wavenet-B"

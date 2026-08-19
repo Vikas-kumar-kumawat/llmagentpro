@@ -43,8 +43,9 @@ class RechargeReminderAgent(BaseAgent):
         DataRepository.add_call_log(
             name=customer_name,
             phone=phone,
+            call_sid=call_result.get("call_sid", "N/A"),
             status=call_result.get("status", "initiated"),
-            call_sid=call_result.get("call_sid")
+            details=call_result.get("message", f"Recharge reminder call dispatched to {customer_name}")
         )
 
         return {
