@@ -281,7 +281,7 @@ export function ChatbotSection() {
           <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
             isDark ? 'bg-[#121216] text-white border border-[#22222a] shadow-xs' : 'bg-slate-100 text-slate-900 border border-slate-200 shadow-xs'
           }`}>
-            <Sparkles className="w-5 h-5 text-white" />
+            <Sparkles className="w-5 h-5" />
           </div>
 
           <div className="flex flex-col">
@@ -371,14 +371,14 @@ export function ChatbotSection() {
                 ? 'bg-[#121216] border-2 border-[#282832] text-white shadow-xl'
                 : 'bg-slate-100 border-2 border-slate-300 text-slate-900 shadow-md'
             }`}>
-              <Sparkles className="w-8 h-8 text-white" />
+              <Sparkles className="w-8 h-8" />
             </div>
 
             {/* Welcome Heading */}
             <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight max-w-xl ${
               isDark ? 'text-white' : 'text-slate-900'
             }`}>
-              Hi! 👋 How can I help you with <span className="text-white underline decoration-zinc-700 font-extrabold">BFibernet Broadband</span> today?
+              Hi! 👋 How can I help you with <span className="underline decoration-zinc-700 font-extrabold">BFibernet Broadband</span> today?
             </h2>
 
             <p className={`text-sm font-medium mt-2 max-w-md ${
@@ -395,21 +395,21 @@ export function ChatbotSection() {
                   <div
                     key={i}
                     onClick={() => handleQuickPrompt(card.prompt)}
-                    className={`p-5 rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
+                    className={`p-6 sm:p-7 min-h-[110px] rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
                       isDark
-                        ? 'bg-[#070709] border-[#1e1e24] hover:border-[#2a2a34] hover:bg-[#0c0c0f] shadow-xl'
-                        : 'bg-white border-slate-200/90 hover:border-slate-300 hover:shadow-md shadow-sm'
+                        ? 'bg-[#070709] border-[#2a2a34] hover:border-zinc-500 hover:bg-[#0c0c0f] shadow-xl'
+                        : 'bg-white border-slate-900 hover:border-black hover:shadow-md shadow-sm'
                     }`}
                   >
-                    <div className="flex items-center gap-4 text-left">
-                      <div className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+                    <div className="flex items-center gap-5 text-left">
+                      <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${
                         isDark ? 'bg-[#121216] border border-[#22222a] text-white' : 'bg-slate-100 border border-slate-200 text-slate-800'
                       }`}>
-                        <IconComp className="w-6 h-6 text-white" />
+                        <IconComp className="w-7 h-7" />
                       </div>
 
                       <div>
-                        <h3 className={`font-extrabold text-sm group-hover:text-white transition-colors ${
+                        <h3 className={`font-extrabold text-sm transition-colors ${
                           isDark ? 'text-white' : 'text-slate-900'
                         }`}>
                           {card.title}
@@ -461,7 +461,7 @@ export function ChatbotSection() {
                         ? 'bg-[#121216] border-[#22222a] text-white'
                         : 'bg-slate-100 border-slate-200 text-slate-800'
                     }`}>
-                      <Sparkles className="w-4.5 h-4.5 text-white" />
+                      <Sparkles className="w-4.5 h-4.5" />
                     </div>
 
                     {/* Agent Response Card Container */}
@@ -477,9 +477,9 @@ export function ChatbotSection() {
                             isDark ? 'bg-[#18181c] border-[#282832] text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700 shadow-xs'
                           }`}
                         >
-                          <Check className="w-3 h-3 text-white" />
+                          <Check className="w-3 h-3" />
                           <span>Completed RAG Search ({msg.sources?.length || 1} sources)</span>
-                          <span className="text-white font-bold ml-1">›</span>
+                          <span className="font-bold ml-1">›</span>
                         </button>
 
                         {msg.role === 'admin' && (
@@ -494,7 +494,7 @@ export function ChatbotSection() {
                         <div className={`p-3.5 rounded-xl border text-xs font-mono space-y-1.5 animate-fadeIn ${
                           isDark ? 'bg-[#0c0c0f] border-[#22222a] text-zinc-400' : 'bg-slate-50 border-slate-200 text-slate-600'
                         }`}>
-                          <div className="font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 text-white">
+                          <div className={`font-bold text-[11px] uppercase tracking-wider flex items-center gap-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                             <Search className="w-3 h-3" /> Hybrid BM25 Retrieval Telemetry:
                           </div>
                           <p>- Retreived {msg.retrieved_chunks?.length || 5} highest-scoring context chunks from vector store.</p>
@@ -614,8 +614,8 @@ export function ChatbotSection() {
             {/* Loading Indicator */}
             {isLoading && (
               <div className="space-y-3 py-4 animate-fadeIn">
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono text-white ${
-                  isDark ? 'bg-[#18181c] border-[#282832]' : 'bg-slate-100 border-slate-200 shadow-xs'
+                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-mono ${
+                  isDark ? 'bg-[#18181c] border-[#282832] text-white' : 'bg-slate-100 border-slate-200 shadow-xs text-slate-700'
                 }`}>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   <span>Searching {userRole.toUpperCase()} knowledge base & synthesizing response...</span>
@@ -637,7 +637,7 @@ export function ChatbotSection() {
           <div className={`p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 flex items-center gap-3 ${
             isDark
               ? 'bg-[#070709] border-[#1e1e24] focus-within:border-zinc-500 shadow-2xl'
-              : 'bg-white border-slate-200/90 focus-within:border-slate-500 shadow-lg'
+              : 'bg-white border-slate-900 focus-within:border-black shadow-lg'
           }`}>
 
             {/* Input Line */}

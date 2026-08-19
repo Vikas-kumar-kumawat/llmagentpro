@@ -48,7 +48,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
         } ${
           isDark
             ? 'bg-[#050507] border-r border-[#1e1e24] text-white'
-            : 'bg-white border-r border-slate-200/90 text-slate-900 shadow-md'
+            : 'bg-slate-100 border-r border-slate-200 text-slate-800'
         } font-['Plus_Jakarta_Sans',sans-serif] shrink-0 z-30`}
       >
         {/* Top Section */}
@@ -58,7 +58,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
             <div className={`h-14 px-3.5 flex items-center justify-between gap-2 max-md:rounded-tr-2xl shrink-0 ${
               isDark
                 ? 'border-b border-[#1e1e24] bg-[#050507]'
-                : 'border-b border-slate-200/90 bg-white'
+                : 'border-b border-slate-200 bg-slate-100'
             }`}>
 
               <div
@@ -72,9 +72,9 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-105 ${
                   isDark
                     ? 'bg-[#121216] border-[#22222a] text-white shadow-xs'
-                    : 'bg-slate-100 border-slate-200 text-slate-900 shadow-xs'
+                    : 'bg-white border-slate-300 text-slate-800 shadow-xs'
                 }`}>
-                  <Wifi className="w-4 h-4 text-white" />
+                  <Wifi className="w-4 h-4" />
                 </div>
                 <span className={`font-extrabold text-base tracking-tight truncate transition-colors ${
                   isDark ? 'text-white' : 'text-slate-900'
@@ -98,7 +98,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
             </div>
           ) : (
             <div className={`h-14 flex flex-col items-center justify-center w-full shrink-0 ${
-              isDark ? 'border-b border-[#1e1e24] bg-[#050507]' : 'border-b border-slate-200/90 bg-white'
+              isDark ? 'border-b border-[#1e1e24] bg-[#050507]' : 'border-b border-slate-200 bg-slate-100'
             }`}>
               <button
                 onClick={() => setIsCollapsed(false)}
@@ -108,9 +108,9 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center border shrink-0 transition-all duration-300 group-hover:scale-105 ${
                   isDark
                     ? 'bg-[#121216] border-[#22222a] text-white shadow-xs'
-                    : 'bg-slate-100 border-slate-200 text-slate-900 shadow-xs'
+                    : 'bg-white border-slate-300 text-slate-800 shadow-xs'
                 }`}>
-                  <Wifi className="w-4 h-4 text-white" />
+                  <Wifi className="w-4 h-4" />
                 </div>
               </button>
             </div>
@@ -141,7 +141,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                               : 'bg-slate-900 text-white border border-slate-900 shadow-xs font-bold'
                             : isDark
                               ? 'hover:bg-[#0c0c0f] text-zinc-400 hover:text-white border border-transparent hover:scale-105'
-                              : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent hover:scale-105'
+                              : 'hover:bg-white text-slate-600 hover:text-slate-900 border border-transparent hover:scale-105'
                         }`
                       : `py-3 px-3.5 sm:py-2.5 sm:px-3 justify-between ${
                           isActive
@@ -150,7 +150,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                               : 'bg-slate-900 text-white border border-slate-900 shadow-xs translate-x-0.5 font-bold'
                             : isDark
                               ? 'hover:bg-[#0c0c0f] text-zinc-400 hover:text-white border border-transparent hover:translate-x-1'
-                              : 'hover:bg-slate-100 text-slate-600 hover:text-slate-900 border border-transparent hover:translate-x-1'
+                              : 'hover:bg-white text-slate-700 hover:text-slate-900 border border-transparent hover:translate-x-1'
                         }`
                   }`}
                 >
@@ -186,7 +186,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
 
         {/* Bottom Section - User Info, Theme Switcher & Logout */}
         <div className={`p-3 border-t shrink-0 transition-colors ${
-          isDark ? 'border-[#1e1e24] bg-[#050507]' : 'border-slate-200/90 bg-white'
+          isDark ? 'border-[#1e1e24] bg-[#050507]' : 'border-slate-200 bg-slate-100'
         }`}>
 
           {!isCollapsed ? (
@@ -196,7 +196,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 className={`flex items-center gap-2 px-3 py-2 rounded-xl border flex-1 min-w-0 ${
                   isDark
                     ? 'bg-[#0c0c0f] border-[#22222a] text-white'
-                    : 'bg-slate-50 border-slate-200 text-slate-900'
+                    : 'bg-white border-slate-300 text-slate-900'
                 }`}
                 title="Logged in as vikas"
               >
@@ -246,7 +246,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
                 }`}
                 title="Logged in as vikas"
               >
-                <User className="w-4 h-4 text-white" />
+                <User className="w-4 h-4" />
               </div>
 
               <button
