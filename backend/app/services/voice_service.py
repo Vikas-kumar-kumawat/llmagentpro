@@ -131,7 +131,7 @@ def analyze_customer_feedback_with_gemini(customer_text: str) -> Dict[str, Any]:
                 "Respond ONLY with a JSON object matching this schema:\n"
                 '{"rating": <number 1-5>, "sentiment": "<positive|negative|neutral>"}'
             )
-            model_name = settings.gemini_model or "gemini-3.6-flash"
+            model_name = "gemini-1.5-flash"
             res = client.models.generate_content(model=model_name, contents=prompt)
             if res and res.text:
                 clean = res.text.strip().replace("```json", "").replace("```", "").strip()
@@ -169,7 +169,7 @@ def analyze_customer_feedback_with_gemini(customer_text: str) -> Dict[str, Any]:
             
     return {"rating": rating, "sentiment": sentiment}
 
-def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] = None) -> str:
+def generate_ai_response(customer_text: str, rating: Optional[int] = None, sentiment: str = "neutral") -> str:
     ai_text = ""
     lower = customer_text.lower()
     active_v = get_active_voice()
@@ -191,7 +191,8 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
                     "3. If customer says service is NOT good/has issues: apologize sincerely and say 'अरेरे, आपकी परेशानी नोट कर ली है। हमारी टीम तुरंत जांच करेगी।'\n"
                     "4. If customer says service is good/fine: say 'अच्छा, ये सुनकर अच्छा लगा।'\n"
                     "5. Keep replies super concise (maximum 15 words).\n"
-                    "6. Output ONLY plain text without markdown, quotes, or internal labels."
+                    "6. Output ONLY plain text without markdown, quotes, or internal labels.\n"
+                    f"Context: the parsed sentiment is '{sentiment}' and rating is {rating}/5."
                 )
             else:
                 prompt = (
@@ -202,9 +203,10 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
                     "2. If customer says service is NOT good/has issues, apologize sincerely and state that technical support will inspect it.\n"
                     "3. If customer says service is good, thank them warmly.\n"
                     "4. Keep your reply super concise (maximum 15 words).\n"
-                    "5. Speak naturally without markdown or internal labels."
+                    "5. Speak naturally without markdown or internal labels.\n"
+                    f"Context: the parsed sentiment is '{sentiment}' and rating is {rating}/5."
                 )
-            model_name = settings.gemini_model or "gemini-3.6-flash"
+            model_name = "gemini-1.5-flash"
             res = client.models.generate_content(model=model_name, contents=prompt)
             if res and res.text:
                 ai_text = res.text.strip()
@@ -213,7 +215,7 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
 
     if not ai_text:
         nums = re.findall(r"\b([1-5])\b", customer_text)
-        rating_num = int(nums[0]) if nums else (customer.get("rating") if customer else None)
+        rating_num = int(nums[0]) if nums else rating
         greetings = ["hi", "hello", "hey", "ji", "haa", "boliye", "yes", "yep", "नमस्ते", "राम राम"]
         bye_words = ["bye", "goodbye", "thank you", "thanks", "that's all", "done", "no", "that is all", "धन्यवाद"]
 

@@ -179,7 +179,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
 
             sentiment = analysis.get("sentiment", "neutral")
 
-            ai_response_text = generate_ai_response(user_input, customer_data)
+            ai_response_text = generate_ai_response(user_input, rating, sentiment)
 
             new_entries = [
                 {
