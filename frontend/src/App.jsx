@@ -52,6 +52,21 @@ function MainAppLayout({ onLogout }) {
     loadAllData();
   }, [loadAllData]);
 
+  const [activeCallItem, setActiveCallItem] = useState(null);
+
+  const handleGlobalTriggerCall = (name, phone) => {
+    const item = {
+      id: `c_${Date.now()}`,
+      customer_name: name,
+      phone: phone,
+      sentiment: 'neutral',
+      rating: 5,
+      created_at: 'Just now'
+    };
+    setActiveCallItem(item);
+    setActiveAgent('feedback');
+  };
+
   return (
     <div className={`flex h-screen overflow-hidden transition-colors duration-200 ${isDark ? 'bg-[#000000] text-white' : 'bg-transparent text-white'}`}>
       {/* BFibernet Sidebar */}
@@ -96,6 +111,7 @@ function MainAppLayout({ onLogout }) {
               feedbackEntries={feedbackEntries}
               isLoading={isLoading}
               onRefreshData={loadAllData}
+              initialSelectedFeedback={activeCallItem}
             />
           )}
 
@@ -127,7 +143,7 @@ function MainAppLayout({ onLogout }) {
                 isOpen={true}
                 onToggle={() => { }}
               >
-                <MakeCallSection onRefreshData={loadAllData} />
+                <MakeCallSection onRefreshData={loadAllData} onTriggerCall={handleGlobalTriggerCall} />
               </SectionCard>
             </div>
           )}

@@ -13,7 +13,7 @@ import { CollectFeedbackModal } from './components/CollectFeedbackModal';
 import { FeedbackDetailModal } from './components/FeedbackDetailModal';
 import { EditCustomerModal } from './components/EditCustomerModal';
 
-export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, onRefreshData }) {
+export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, onRefreshData, initialSelectedFeedback = null }) {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
@@ -29,6 +29,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   // Modal States
   const [showCollectModal, setShowCollectModal] = useState(false);
   const [selectedFeedback, setSelectedFeedback] = useState(null);
+
   const [editingFeedback, setEditingFeedback] = useState(null);
   const [callingState, setCallingState] = useState({ loading: false, phone: null, msg: '' });
 
@@ -210,6 +211,15 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     }
     setTimeout(() => setCallingState({ loading: false, phone: null, msg: '' }), 4000);
   };
+
+  const triggeredCallsRef = useRef(new Set());
+  
+  useEffect(() => {
+    if (initialSelectedFeedback && !triggeredCallsRef.current.has(initialSelectedFeedback.id)) {
+      triggeredCallsRef.current.add(initialSelectedFeedback.id);
+      handleTriggerCall(initialSelectedFeedback.customer_name, initialSelectedFeedback.phone, initialSelectedFeedback);
+    }
+  }, [initialSelectedFeedback]);
 
   // Handle Cancel Batch Outbound Calls
   const handleCancelBatchCall = () => {

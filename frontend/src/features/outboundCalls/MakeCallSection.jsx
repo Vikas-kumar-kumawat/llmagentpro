@@ -11,7 +11,7 @@ function formatPhoneNumber(val) {
   return `+91${noZero}`;
 }
 
-export function MakeCallSection({ onRefreshData }) {
+export function MakeCallSection({ onRefreshData, onTriggerCall }) {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [customMsg, setCustomMsg] = useState('');
@@ -27,6 +27,13 @@ export function MakeCallSection({ onRefreshData }) {
 
     const formattedPhone = formatPhoneNumber(phone);
     setPhone(formattedPhone);
+
+    if (onTriggerCall) {
+      onTriggerCall(name.trim(), formattedPhone);
+      if (onRefreshData) onRefreshData();
+      return;
+    }
+
     setLoading(true);
     setCallResult(null);
 
