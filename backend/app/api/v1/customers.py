@@ -27,7 +27,7 @@ def list_customers():
 
 @router.post("")
 def create_customer(request: CreateCustomerRequest):
-    """Creates a new customer feedback record."""
+    """Creates a new customer feedback record and stores contact info in DB."""
     name = request.name.strip()
     phone = format_phone_number(request.phone.strip())
 
@@ -38,11 +38,13 @@ def create_customer(request: CreateCustomerRequest):
         customer_name=name,
         phone=phone,
         rating=5,
-        feedback_text="New customer record added",
+        feedback_text="No previous feedback recorded.",
         sentiment="neutral",
         category="general",
         followup_needed=False
     )
+
+    DataRepository.ensure_contact_exists(name, phone)
 
     return {"success": True, "id": fb_id, "customer_name": name, "phone": phone}
 

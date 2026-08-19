@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useTheme } from '../../context/ThemeContext';
-import { executeFeedbackAgent, makeOutboundCall, deleteCustomerRecord, updateCustomerRecord } from '../../services/apiService';
+import { executeFeedbackAgent, makeOutboundCall, deleteCustomerRecord, updateCustomerRecord, createCustomerRecord } from '../../services/apiService';
 import { Zap } from 'lucide-react';
 
 import { DEFAULT_FEEDBACKS, formatPhoneNumber } from './components/feedbackConstants';
@@ -17,8 +17,24 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 
-  // State
-  const [localFeedbacks, setLocalFeedbacks] = useState(DEFAULT_FEEDBACKS);
+  // State with LocalStorage Persistence Fallback
+  const [localFeedbacks, setLocalFeedbacks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('bfibernet_local_feedbacks');
+      return saved ? JSON.parse(saved) : DEFAULT_FEEDBACKS;
+    } catch {
+      return DEFAULT_FEEDBACKS;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('bfibernet_local_feedbacks', JSON.stringify(localFeedbacks));
+    } catch (e) {
+      console.error("Failed to sync local feedbacks to localStorage:", e);
+    }
+  }, [localFeedbacks]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [sentimentFilter, setSentimentFilter] = useState('all');
 
@@ -49,11 +65,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
 
   // Merge prop feedback entries if available
   const allFeedbacks = useMemo(() => {
-    if (!feedbackEntries || !Array.isArray(feedbackEntries) || feedbackEntries.length === 0) {
-      return localFeedbacks || [];
-    }
-    
-    const backendMapped = feedbackEntries.map(entry => {
+    const backendMapped = (feedbackEntries || []).map(entry => {
       const cName = entry?.customer_name || 'Customer';
       const initials = cName.split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CU';
       
@@ -74,7 +86,14 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     });
 
     const existingIds = new Set(backendMapped.map(b => String(b.id)));
-    const uniqueLocal = (localFeedbacks || []).filter(l => !existingIds.has(String(l.id)));
+    const existingPhones = new Set(backendMapped.map(b => String(b.phone).replace(/[^\d]/g, '')));
+
+    const uniqueLocal = (localFeedbacks || []).filter(l => {
+      const lId = String(l.id);
+      const lPhone = String(l.phone || '').replace(/[^\d]/g, '');
+      return !existingIds.has(lId) && (lPhone === '' || !existingPhones.has(lPhone));
+    });
+
     return [...backendMapped, ...uniqueLocal];
   }, [feedbackEntries, localFeedbacks]);
 
@@ -376,29 +395,36 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     setAgentTraceResult(null);
 
     try {
-      const res = await executeFeedbackAgent(fbName.trim(), formatted, fbRating, fbText.trim());
-      setAgentTraceResult(res);
+      // 1. Instantly save customer & contact into DB via backend
+      const res = await createCustomerRecord(fbName.trim(), formatted);
 
-      const newItem = {
-        id: Date.now(),
-        customer_name: fbName.trim(),
-        phone: formatted,
-        avatar: fbName.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase(),
-        avatarBg: 'bg-purple-600',
-        feedback_text: fbText.trim(),
-        sentiment: res.result?.sentiment || (fbRating >= 4 ? 'positive' : fbRating <= 2 ? 'negative' : 'neutral'),
-        rating: fbRating,
-        category: res.result?.category || 'general',
-        created_at: 'Just now'
-      };
+      if (res && res.id) {
+        const newItem = {
+          id: res.id,
+          customer_name: fbName.trim(),
+          phone: formatted,
+          avatar: fbName.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CU',
+          avatarBg: 'bg-purple-600',
+          feedback_text: 'No previous feedback recorded.',
+          sentiment: 'neutral',
+          rating: 5,
+          category: 'general',
+          created_at: 'Just now'
+        };
 
-      setLocalFeedbacks(prev => [newItem, ...prev]);
-      if (onRefreshData) onRefreshData();
+        setLocalFeedbacks(prev => [newItem, ...prev]);
+      }
+
+      // 2. Refresh data directly from backend SQLite DB
+      if (onRefreshData) await onRefreshData();
+
+      // 3. Close modal & reset form
+      setShowCollectModal(false);
+      setFbName('');
+      setFbPhone('');
     } catch (err) {
-      setAgentTraceResult({
-        result: { sentiment: fbRating >= 4 ? 'positive' : 'neutral', category: 'general' },
-        trace_steps: [{ step: 1, name: 'Fallback Execution', status: 'completed' }]
-      });
+      console.error("Failed to save customer record to DB:", err);
+      alert("Failed to save record to database.");
     } finally {
       setIsSubmitting(false);
     }

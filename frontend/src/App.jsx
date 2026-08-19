@@ -32,16 +32,16 @@ function MainAppLayout({ onLogout }) {
   const loadAllData = useCallback(async () => {
     try {
       const [statusData, contactsData, feedbackData] = await Promise.all([
-        getServiceStatus(),
-        getContactsAndLogs(),
-        getFeedbackAndTickets()
+        getServiceStatus().catch(() => ({ twilio_configured: false })),
+        getContactsAndLogs().catch(() => ({ contacts: [], call_logs: [] })),
+        getFeedbackAndTickets().catch(() => ({ feedback_entries: [], support_tickets: [] }))
       ]);
 
-      setTwilioConfigured(statusData.twilio_configured);
-      setContacts(contactsData.contacts || []);
-      setCallLogs(contactsData.call_logs || []);
-      setFeedbackEntries(feedbackData.feedback_entries || []);
-      setSupportTickets(feedbackData.support_tickets || []);
+      setTwilioConfigured(statusData?.twilio_configured || false);
+      setContacts(contactsData?.contacts || []);
+      setCallLogs(contactsData?.call_logs || []);
+      setFeedbackEntries(feedbackData?.feedback_entries || []);
+      setSupportTickets(feedbackData?.support_tickets || []);
     } catch (err) {
       console.error('Failed to refresh data:', err);
     } finally {

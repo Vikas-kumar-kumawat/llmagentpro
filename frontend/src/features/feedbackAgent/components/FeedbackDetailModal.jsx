@@ -196,6 +196,19 @@ export function FeedbackDetailModal({
               ) : (
                 transcriptThread.map((chat, index) => {
                   const isAgent = chat.speaker === 'agent';
+                  const isHistory = chat.speaker === 'history';
+
+                  if (isHistory) {
+                    return (
+                      <div key={index} className="my-2 p-2.5 rounded-lg border border-[#27272a] bg-[#18181b] text-xs text-[#a1a1aa] font-mono space-y-1">
+                        <div className="flex justify-between items-center text-[10px] text-zinc-400 font-semibold uppercase tracking-wider">
+                          <span>📜 {chat.name || 'Previous Feedback History'}</span>
+                          <span>{chat.time}</span>
+                        </div>
+                        <p className="text-white text-xs italic">"{chat.text}"</p>
+                      </div>
+                    );
+                  }
 
                   return (
                     <div
