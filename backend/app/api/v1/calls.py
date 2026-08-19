@@ -144,10 +144,15 @@ def make_call(request: MakeCallRequest):
 
     # ── 2. Prepare initial transcript with the AI greeting ───────────────────
     agent_info = get_active_agent_info()
-    greeting = (
-        f"Hello {name}! I am {agent_info['agent_name']} from BFibernet, "
-        "calling for quick feedback on your internet service. How is your experience?"
-    )
+    from app.services.voice_service import is_marwari_accent_active
+    if is_marwari_accent_active():
+        greeting = "राम राम सा! मैं बीसीटी फ़ाइबरनेट से बोल रहा हूँ। आपकी इंटरनेट सेवा कैसी चल रही है? थोड़ा फीडबैक दीजिए।"
+    else:
+        greeting = (
+            f"Hello {name}! I am {agent_info['agent_name']} from BFibernet, "
+            "calling for quick feedback on your internet service. How is your experience?"
+        )
+    
     initial_transcript = [{
         "speaker": "agent",
         "name": f"AI Voice Collector ({agent_info['agent_name']})",

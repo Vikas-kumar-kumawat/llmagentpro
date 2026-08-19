@@ -72,8 +72,8 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
       };
     });
 
-    const existingIds = new Set(backendMapped.map(b => b.id));
-    const uniqueLocal = (localFeedbacks || []).filter(l => !existingIds.has(l.id));
+    const existingIds = new Set(backendMapped.map(b => String(b.id)));
+    const uniqueLocal = (localFeedbacks || []).filter(l => !existingIds.has(String(l.id)));
     return [...backendMapped, ...uniqueLocal];
   }, [feedbackEntries, localFeedbacks]);
 

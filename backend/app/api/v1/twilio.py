@@ -75,7 +75,12 @@ def twilio_voice_webhook(request: Request, customer_id: Optional[str] = None):
         if c:
             customer_name = c.get("customer_name", "")
             agent_info = get_active_agent_info()
-            greeting = f"Hello {customer_name}! I am {agent_info['agent_name']} from BFibernet, calling for quick feedback on your internet service. How is your experience?"
+            from app.services.voice_service import is_marwari_accent_active
+            if is_marwari_accent_active():
+                greeting = "राम राम सा! मैं बीसीटी फ़ाइबरनेट से बोल रहा हूँ। आपकी इंटरनेट सेवा कैसी चल रही है? थोड़ा फीडबैक दीजिए।"
+            else:
+                greeting = f"Hello {customer_name}! I am {agent_info['agent_name']} from BFibernet, calling for quick feedback on your internet service. How is your experience?"
+            
             initial_transcript = [
                 {
                     "speaker": "agent",
@@ -101,6 +106,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
         form_data = await request.form()
         speech_result = form_data.get("SpeechResult", "").strip()
         digits = form_data.get("Digits", "").strip()
+        print(f"[Twilio Feedback Webhook] Received SpeechResult: '{speech_result}', Digits: '{digits}'")
 
         public_url = settings.base_url
         host_url = public_url if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127.") else str(request.base_url).rstrip("/")
@@ -122,6 +128,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
                         pass
 
         user_input = speech_result or (f"Pressed key {digits} for feedback" if digits else "")
+        print(f"[Twilio Feedback Webhook] User Input resolved to: '{user_input}'")
 
         if user_input and customer_id:
             rating = None
@@ -168,10 +175,31 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
                 rating=rating or (customer_data.get("rating") if customer_data else 5),
                 sentiment=sentiment,
                 transcript_json=json.dumps(full_transcript),
-                status="completed"
+                status="in-progress"
             )
+        elif customer_id:
+            from app.services.voice_service import is_marwari_accent_active
+            ai_response_text = "जी, आपकी आवाज़ थोड़ी साफ़ नहीं आ रही है। एक बार फिर से बताइए।" if is_marwari_accent_active() else "I didn't quite catch that. Could you please tell me about your experience?"
+            
+            new_entries = [
+                {
+                    "speaker": "agent",
+                    "name": "AI Voice Collector",
+                    "time": datetime.now().strftime("%I:%M %p"),
+                    "text": ai_response_text
+                }
+            ]
+            full_transcript = existing_transcript + new_entries
+            DataRepository.update_feedback_transcript_and_data(
+                feedback_id=customer_id,
+                feedback_text=customer_data.get("feedback_text", "Listening...") if customer_data else "Listening...",
+                transcript_json=json.dumps(full_transcript),
+                status="in-progress"
+            )
+        else:
+            ai_response_text = None
 
-        xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url)
+        xml_twiml = build_twilio_feedback_response_twiml(user_input, customer_data, feedback_url, ai_response_text)
         return Response(content=xml_twiml, media_type="application/xml")
     except Exception as e:
         print(f"[Twilio Feedback Webhook Error] {e}")

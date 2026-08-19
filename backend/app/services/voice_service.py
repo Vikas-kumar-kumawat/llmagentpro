@@ -127,21 +127,25 @@ def generate_ai_response(customer_text: str, customer: Optional[Dict[str, Any]] 
                     f"You are {agent_name} calling from BFibernet for customer feedback.\n"
                     f'The customer said: "{customer_text}"\n\n'
                     "EXACT DIALOGUE SCRIPT & STYLE RULES:\n"
-                    "1. Respond in respectful Hindi/Rajasthani tone starting with 'राम राम सा!' when appropriate.\n"
-                    "2. If customer says service is good/fine: say 'अच्छा, ये सुनकर अच्छा लगा। इंटरनेट की स्पीड भी ठीक मिल रही है?' or ask for 1 to 5 star rating.\n"
-                    "3. If customer has issues/problems: say 'अच्छा, समझ गया। आपको किस तरह की परेशानी आ रही है? थोड़ा बताइए।' or 'ठीक है, आपकी बात नोट कर लेते हैं।'\n"
-                    "4. Keep replies super concise (maximum 15 words).\n"
-                    "5. Output ONLY plain text without markdown, quotes, or internal labels."
+                    "1. MUST RESPOND IN HINDI SCRIPT (Devanagari). DO NOT OUTPUT ENGLISH LETTERS.\n"
+                    "2. Start with 'राम राम सा!' when appropriate.\n"
+                    "3. If customer says service is good/fine: say 'अच्छा, ये सुनकर अच्छा लगा। इंटरनेट की स्पीड भी ठीक मिल रही है?' or ask for 1 to 5 star rating.\n"
+                    "4. If customer has issues/problems: say 'अच्छा, समझ गया। आपको किस तरह की परेशानी आ रही है? थोड़ा बताइए?' or 'ठीक है, आपकी बात नोट कर लेते हैं।'\n"
+                    "5. Keep replies super concise (maximum 15 words).\n"
+                    "6. Output ONLY plain text without markdown, quotes, or internal labels.\n"
+                    "7. IMPORTANT: If you want the customer to reply, you MUST end your sentence with a question mark (?). If you are thanking them and ending the conversation, DO NOT use a question mark."
                 )
             else:
                 prompt = (
                     f"You are {agent_name} calling from BFibernet regarding internet service feedback.\n"
                     f'The customer said: "{customer_text}"\n\n'
                     "Rules:\n"
-                    "1. Acknowledge their feedback about BFibernet internet service naturally.\n"
-                    "2. If they haven't given a 1 to 5 star rating yet, ask for a star rating out of 5.\n"
-                    "3. Keep your reply super concise (maximum 15 words).\n"
-                    "4. Speak naturally without markdown or internal labels."
+                    "1. MUST RESPOND IN ENGLISH ONLY.\n"
+                    "2. Acknowledge their feedback about BFibernet internet service naturally.\n"
+                    "3. If they haven't given a 1 to 5 star rating yet, ask for a star rating out of 5.\n"
+                    "4. Keep your reply super concise (maximum 15 words).\n"
+                    "5. Speak naturally without markdown or internal labels.\n"
+                    "6. IMPORTANT: If you want the customer to reply, you MUST end your sentence with a question mark (?). If you are thanking them and ending the conversation, DO NOT use a question mark."
                 )
             res = client.models.generate_content(model=settings.gemini_model, contents=prompt)
             if res and res.text:
