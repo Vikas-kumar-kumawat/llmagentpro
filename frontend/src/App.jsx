@@ -90,7 +90,7 @@ function MainAppLayout({ onLogout }) {
 
         {/* Dynamic Agent Workspace View — Notion Document Centered Layout */}
         <div className={`flex-1 w-full ${
-          activeAgent === 'chatbot' 
+          ['chatbot', 'outbound', 'calls'].includes(activeAgent) 
             ? 'w-full h-full p-0 flex flex-col overflow-hidden' 
             : ['feedback', 'recharge', 'offers', 'competitor', 'sales'].includes(activeAgent) 
               ? 'max-w-6xl mx-auto p-2 sm:p-4 md:p-8' 
@@ -133,18 +133,7 @@ function MainAppLayout({ onLogout }) {
           )}
 
           {(activeAgent === 'outbound' || activeAgent === 'calls') && (
-            <div className="max-w-3xl mx-auto pt-4">
-              <SectionCard
-                icon="🎧"
-                title="Customer Support Agent"
-                subtitle="Trigger voice calls & AI support operations via Twilio Voice API"
-                tag="POST /api/v1/make-call"
-                isOpen={true}
-                onToggle={() => { }}
-              >
-                <MakeCallSection onRefreshData={loadAllData} onTriggerCall={handleGlobalTriggerCall} />
-              </SectionCard>
-            </div>
+            <MakeCallSection onRefreshData={loadAllData} onTriggerCall={handleGlobalTriggerCall} />
           )}
 
           {activeAgent === 'history' && (

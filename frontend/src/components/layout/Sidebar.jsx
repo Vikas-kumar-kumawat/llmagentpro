@@ -21,7 +21,7 @@ export function Sidebar({ activeAgent, setActiveAgent, isCollapsed, setIsCollaps
   const { theme, toggleTheme, isDark } = useTheme();
 
   const agents = [
-    { id: 'chatbot', name: 'BFibernet AI', icon: Brain },
+    { id: 'chatbot', name: 'BFibernet AI', icon: Brain, badge: 'Admin' },
     { id: 'feedback', name: 'Feedback Agent', icon: MessageSquare },
     { id: 'sales', name: 'Sales AI Agent', icon: ShoppingBag, badge: 'New' },
     { id: 'recharge', name: 'Recharge Reminder', icon: Zap },

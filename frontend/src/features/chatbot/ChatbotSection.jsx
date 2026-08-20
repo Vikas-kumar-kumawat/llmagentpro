@@ -26,12 +26,27 @@ import {
   User,
   ArrowUp,
   ChevronRight,
+  ChevronLeft,
   Wifi,
   Router,
   Phone,
   Shield,
   Paperclip,
-  RotateCw
+  RotateCw,
+  DollarSign,
+  Crown,
+  AlertTriangle,
+  Cpu,
+  TrendingDown,
+  TrendingUp,
+  BarChart3,
+  Activity,
+  Gift,
+  Ticket,
+  Zap,
+  Award,
+  PhoneCall,
+  CreditCard
 } from 'lucide-react';
 
 export function ChatbotSection() {
@@ -43,12 +58,12 @@ export function ChatbotSection() {
   const [copiedMsgId, setCopiedMsgId] = useState(null);
   const [msgFeedback, setMsgFeedback] = useState({});
 
-  // Active Role State: 'customer' | 'admin'
-  const [userRole, setUserRole] = useState('customer');
+  // Active Role State: Restricted to Admin
+  const [userRole] = useState('admin');
 
   // KB Modal State & Tabs
   const [isKbModalOpen, setIsKbModalOpen] = useState(false);
-  const [modalRagTab, setModalRagTab] = useState('customer'); // 'customer' or 'admin'
+  const [modalRagTab, setModalRagTab] = useState('admin'); // Defaults to 'admin'
   const [kbDocs, setKbDocs] = useState([]);
   const [totalChunks, setTotalChunks] = useState(0);
 
@@ -60,6 +75,14 @@ export function ChatbotSection() {
   const messagesEndRef = useRef(null);
   const fileInputRef = useRef(null);
   const mainFileInputRef = useRef(null);
+  const carouselRef = useRef(null);
+
+  const scrollCarousel = (direction) => {
+    if (carouselRef.current) {
+      const scrollAmount = direction === 'left' ? -300 : 300;
+      carouselRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -215,56 +238,95 @@ export function ChatbotSection() {
     link.download = `bfibernet-${userRole}-chat-${Date.now()}.txt`;
   };
 
-  // Quick Action Prompt Cards Data matching Screenshots
-  const promptCards = userRole === 'customer' ? [
+  // ISP Executive Row 1 Cards (Moving Left-to-Right)
+  const promptCardsRow1 = [
     {
-      title: 'Broadband Plans',
-      desc: 'Check available fiber plans & speeds',
-      prompt: 'What broadband fiber plans are available?',
-      icon: Wifi
+      title: 'Monthly Revenue & ARPU',
+      desc: 'Total collections, renewals & ARPU growth',
+      prompt: 'Show me this month revenue report, total collections, ARPU, and pending subscription renewals.',
+      icon: DollarSign,
+      badge: '💰 Revenue'
     },
     {
-      title: 'Installation & SLA',
-      desc: 'Router setup & installation SLA details',
-      prompt: 'What is the router installation SLA?',
-      icon: Router
+      title: 'Top 10 VIP Accounts',
+      desc: 'Gigabit enterprise & high-billing clients',
+      prompt: 'List our top premium ISP customers, VIP enterprise connections, and high-value subscribers.',
+      icon: Crown,
+      badge: '⭐ VIP'
     },
     {
-      title: 'Billing & Recharge',
-      desc: 'Billing info, recharge options & invoices',
-      prompt: 'What are the billing and recharge offers?',
-      icon: FileText
+      title: 'Top 5 Chronic Issues',
+      desc: 'Speed drops, fiber cuts & outage trends',
+      prompt: 'What are the top 5 most common problems and complaints customers are facing this month?',
+      icon: AlertTriangle,
+      badge: '⚠️ Outages'
     },
     {
-      title: 'Contact & Support',
-      desc: 'Contact numbers, emails & support channels',
-      prompt: 'What contact numbers & emails are available?',
-      icon: Phone
+      title: 'OLT Node & Optical Health',
+      desc: 'Power levels, port load & ONT telemetries',
+      prompt: 'Show hardware monitoring status, OLT optical power levels, and active router telemetries.',
+      icon: Cpu,
+      badge: '📡 Hardware'
+    },
+    {
+      title: 'High Churn Risk Accounts',
+      desc: 'Users expiring in 3 days & low usage',
+      prompt: 'Which customers are at high risk of churning or have recharges expiring in the next 3 days?',
+      icon: TrendingDown,
+      badge: '📉 Churn'
+    },
+    {
+      title: 'Competitor Tariff Benchmarks',
+      desc: 'JioFiber & Airtel vs local fiber plans',
+      prompt: 'Compare our broadband plans and pricing against JioFiber, Airtel Xstream, and local competitors.',
+      icon: BarChart3,
+      badge: '⚔️ Market'
     }
-  ] : [
+  ];
+
+  // ISP Executive Row 2 Cards (Moving Right-to-Left)
+  const promptCardsRow2 = [
     {
-      title: 'Partner SLA Workflow',
-      desc: 'Partner installation & escalation SLA',
-      prompt: 'What is the partner SLA & installation workflow?',
-      icon: Shield
+      title: 'New Subscriber Additions',
+      desc: 'Net monthly signups & retention rate',
+      prompt: 'Show monthly subscriber growth rate, net customer additions, and ARPU trends.',
+      icon: TrendingUp,
+      badge: '📈 Growth'
     },
     {
-      title: 'Technical Hardware',
-      desc: 'Internal router configuration & telemetries',
-      prompt: 'Show internal technical router configurations',
-      icon: Router
+      title: 'Recharge Promos & ROI',
+      desc: 'Festival discounts & plan upgrades',
+      prompt: 'What active festival offers and promotional discounts are currently running?',
+      icon: Gift,
+      badge: '🎁 Offers'
     },
     {
-      title: 'Admin Billing Rules',
-      desc: 'Internal discount matrix & policies',
-      prompt: 'What are the admin billing & discount policies?',
-      icon: FileText
+      title: 'Core IP Backbone Peak',
+      desc: 'Bandwidth utilization & OTT peering',
+      prompt: 'Show core IP backbone traffic utilization, peering usage, and peak hour telemetries.',
+      icon: Zap,
+      badge: '⚡ Traffic'
     },
     {
-      title: 'Helpline Matrix',
-      desc: 'Executive escalation phone matrix',
-      prompt: 'What helpline escalation matrix is active?',
-      icon: Phone
+      title: 'LCO Partner Payouts',
+      desc: 'Franchisee commission & SLA splits',
+      prompt: 'Show LCO partner revenue share payouts, franchisee commission logs, and partner SLAs.',
+      icon: Shield,
+      badge: '🤝 LCO'
+    },
+    {
+      title: 'Critical SLA Breaches',
+      desc: 'Unresolved outage tickets > 4 hours',
+      prompt: 'List all open high-priority support tickets and SLA breach warnings.',
+      icon: Ticket,
+      badge: '🎫 SLA'
+    },
+    {
+      title: 'Voice CSAT & Sentiment',
+      desc: 'Satisfaction score & voice analytics',
+      prompt: 'What is our current Customer Satisfaction (CSAT) score and voice feedback sentiment breakdown?',
+      icon: Award,
+      badge: '📊 CSAT'
     }
   ];
 
@@ -275,65 +337,36 @@ export function ChatbotSection() {
 
       {/* Floating Header Bar */}
       <div className={`w-full px-4 sm:px-8 py-3.5 border-b flex items-center justify-between shrink-0 transition-colors duration-300 ${
-        isDark ? 'bg-[#050507] border-[#1e1e24] text-white shadow-xl' : 'bg-white/90 border-slate-200/80 text-slate-900 shadow-sm backdrop-blur-md'
+        isDark ? 'bg-[#070709] border-[#1e1e24] text-white shadow-xl' : 'bg-white/90 border-slate-200/80 text-slate-900 shadow-sm backdrop-blur-md'
       }`}>
         <div className="flex items-center gap-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
-            isDark ? 'bg-[#121216] text-white border border-[#22222a] shadow-xs' : 'bg-slate-100 text-slate-900 border border-slate-200 shadow-xs'
+          <div className={`w-10 h-10 rounded-none flex items-center justify-center transition-all ${
+            isDark ? 'bg-[#121216] text-emerald-400 border border-[#22222a] shadow-xs' : 'bg-slate-100 text-slate-900 border border-slate-200 shadow-xs'
           }`}>
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="w-5 h-5 text-emerald-400" />
           </div>
 
           <div className="flex flex-col">
             <span className={`font-extrabold text-base sm:text-lg tracking-tight flex items-center gap-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              BFibernet AI
-            </span>
-            <span className={`text-xs font-medium ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
-              Your Broadband Assistant
+              BFibernet Admin AI
             </span>
           </div>
         </div>
 
         {/* Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Customer Mode Switcher */}
-          <button
-            onClick={() => setUserRole('customer')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-1.5 border ${
-              userRole === 'customer'
-                ? isDark
-                  ? 'bg-white text-black border-white shadow-xs'
-                  : 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                : isDark
-                  ? 'bg-[#0c0c0f] text-zinc-400 border-[#22222a] hover:text-white'
-                  : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
-            }`}
-          >
-            <User className="w-3.5 h-3.5" />
-            <span>Customer</span>
-          </button>
-
-          {/* Admin Mode Switcher */}
-          <button
-            onClick={() => setUserRole('admin')}
-            className={`px-3.5 py-1.5 rounded-xl text-xs font-extrabold transition-all duration-200 cursor-pointer flex items-center gap-1.5 border ${
-              userRole === 'admin'
-                ? isDark
-                  ? 'bg-white text-black border-white shadow-xs'
-                  : 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                : isDark
-                  ? 'bg-[#0c0c0f] text-zinc-400 border-[#22222a] hover:text-white'
-                  : 'bg-white text-slate-600 border-slate-200 hover:text-slate-900'
-            }`}
-          >
+          {/* Admin Role Badge */}
+          <div className={`px-3 py-1.5 rounded-none text-xs font-extrabold flex items-center gap-1.5 border ${
+            isDark ? 'bg-[#18181c] text-emerald-400 border-[#282832]' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+          }`}>
             <Shield className="w-3.5 h-3.5" />
-            <span>Admin</span>
-          </button>
+            <span>Admin Executive</span>
+          </div>
 
           {/* Docs Button */}
           <button
             onClick={() => { setIsKbModalOpen(true); fetchKbInfo(); }}
-            className={`px-3.5 py-1.5 rounded-xl transition-all cursor-pointer text-xs font-bold flex items-center gap-1.5 border ${
+            className={`px-3.5 py-1.5 rounded-none transition-all cursor-pointer text-xs font-bold flex items-center gap-1.5 border ${
               isDark
                 ? 'bg-[#0c0c0f] hover:bg-[#141418] text-zinc-200 border-[#22222a]'
                 : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200 shadow-xs'
@@ -342,7 +375,7 @@ export function ChatbotSection() {
           >
             <Database className="w-3.5 h-3.5 text-zinc-300" />
             <span>Docs</span>
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-md bg-[#18181c] text-zinc-300 border border-[#282832] font-extrabold">
+            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-none bg-[#18181c] text-zinc-300 border border-[#282832] font-extrabold">
               {kbDocs.length}
             </span>
           </button>
@@ -350,8 +383,8 @@ export function ChatbotSection() {
           {messages.length > 0 && (
             <button
               onClick={handleExportChat}
-              className={`p-1.5 px-2.5 rounded-xl transition cursor-pointer text-xs font-bold border ${
-                isDark ? 'bg-[#0c0c0f] hover:bg-[#141418] text-zinc-300 border-[#22222a]' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
+              className={`p-1.5 px-2.5 rounded-none transition cursor-pointer text-xs font-bold border ${
+                isDark ? 'bg-[#050507] hover:bg-[#0c0c0f] text-zinc-300 border-[#1c1c20]' : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'
               }`}
               title="Export Chat Transcript"
             >
@@ -361,73 +394,185 @@ export function ChatbotSection() {
         </div>
       </div>
 
+      {/* Inline Keyframes CSS for Left-to-Right and Right-to-Left Marquee Animations */}
+      <style>{`
+        @keyframes marqueeRight {
+          0% { transform: translateX(-50%); }
+          100% { transform: translateX(0%); }
+        }
+        @keyframes marqueeLeft {
+          0% { transform: translateX(0%); }
+          100% { transform: translateX(-50%); }
+        }
+        .animate-marquee-right {
+          display: flex;
+          width: max-content;
+          animation: marqueeRight 40s linear infinite;
+        }
+        .animate-marquee-right:hover {
+          animation-play-state: paused;
+        }
+        .animate-marquee-left {
+          display: flex;
+          width: max-content;
+          animation: marqueeLeft 40s linear infinite;
+        }
+        .animate-marquee-left:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+
       {/* Main Workspace Canvas */}
-      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 py-6 space-y-6">
+      <div className="flex-1 w-full overflow-y-auto px-4 sm:px-8 py-8 sm:py-12 space-y-6 flex flex-col">
         {messages.length === 0 ? (
-          <div className="my-auto h-full flex flex-col items-center justify-center max-w-4xl mx-auto text-center py-10 animate-fadeIn">
-            {/* Glowing Center Logo Icon */}
-            <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-5 transition-transform duration-300 hover:scale-105 ${
-              isDark
-                ? 'bg-[#121216] border-2 border-[#282832] text-white shadow-xl'
-                : 'bg-slate-100 border-2 border-slate-300 text-slate-900 shadow-md'
-            }`}>
-              <Sparkles className="w-8 h-8" />
+          <div className="my-auto flex flex-col items-center justify-center max-w-6xl mx-auto w-full animate-fadeIn space-y-10">
+            
+            {/* Premium Welcome Header */}
+            <div className="flex flex-col items-center justify-center text-center">
+              <div className={`w-14 h-14 rounded-none flex items-center justify-center mb-6 transition-transform duration-500 hover:rotate-180 hover:scale-110 ${
+                isDark
+                  ? 'bg-gradient-to-br from-[#0c0c0f] to-[#121216] border border-[#22222a] text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.15)]'
+                  : 'bg-emerald-50 border border-emerald-200 text-emerald-600 shadow-lg'
+              }`}>
+                <Sparkles className="w-7 h-7" />
+              </div>
+
+              <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight max-w-2xl ${
+                isDark ? 'text-white' : 'text-slate-900'
+              }`}>
+                Executive <span className="text-emerald-500">ISP Copilot</span>
+              </h1>
+              <p className={`mt-3 text-sm sm:text-base font-medium max-w-lg ${
+                isDark ? 'text-zinc-400' : 'text-slate-500'
+              }`}>
+                Manage your work and agents using prompt.
+              </p>
             </div>
 
-            {/* Welcome Heading */}
-            <h2 className={`text-2xl sm:text-3xl font-extrabold tracking-tight max-w-xl ${
-              isDark ? 'text-white' : 'text-slate-900'
-            }`}>
-              Hi! 👋 How can I help you with <span className="underline decoration-zinc-700 font-extrabold">BFibernet Broadband</span> today?
-            </h2>
+            {/* MARQUEE ROW: Single Moving Track with Fade Edges */}
+            <div className="w-full relative py-2 font-['Plus_Jakarta_Sans',sans-serif]">
+              {/* Fade Gradient Masks */}
+              <div className="absolute inset-y-0 left-0 w-16 sm:w-32 z-10 pointer-events-none" style={{ background: isDark ? 'linear-gradient(to right, #050507, transparent)' : 'linear-gradient(to right, #f8fafc, transparent)' }}></div>
+              <div className="absolute inset-y-0 right-0 w-16 sm:w-32 z-10 pointer-events-none" style={{ background: isDark ? 'linear-gradient(to left, #050507, transparent)' : 'linear-gradient(to left, #f8fafc, transparent)' }}></div>
+              
+              <div className="overflow-hidden flex">
+                <div className="animate-marquee-right gap-4 flex items-center">
+                  {[...promptCardsRow1, ...promptCardsRow2, ...promptCardsRow1, ...promptCardsRow2].map((card, i) => {
+                    const IconComp = card.icon;
+                    return (
+                      <div
+                        key={i}
+                        onClick={() => handleQuickPrompt(card.prompt)}
+                        className={`w-[240px] shrink-0 p-4 rounded-none border transition-all duration-300 cursor-pointer flex flex-col justify-between group/card relative overflow-hidden ${
+                          isDark
+                            ? 'bg-[#070709] border-[#1e1e24] hover:border-emerald-500/50 hover:bg-[#0a0a0d] shadow-xl hover:shadow-[0_0_20px_rgba(16,185,129,0.05)]'
+                            : 'bg-white border-slate-200 hover:border-emerald-500 hover:shadow-md'
+                        }`}
+                      >
+                        <div>
+                          <div className="flex items-center justify-between gap-1.5 mb-3">
+                            <div className={`w-8 h-8 rounded-none flex items-center justify-center shrink-0 transition-colors ${
+                              isDark ? 'bg-[#121216] border border-[#22222a] text-emerald-400 group-hover/card:bg-emerald-500/10' : 'bg-emerald-50 border border-emerald-200 text-emerald-600'
+                            }`}>
+                              <IconComp className="w-4 h-4" />
+                            </div>
 
-            <p className={`text-sm font-medium mt-2 max-w-md ${
-              isDark ? 'text-zinc-400' : 'text-slate-500'
-            }`}>
-              Ask anything about plans, installation, billing, or support.
-            </p>
+                            {card.badge && (
+                              <span className={`text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-none border ${
+                                isDark ? 'bg-[#121216] text-zinc-300 border-[#22222a]' : 'bg-slate-100 text-slate-700 border-slate-200'
+                              }`}>
+                                {card.badge}
+                              </span>
+                            )}
+                          </div>
 
-            {/* 4 Prompt Cards in a 2x2 Grid Layout */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-3xl mx-auto w-full mt-8">
-              {promptCards.map((card, i) => {
-                const IconComp = card.icon;
-                return (
-                  <div
-                    key={i}
-                    onClick={() => handleQuickPrompt(card.prompt)}
-                    className={`p-6 sm:p-7 min-h-[110px] rounded-2xl border transition-all duration-200 cursor-pointer flex items-center justify-between group active:scale-[0.99] ${
-                      isDark
-                        ? 'bg-[#070709] border-[#2a2a34] hover:border-zinc-500 hover:bg-[#0c0c0f] shadow-xl'
-                        : 'bg-white border-slate-900 hover:border-black hover:shadow-md shadow-sm'
-                    }`}
-                  >
-                    <div className="flex items-center gap-5 text-left">
-                      <div className={`w-14 h-14 rounded-full flex items-center justify-center shrink-0 ${
-                        isDark ? 'bg-[#121216] border border-[#22222a] text-white' : 'bg-slate-100 border border-slate-200 text-slate-800'
-                      }`}>
-                        <IconComp className="w-7 h-7" />
+                          <h4 className={`font-extrabold text-sm transition-colors mb-1 ${
+                            isDark ? 'text-white group-hover/card:text-emerald-400' : 'text-slate-900 group-hover/card:text-emerald-600'
+                          }`}>
+                            {card.title}
+                          </h4>
+                          <p className={`text-[11px] font-medium leading-relaxed line-clamp-2 ${
+                            isDark ? 'text-zinc-400' : 'text-slate-500'
+                          }`}>
+                            {card.desc}
+                          </p>
+                        </div>
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
 
-                      <div>
-                        <h3 className={`font-extrabold text-sm transition-colors ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}>
-                          {card.title}
-                        </h3>
-                        <p className={`text-xs font-medium mt-0.5 ${
-                          isDark ? 'text-zinc-400' : 'text-slate-500'
-                        }`}>
-                          {card.desc}
-                        </p>
-                      </div>
-                    </div>
+            {/* AI Agent Work Section - Structured & Sleek */}
+            <div className={`w-full max-w-4xl mx-auto px-5 py-4 rounded-none border transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+              isDark
+                ? 'bg-[#070709] border-[#1e1e24] text-white shadow-xl hover:border-[#2a2a34]'
+                : 'bg-white border-slate-200 text-slate-900 shadow-md'
+            }`}>
+              <div className="flex items-center gap-3 shrink-0">
+                <div className={`p-2 rounded-none border ${isDark ? 'bg-[#121216] border-[#22222a] text-emerald-400' : 'bg-emerald-50 border-emerald-200 text-emerald-600'}`}>
+                  <Bot className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-extrabold">Manage Agents</h4>
+                  <p className={`text-[10px] font-medium mt-0.5 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>Assign background tasks instantly</p>
+                </div>
+              </div>
 
-                    <ChevronRight className={`w-4 h-4 transition-transform group-hover:translate-x-1 ${
-                      isDark ? 'text-zinc-500 group-hover:text-white' : 'text-slate-400 group-hover:text-slate-900'
-                    }`} />
-                  </div>
-                );
-              })}
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleQuickPrompt("Assign Agent: Feedback Agent - Call all pending feedback customers.")}
+                  className={`px-3 py-1.5 rounded-none border transition cursor-pointer flex items-center gap-2 text-xs font-bold active:scale-95 ${
+                    isDark
+                      ? 'bg-[#0c0c0f] border-[#22222a] text-zinc-300 hover:border-emerald-500/50 hover:text-white'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-slate-900'
+                  }`}
+                >
+                  <PhoneCall className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Feedback Agent</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickPrompt("Assign Agent: Network Agent - Monitor hardware telemetries & alert outages.")}
+                  className={`px-3 py-1.5 rounded-none border transition cursor-pointer flex items-center gap-2 text-xs font-bold active:scale-95 ${
+                    isDark
+                      ? 'bg-[#0c0c0f] border-[#22222a] text-zinc-300 hover:border-emerald-500/50 hover:text-white'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-slate-900'
+                  }`}
+                >
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  <span>Network Agent</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickPrompt("Assign Agent: Market Agent - Benchmark competitor tariffs vs Jio & Airtel.")}
+                  className={`px-3 py-1.5 rounded-none border transition cursor-pointer flex items-center gap-2 text-xs font-bold active:scale-95 ${
+                    isDark
+                      ? 'bg-[#0c0c0f] border-[#22222a] text-zinc-300 hover:border-emerald-500/50 hover:text-white'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-slate-900'
+                  }`}
+                >
+                  <BarChart3 className="w-3.5 h-3.5 text-cyan-400" />
+                  <span>Market Agent</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => handleQuickPrompt("Assign Agent: Billing Agent - Send recharge reminders to 3-day expiring accounts.")}
+                  className={`px-3 py-1.5 rounded-none border transition cursor-pointer flex items-center gap-2 text-xs font-bold active:scale-95 ${
+                    isDark
+                      ? 'bg-[#0c0c0f] border-[#22222a] text-zinc-300 hover:border-emerald-500/50 hover:text-white'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:border-emerald-500 hover:text-slate-900'
+                  }`}
+                >
+                  <CreditCard className="w-3.5 h-3.5 text-rose-400" />
+                  <span>Billing Agent</span>
+                </button>
+              </div>
             </div>
           </div>
         ) : (
@@ -438,9 +583,9 @@ export function ChatbotSection() {
                 {/* User Prompt Bubble */}
                 {msg.sender === 'human' && (
                   <div className="flex justify-end pt-2 pb-1">
-                    <div className={`px-5 py-3 rounded-2xl shadow-xl text-sm font-medium max-w-[85%] sm:max-w-[75%] ${
+                    <div className={`px-5 py-3 rounded-none text-sm font-medium max-w-[85%] sm:max-w-[75%] ${
                       isDark
-                        ? 'bg-[#121216] text-white border border-[#22222a]'
+                        ? 'bg-[#050507] text-white border border-[#1c1c20]'
                         : 'bg-slate-900 text-white border border-slate-800 shadow-md'
                     }`}>
                       <div className="text-sm font-normal text-white">{msg.text}</div>
@@ -456,34 +601,34 @@ export function ChatbotSection() {
                 {msg.sender === 'agent' && (
                   <div className="flex gap-3 items-start pt-2">
                     {/* Left AI avatar badge */}
-                    <div className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border ${
+                    <div className={`w-9 h-9 rounded-none flex items-center justify-center shrink-0 border ${
                       isDark
-                        ? 'bg-[#121216] border-[#22222a] text-white'
+                        ? 'bg-[#050507] border-[#1c1c20] text-emerald-400'
                         : 'bg-slate-100 border-slate-200 text-slate-800'
                     }`}>
                       <Sparkles className="w-4.5 h-4.5" />
                     </div>
 
                     {/* Agent Response Card Container */}
-                    <div className={`flex-1 rounded-2xl border p-5 space-y-4 shadow-xl ${
-                      isDark ? 'bg-[#070709] border-[#1e1e24] text-white shadow-2xl' : 'bg-white border-slate-200 text-slate-900'
+                    <div className={`flex-1 rounded-none border p-5 space-y-4 ${
+                      isDark ? 'bg-[#050507] border-[#1c1c20] text-white' : 'bg-white border-slate-200 text-slate-900'
                     }`}>
 
                       {/* RAG Telemetry badge */}
                       <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
                         <button
                           onClick={() => toggleSteps(msg.id)}
-                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border cursor-pointer transition text-[11px] ${
-                            isDark ? 'bg-[#18181c] border-[#282832] text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700 shadow-xs'
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-none border cursor-pointer transition text-[11px] ${
+                            isDark ? 'bg-black border-[#1c1c20] text-zinc-300' : 'bg-slate-100 border-slate-200 text-slate-700 shadow-xs'
                           }`}
                         >
-                          <Check className="w-3 h-3" />
+                          <Check className="w-3 h-3 text-emerald-400" />
                           <span>Completed RAG Search ({msg.sources?.length || 1} sources)</span>
                           <span className="font-bold ml-1">›</span>
                         </button>
 
                         {msg.role === 'admin' && (
-                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-[#18181c] text-zinc-300 border border-[#282832]">
+                          <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-none bg-black text-zinc-300 border border-[#1c1c20]">
                             🛡️ Admin RAG Grounded
                           </span>
                         )}
@@ -632,21 +777,32 @@ export function ChatbotSection() {
       </div>
 
       {/* Floating Bottom Command Input Console */}
-      <div className="w-full max-w-4xl mx-auto px-4 pb-4">
-        <form onSubmit={handleSend}>
-          <div className={`p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 flex items-center gap-3 ${
+      <div className="w-full max-w-5xl mx-auto px-4 pb-6 pt-2">
+        <form onSubmit={handleSend} className="relative group">
+          <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500/20 via-emerald-400/10 to-emerald-500/20 rounded-none blur opacity-0 group-hover:opacity-100 transition duration-1000 group-hover:duration-200" />
+          <div className={`relative p-3 sm:p-4 rounded-none border transition-all duration-300 flex items-center gap-3 ${
             isDark
-              ? 'bg-[#070709] border-[#1e1e24] focus-within:border-zinc-500 shadow-2xl'
-              : 'bg-white border-slate-900 focus-within:border-black shadow-lg'
+              ? 'bg-[#0a0a0d] border-[#22222a] focus-within:border-emerald-500/50 focus-within:bg-[#0c0c10] shadow-[0_0_40px_rgba(0,0,0,0.5)]'
+              : 'bg-white border-slate-300 focus-within:border-emerald-500 shadow-xl'
           }`}>
+            <button
+              type="button"
+              onClick={() => alert("Attachment upload ready.")}
+              className={`p-2.5 rounded-none border transition cursor-pointer flex items-center justify-center ${
+                isDark ? 'bg-[#121216] border-[#22222a] text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-emerald-600'
+              }`}
+              title="Attach File"
+            >
+              <Paperclip className="w-4 h-4" />
+            </button>
 
             {/* Input Line */}
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask anything about BFibernet broadband plans, SLAs, routers, or support..."
-              className={`w-full bg-transparent text-sm outline-none font-medium px-3 py-1 min-w-0 ${
+              placeholder="Query internal knowledge, assign agents, or fetch metrics..."
+              className={`w-full bg-transparent text-sm sm:text-base outline-none font-medium px-2 py-1 min-w-0 ${
                 isDark ? 'text-white placeholder-zinc-500' : 'text-slate-900 placeholder-slate-400'
               }`}
             />
@@ -655,39 +811,34 @@ export function ChatbotSection() {
               <button
                 type="button"
                 onClick={() => setInput('')}
-                className="text-zinc-400 hover:text-white p-1 cursor-pointer"
+                className="text-zinc-500 hover:text-zinc-300 p-2 cursor-pointer transition"
               >
                 <X className="w-4 h-4" />
               </button>
             )}
 
-            {/* Paperclip attachment icon */}
-            <button
-              type="button"
-              onClick={() => alert("Attachment upload ready.")}
-              className={`p-2 rounded-xl transition cursor-pointer ${
-                isDark ? 'text-zinc-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'
-              }`}
-              title="Attach file"
-            >
-              <Paperclip className="w-4 h-4" />
-            </button>
-
-            {/* Solid White Circular Send Button */}
+            {/* Solid Send Button */}
             <button
               type="submit"
               disabled={!input.trim() || isLoading}
-              className="w-10 h-10 rounded-full bg-white text-black hover:bg-zinc-200 flex items-center justify-center shrink-0 transition-all duration-200 cursor-pointer shadow-md active:scale-95"
-              title="Send Question"
+              className={`w-11 h-11 rounded-none flex items-center justify-center shrink-0 transition-all duration-300 cursor-pointer shadow-none active:scale-95 border ${
+                !input.trim() || isLoading
+                  ? isDark ? 'bg-[#121216] border-[#22222a] text-zinc-600' : 'bg-slate-100 border-slate-200 text-slate-400'
+                  : 'bg-emerald-600 border-emerald-500 text-white hover:bg-emerald-500 hover:shadow-[0_0_15px_rgba(16,185,129,0.4)]'
+              }`}
+              title="Send Command"
             >
               {isLoading ? (
-                <Loader2 className="w-4 h-4 animate-spin text-black" />
+                <Loader2 className="w-5 h-5 animate-spin" />
               ) : (
-                <Send className="w-4 h-4 text-black" />
+                <Send className="w-5 h-5 ml-0.5" />
               )}
             </button>
           </div>
         </form>
+        <div className={`text-center mt-3 text-[10px] font-mono tracking-wide ${isDark ? 'text-zinc-500' : 'text-slate-400'}`}>
+          AI Copilot may generate incorrect information. Verify critical data.
+        </div>
       </div>
 
       {/* Docs Modal */}

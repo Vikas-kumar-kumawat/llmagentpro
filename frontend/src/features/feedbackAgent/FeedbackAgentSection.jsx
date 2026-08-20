@@ -21,7 +21,12 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   const [localFeedbacks, setLocalFeedbacks] = useState(() => {
     try {
       const saved = localStorage.getItem('bfibernet_local_feedbacks');
-      return saved ? JSON.parse(saved) : DEFAULT_FEEDBACKS;
+      const parsed = saved ? JSON.parse(saved) : null;
+      // If nothing saved, or if it's an empty array, load the default dummy customers
+      if (!parsed || (Array.isArray(parsed) && parsed.length === 0)) {
+        return DEFAULT_FEEDBACKS;
+      }
+      return parsed;
     } catch {
       return DEFAULT_FEEDBACKS;
     }
@@ -433,7 +438,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
   return (
     <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[var(--bg-app)] text-[var(--text-primary)] select-none space-y-8 transition-colors duration-200">
       {/* 1. Header Bar */}
-      <FeedbackHeader />
+      <FeedbackHeader onCollectAll={handleCollectAllFeedbacks} isBatchCalling={isBatchCalling} />
 
       {/* 2. Stat Metric Cards */}
       <FeedbackMetricsCards metrics={metrics} />
