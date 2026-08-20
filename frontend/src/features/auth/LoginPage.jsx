@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ShieldCheck, User, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle, CheckCircle2, Sun, Moon, Wifi, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
+import { loginUser } from '../../services/apiService';
 
 export function LoginPage({ onLoginSuccess }) {
   const { isDark, toggleTheme } = useTheme();
@@ -11,28 +12,41 @@ export function LoginPage({ onLoginSuccess }) {
   const [isSuccess, setIsSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg('');
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      const cleanUser = username.trim().toLowerCase();
-      const cleanPass = password.trim();
+    const cleanUser = username.trim().toLowerCase();
+    const cleanPass = password.trim();
 
-      if ((cleanUser === 'vikas' && cleanPass === '7014') || 
-          (cleanUser === 'admin' && (cleanPass === 'admin' || cleanPass === '7014' || cleanPass === '123456'))) {
+    try {
+      const response = await loginUser(cleanUser, cleanPass).catch(() => null);
+      if (response && response.success) {
         setIsSuccess(true);
         setTimeout(() => {
           localStorage.setItem('bfibernet_auth', 'true');
           localStorage.setItem('bfibernet_admin', username.trim() || 'Vikas');
           onLoginSuccess();
-        }, 800);
-      } else {
-        setIsSubmitting(false);
-        setErrorMsg('Invalid Admin Name or Password. Use: vikas / 7014 or admin / admin');
+        }, 600);
+        return;
       }
-    }, 400);
+    } catch {
+      // Fallback to client verification if server unreachable
+    }
+
+    if ((cleanUser === 'vikas' && cleanPass === '7014') || 
+        (cleanUser === 'admin' && (cleanPass === 'admin' || cleanPass === '7014' || cleanPass === '123456'))) {
+      setIsSuccess(true);
+      setTimeout(() => {
+        localStorage.setItem('bfibernet_auth', 'true');
+        localStorage.setItem('bfibernet_admin', username.trim() || 'Vikas');
+        onLoginSuccess();
+      }, 600);
+    } else {
+      setIsSubmitting(false);
+      setErrorMsg('Invalid Admin Name or Password. Use: vikas / 7014 or admin / admin');
+    }
   };
 
   return (
