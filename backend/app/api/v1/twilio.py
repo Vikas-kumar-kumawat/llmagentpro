@@ -132,7 +132,12 @@ async def twilio_voice_webhook(request: Request, customer_id: Optional[str] = No
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return Response(content=str(e), status_code=500)
+        from twilio.twiml.voice_response import VoiceResponse
+        res = VoiceResponse()
+        v = get_twilio_voice(get_active_voice())
+        res.say("We are sorry, our service is temporarily unavailable. Goodbye.", voice=v)
+        res.hangup()
+        return Response(content=str(res), media_type="application/xml")
 
 @router.api_route("/twilio/feedback", methods=["GET", "POST"])
 async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] = None):

@@ -127,7 +127,7 @@ def build_twilio_feedback_response_twiml(customer_text: str, customer_data: Opti
         return str(response)
 
     if not ai_response_dict:
-        ai_response_dict = generate_ai_response(customer_text, customer_data)
+        ai_response_dict = generate_ai_response(customer_text)
         
     ai_text = ai_response_dict.get("reply", "")
     end_call = ai_response_dict.get("end_call", False)
