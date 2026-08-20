@@ -51,13 +51,14 @@ def make_ai_outbound_call(request: TriggerCallRequest, req: Request):
 
     host_url = settings.base_url or str(req.base_url).rstrip("/")
     if host_url.startswith("http://localhost") or host_url.startswith("http://127."):
-        pass # Keep as is
-    elif host_url.startswith("http://"):
-        host_url = host_url.replace("http://", "https://", 1)
+        host_url = str(req.base_url).rstrip("/")
 
-    cid_param = f"?customer_id={customer_id}"
-    voice_url = f"{host_url}/api/v1/twilio/voice{cid_param}"
-    status_url = f"{host_url}/api/v1/twilio/status{cid_param}"
+    if customer_id:
+        voice_url = f"{host_url}/api/v1/twilio/voice/{customer_id}"
+        status_url = f"{host_url}/api/v1/twilio/status/{customer_id}"
+    else:
+        voice_url = f"{host_url}/api/v1/twilio/voice"
+        status_url = f"{host_url}/api/v1/twilio/status"
 
     if not settings.is_twilio_configured():
         return {
@@ -86,6 +87,7 @@ def make_ai_outbound_call(request: TriggerCallRequest, req: Request):
     return res
 
 @router.api_route("/twilio/voice", methods=["GET", "POST"])
+@router.api_route("/twilio/voice/{customer_id}", methods=["GET", "POST"])
 async def twilio_voice_webhook(request: Request, customer_id: Optional[str] = None, phone: Optional[str] = None):
     """Initial TwiML entry point when call connects (converted from democode.py)."""
     try:
@@ -97,11 +99,11 @@ async def twilio_voice_webhook(request: Request, customer_id: Optional[str] = No
             host_url = public_url
         else:
             host_url = str(request.base_url).rstrip("/")
-            if "localhost" not in host_url and "127.0.0.1" not in host_url and host_url.startswith("http://"):
-                host_url = host_url.replace("http://", "https://", 1)
         
-        cid_param = f"?customer_id={customer_id}" if customer_id else ""
-        feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
+        if customer_id:
+            feedback_url = f"{host_url}/api/v1/twilio/feedback/{customer_id}"
+        else:
+            feedback_url = f"{host_url}/api/v1/twilio/feedback"
 
         customer_name = "Customer"
         if customer_id:
@@ -147,6 +149,7 @@ async def twilio_voice_webhook(request: Request, customer_id: Optional[str] = No
         return Response(content=str(res), media_type="application/xml")
 
 @router.api_route("/twilio/feedback", methods=["GET", "POST"])
+@router.api_route("/twilio/feedback/{customer_id}", methods=["GET", "POST"])
 async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] = None):
     """Processes customer speech result and renders conversational response TwiML (converted from democode.py)."""
     try:
@@ -163,10 +166,11 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
             host_url = public_url
         else:
             host_url = str(request.base_url).rstrip("/")
-            if "localhost" not in host_url and "127.0.0.1" not in host_url and host_url.startswith("http://"):
-                host_url = host_url.replace("http://", "https://", 1)
-        cid_param = f"?customer_id={customer_id}" if customer_id else ""
-        feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
+            
+        if customer_id:
+            feedback_url = f"{host_url}/api/v1/twilio/feedback/{customer_id}"
+        else:
+            feedback_url = f"{host_url}/api/v1/twilio/feedback"
 
         customer_data = None
         customer_name = "Customer"
@@ -258,6 +262,7 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
         return Response(content=str(res), media_type="application/xml")
 
 @router.post("/twilio/status")
+@router.post("/twilio/status/{customer_id}")
 async def twilio_status_webhook(request: Request, customer_id: Optional[str] = None):
     """Webhook for Twilio call state transitions (converted from democode.py)."""
     form_data = await request.form()
