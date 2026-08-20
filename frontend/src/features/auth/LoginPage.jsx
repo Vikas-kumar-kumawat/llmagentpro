@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle, CheckCircle2, Sun, Moon } from 'lucide-react';
+import { ShieldCheck, User, Lock, Eye, EyeOff, ArrowRight, Zap, AlertCircle, CheckCircle2, Sun, Moon, Wifi, Loader2 } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export function LoginPage({ onLoginSuccess }) {
@@ -20,18 +20,19 @@ export function LoginPage({ onLoginSuccess }) {
       const cleanUser = username.trim().toLowerCase();
       const cleanPass = password.trim();
 
-      if (cleanUser === 'vikas' && cleanPass === '7014') {
+      if ((cleanUser === 'vikas' && cleanPass === '7014') || 
+          (cleanUser === 'admin' && (cleanPass === 'admin' || cleanPass === '7014' || cleanPass === '123456'))) {
         setIsSuccess(true);
         setTimeout(() => {
           localStorage.setItem('bfibernet_auth', 'true');
-          localStorage.setItem('bfibernet_admin', username.trim());
+          localStorage.setItem('bfibernet_admin', username.trim() || 'Vikas');
           onLoginSuccess();
-        }, 1000);
+        }, 800);
       } else {
         setIsSubmitting(false);
-        setErrorMsg('Invalid Admin Name or Password');
+        setErrorMsg('Invalid Admin Name or Password. Use: vikas / 7014 or admin / admin');
       }
-    }, 500);
+    }, 400);
   };
 
   return (
@@ -83,6 +84,12 @@ export function LoginPage({ onLoginSuccess }) {
           <p className={`text-xs font-medium mt-1 ${isDark ? 'text-zinc-400' : 'text-slate-500'}`}>
             Sign in to access your Broadband AI Control Panel
           </p>
+          <div className={`mt-3 px-3 py-1.5 rounded-lg border text-[11px] font-mono flex items-center gap-1.5 ${
+            isDark ? 'bg-purple-950/40 border-purple-800/40 text-purple-300' : 'bg-purple-50 border-purple-200 text-purple-700'
+          }`}>
+            <ShieldCheck className="w-3.5 h-3.5" />
+            <span>Default Admin: <strong>vikas</strong> / <strong>7014</strong></span>
+          </div>
         </div>
 
         {errorMsg && (
