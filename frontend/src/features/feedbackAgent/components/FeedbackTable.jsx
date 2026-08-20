@@ -8,7 +8,8 @@ import {
   Play,
   Phone,
   Trash2,
-  Edit3
+  Edit3,
+  Download
 } from 'lucide-react';
 import { useTheme } from '../../../context/ThemeContext';
 
@@ -27,7 +28,8 @@ export function FeedbackTable({
   handleTriggerCall,
   rowCallStatuses,
   handleDeleteFeedback,
-  setEditingFeedback
+  setEditingFeedback,
+  onDownloadReviews
 }) {
   const { isDark } = useTheme();
   const safeList = Array.isArray(filteredFeedbacks) ? filteredFeedbacks : [];
@@ -37,23 +39,25 @@ export function FeedbackTable({
       isDark ? 'bg-[#070709] border-[#1e1e24] text-white shadow-xl' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
     }`}>
       {/* Table Header Controls */}
-      <div className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-3 border-b ${
+      <div className={`p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b ${
         isDark ? 'border-[#1e1e24] bg-[#050507]' : 'border-slate-200 bg-slate-50'
       }`}>
-        <div>
-          <h2 className={`text-sm font-extrabold flex items-center gap-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        {/* Left Title & Record Counter */}
+        <div className="flex items-center gap-3 shrink-0">
+          <h2 className={`text-base font-extrabold whitespace-nowrap flex items-center gap-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             Feedback Log Directory
-            <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded-full border font-bold ${
-              isDark ? 'text-zinc-300 bg-[#18181c] border-[#282832]' : 'text-slate-700 bg-slate-200 border-slate-300'
-            }`}>
-              {safeList.length} records
-            </span>
           </h2>
+          <span className={`text-xs font-mono px-2.5 py-0.5 rounded-full border font-bold whitespace-nowrap shrink-0 ${
+            isDark ? 'text-emerald-400 bg-emerald-950/40 border-emerald-800/60' : 'text-emerald-700 bg-emerald-50 border-emerald-200'
+          }`}>
+            {safeList.length} records
+          </span>
         </div>
 
-        <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2.5 w-full md:w-auto">
+        {/* Right Filter & Action Buttons */}
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
           {/* Search Input */}
-          <div className="relative w-full sm:w-52">
+          <div className="relative flex-1 sm:flex-initial sm:w-56">
             <Search className={`w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 ${
               isDark ? 'text-zinc-400' : 'text-slate-400'
             }`} />
@@ -61,56 +65,55 @@ export function FeedbackTable({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Filter by customer or phone..."
+              placeholder="Search customer or phone..."
               className={`w-full py-1.5 pl-8 pr-3 rounded-lg text-xs border focus:outline-none transition ${
                 isDark 
-                  ? 'bg-[#0c0c0f] text-white border-[#22222a] focus:border-zinc-500 placeholder-zinc-500' 
+                  ? 'bg-[#0c0c0f] text-white border-[#22222a] focus:border-emerald-500/60 placeholder-zinc-500' 
                   : 'bg-white text-slate-900 border-slate-300 focus:border-slate-500 placeholder-slate-400 shadow-xs'
               }`}
             />
           </div>
 
-          <div className="grid grid-cols-2 sm:flex items-center gap-2 w-full sm:w-auto">
-            {/* Sentiment Filter Dropdown */}
-            <div className="relative col-span-1 sm:w-auto">
-              <select
-                value={sentimentFilter}
-                onChange={(e) => setSentimentFilter(e.target.value)}
-                className={`w-full py-1.5 pl-3 pr-7 rounded-lg text-xs border appearance-none cursor-pointer focus:outline-none transition font-medium ${
-                  isDark 
-                    ? 'bg-[#0c0c0f] text-white border-[#22222a] focus:border-zinc-500' 
-                    : 'bg-white text-slate-900 border-slate-300 focus:border-slate-500 shadow-xs'
-                }`}
-              >
-                <option value="all">All Sentiments</option>
-                <option value="positive">Positive</option>
-                <option value="neutral">Neutral</option>
-                <option value="negative">Negative</option>
-              </select>
-              <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
-                isDark ? 'text-zinc-400' : 'text-slate-400'
-              }`} />
-            </div>
-
-            {/* Refresh Icon Button */}
-            <button
-              onClick={() => onRefreshData && onRefreshData()}
-              title="Refresh Records"
-              className={`p-2 rounded-lg transition cursor-pointer border flex items-center justify-center col-span-1 sm:w-auto ${
+          {/* Sentiment Filter Dropdown */}
+          <div className="relative shrink-0">
+            <select
+              value={sentimentFilter}
+              onChange={(e) => setSentimentFilter(e.target.value)}
+              className={`py-1.5 pl-3 pr-7 rounded-lg text-xs border appearance-none cursor-pointer focus:outline-none transition font-medium ${
                 isDark 
-                  ? 'border-[#22222a] bg-[#0c0c0f] hover:bg-[#141418] text-white' 
-                  : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-xs'
+                  ? 'bg-[#0c0c0f] text-white border-[#22222a] focus:border-emerald-500/60' 
+                  : 'bg-white text-slate-900 border-slate-300 focus:border-slate-500 shadow-xs'
               }`}
             >
-              <RotateCw className="w-3.5 h-3.5" />
-            </button>
+              <option value="all">All Sentiments</option>
+              <option value="positive">Positive</option>
+              <option value="neutral">Neutral</option>
+              <option value="negative">Negative</option>
+            </select>
+            <ChevronDown className={`w-3.5 h-3.5 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none ${
+              isDark ? 'text-zinc-400' : 'text-slate-400'
+            }`} />
           </div>
 
-          <div className="flex items-center gap-2 w-full sm:w-auto">
+          {/* Refresh Button */}
+          <button
+            onClick={() => onRefreshData && onRefreshData()}
+            title="Refresh Records"
+            className={`p-2 rounded-lg transition cursor-pointer border flex items-center justify-center shrink-0 ${
+              isDark 
+                ? 'border-[#22222a] bg-[#0c0c0f] hover:bg-[#141418] text-white' 
+                : 'border-slate-300 bg-white hover:bg-slate-100 text-slate-700 shadow-xs'
+            }`}
+          >
+            <RotateCw className="w-3.5 h-3.5" />
+          </button>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap shrink-0">
             {isBatchCalling ? (
               <button
                 onClick={handleCancelBatchCall}
-                className={`flex-1 sm:flex-none justify-center px-3.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                   isDark 
                     ? 'bg-[#18181c] hover:bg-[#282832] text-white border-[#282832]' 
                     : 'bg-slate-200 hover:bg-slate-300 text-slate-800 border-slate-300'
@@ -121,7 +124,7 @@ export function FeedbackTable({
             ) : (
               <button
                 onClick={handleCollectAllFeedbacks}
-                className={`flex-1 sm:flex-none justify-center px-4 py-1.5 rounded-lg text-xs font-extrabold border transition flex items-center gap-2 cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border transition flex items-center gap-2 cursor-pointer whitespace-nowrap ${
                   isDark 
                     ? 'bg-white text-black border-white hover:bg-zinc-200 shadow-sm' 
                     : 'bg-slate-900 text-white border-slate-900 hover:bg-slate-800 shadow-xs'
@@ -134,7 +137,7 @@ export function FeedbackTable({
 
             <button
               onClick={() => setShowCollectModal(true)}
-              className={`flex-1 sm:flex-none justify-center px-3.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
                 isDark 
                   ? 'bg-[#121216] hover:bg-[#1a1a20] text-white border-[#22222a]' 
                   : 'bg-white hover:bg-slate-100 text-slate-800 border-slate-300 shadow-xs'
@@ -143,6 +146,20 @@ export function FeedbackTable({
               <Plus className="w-3.5 h-3.5" />
               <span>Add Record</span>
             </button>
+
+            {onDownloadReviews && (
+              <button
+                onClick={onDownloadReviews}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 cursor-pointer whitespace-nowrap ${
+                  isDark 
+                    ? 'bg-emerald-950/40 hover:bg-emerald-900/60 text-emerald-300 border-emerald-800/60' 
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-300 shadow-xs'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Download Feedbacks</span>
+              </button>
+            )}
           </div>
         </div>
       </div>

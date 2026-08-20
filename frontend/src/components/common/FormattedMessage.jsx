@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FileText, CheckCircle2, Copy, Check, ChevronRight, Sparkles } from 'lucide-react';
+import { FileText, CheckCircle2, Copy, Check, ChevronRight, Sparkles, Download } from 'lucide-react';
 import { useTheme } from '../../context/ThemeContext';
 
 export function FormattedMessage({ content, isAgent = true, sources = [], retrievedChunks = [], onOpenSources }) {
@@ -203,6 +203,21 @@ export function FormattedMessage({ content, isAgent = true, sources = [], retrie
               <td className={`px-3.5 py-2.5 text-xs font-medium ${isDark ? 'text-zinc-300' : 'text-slate-700'}`}>
                 {children}
               </td>
+            ),
+            a: ({ href, children }) => (
+              <a
+                href={href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-2 px-3.5 py-1.5 rounded-lg border font-bold text-xs transition cursor-pointer my-1.5 no-underline shadow-xs ${
+                  isDark
+                    ? 'bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border-emerald-700/80 hover:text-white'
+                    : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-300'
+                }`}
+              >
+                <Download className="w-3.5 h-3.5 text-emerald-400" />
+                <span>{children}</span>
+              </a>
             ),
           }}
         >

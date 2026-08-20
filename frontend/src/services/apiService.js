@@ -84,11 +84,11 @@ export async function getCustomersList() {
   return await res.json();
 }
 
-export async function createCustomerRecord(name, phone) {
+export async function createCustomerRecord(name, phone, rating = 5, feedback_text = '', sentiment = 'neutral', category = 'general') {
   const res = await fetch(`${API_BASE_URL}/api/v1/customers`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name, phone })
+    body: JSON.stringify({ name, phone, rating, feedback_text, sentiment, category })
   });
   return await res.json();
 }
@@ -128,6 +128,15 @@ export async function queryRagKnowledgeBase(question) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ question })
+  });
+  return await res.json();
+}
+
+export async function querySuperAgent(question, role = 'admin') {
+  const res = await fetch(`${API_BASE_URL}/api/v1/superagent/query`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question, role })
   });
   return await res.json();
 }

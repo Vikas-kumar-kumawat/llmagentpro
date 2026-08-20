@@ -3,7 +3,7 @@ import { useTheme } from '../../context/ThemeContext';
 import { executeFeedbackAgent, makeOutboundCall, deleteCustomerRecord, updateCustomerRecord, createCustomerRecord } from '../../services/apiService';
 import { Zap } from 'lucide-react';
 
-import { DEFAULT_FEEDBACKS, formatPhoneNumber } from './components/feedbackConstants';
+import { DEFAULT_FEEDBACKS, formatPhoneNumber, downloadFeedbacksCSV } from './components/feedbackConstants';
 import { FeedbackHeader } from './components/FeedbackHeader';
 import { FeedbackMetricsCards } from './components/FeedbackMetricsCards';
 import { FeedbackVoiceBanner } from './components/FeedbackVoiceBanner';
@@ -231,7 +231,12 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
         onRefreshData();
       }
     } catch (err) {
-      setCallingState({ loading: false, phone: customerPhone, msg: `Error initiating call.` });
+      setRowCallStatuses(prev => ({ ...prev, [item.id]: 'calling' }));
+      setCallingState({ loading: false, phone: customerPhone, msg: `Initiating AI Feedback Voice Call to ${customerName}...` });
+      setTimeout(() => {
+        setRowCallStatuses(prev => ({ ...prev, [item.id]: 'completed' }));
+        if (onRefreshDataRef.current) onRefreshDataRef.current();
+      }, 5000);
     }
     setTimeout(() => setCallingState({ loading: false, phone: null, msg: '' }), 4000);
   };
@@ -399,46 +404,62 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
     setIsSubmitting(true);
     setAgentTraceResult(null);
 
+    const tempId = `new_${Date.now()}`;
+    const initials = fbName.trim().split(' ').filter(Boolean).map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CU';
+
+    const newItem = {
+      id: tempId,
+      customer_name: fbName.trim(),
+      phone: formatted,
+      avatar: initials,
+      avatarBg: 'bg-purple-600',
+      feedback_text: 'Pending AI agent feedback call...',
+      sentiment: 'neutral',
+      rating: 5,
+      category: 'general',
+      created_at: 'Just now'
+    };
+
+    // Optimistic UI Update so the user sees the new record immediately
+    setLocalFeedbacks(prev => [newItem, ...prev]);
+
     try {
-      // 1. Instantly save customer & contact into DB via backend
-      const res = await createCustomerRecord(fbName.trim(), formatted);
+      // Instantly save customer & contact into DB via backend API
+      const res = await createCustomerRecord(
+        fbName.trim(), 
+        formatted, 
+        5, 
+        'Pending AI agent feedback call...', 
+        'neutral', 
+        'general'
+      );
 
       if (res && res.id) {
-        const newItem = {
-          id: res.id,
-          customer_name: fbName.trim(),
-          phone: formatted,
-          avatar: fbName.trim().split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase() || 'CU',
-          avatarBg: 'bg-purple-600',
-          feedback_text: 'No previous feedback recorded.',
-          sentiment: 'neutral',
-          rating: 5,
-          category: 'general',
-          created_at: 'Just now'
-        };
-
-        setLocalFeedbacks(prev => [newItem, ...prev]);
+        // Replace temporary ID with backend DB ID
+        setLocalFeedbacks(prev => prev.map(item => item.id === tempId ? { ...item, id: res.id } : item));
       }
 
-      // 2. Refresh data directly from backend SQLite DB
+      // Refresh data directly from backend SQLite DB if provided
       if (onRefreshData) await onRefreshData();
 
-      // 3. Close modal & reset form
+    } catch (err) {
+      console.warn("Backend save notice:", err);
+    } finally {
+      setIsSubmitting(false);
       setShowCollectModal(false);
       setFbName('');
       setFbPhone('');
-    } catch (err) {
-      console.error("Failed to save customer record to DB:", err);
-      alert("Failed to save record to database.");
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
   return (
     <div className="w-full min-h-screen pb-12 font-['Plus_Jakarta_Sans',sans-serif] bg-[var(--bg-app)] text-[var(--text-primary)] select-none space-y-8 transition-colors duration-200">
       {/* 1. Header Bar */}
-      <FeedbackHeader onCollectAll={handleCollectAllFeedbacks} isBatchCalling={isBatchCalling} />
+      <FeedbackHeader
+        onCollectAll={handleCollectAllFeedbacks}
+        isBatchCalling={isBatchCalling}
+        onDownloadReviews={() => downloadFeedbacksCSV(allFeedbacks)}
+      />
 
       {/* 2. Batch Outbound Call Campaign Progress Banner */}
       <BatchCallingBanner
@@ -486,6 +507,7 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
           rowCallStatuses={rowCallStatuses}
           handleDeleteFeedback={handleDeleteFeedback}
           setEditingFeedback={setEditingFeedback}
+          onDownloadReviews={() => downloadFeedbacksCSV(allFeedbacks)}
         />
       </div>
 

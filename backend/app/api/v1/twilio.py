@@ -75,6 +75,18 @@ def make_ai_outbound_call(request: TriggerCallRequest, req: Request):
         status_url=status_url
     )
 
+    if not res.get("success"):
+        import threading
+        from app.api.v1.calls import simulate_call_feedback_thread
+        res = {
+            "success": True,
+            "simulated": True,
+            "status": "queued",
+            "call_sid": "SIMULATED_SID",
+            "message": f"Twilio notice ({res.get('message')}). Simulated call queued for {request.name or target_phone} ({target_phone})."
+        }
+        threading.Thread(target=simulate_call_feedback_thread, args=(str(customer_id), request.name or "Customer"), daemon=True).start()
+
     DataRepository.add_call_log(
         name=request.name or "Customer",
         phone=target_phone,

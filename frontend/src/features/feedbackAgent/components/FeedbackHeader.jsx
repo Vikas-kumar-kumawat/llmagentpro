@@ -1,9 +1,9 @@
 import React from 'react';
 import { useTheme } from '../../../context/ThemeContext';
-import { PhoneCall, Loader2, Sparkles, Zap } from 'lucide-react';
+import { PhoneCall, Loader2, Sparkles, Zap, Download } from 'lucide-react';
 import aiagentImage from '../../../assets/aiagentimage.jfif';
 
-export function FeedbackHeader({ onCollectAll, isBatchCalling }) {
+export function FeedbackHeader({ onCollectAll, isBatchCalling, onDownloadReviews }) {
   const { isDark } = useTheme();
 
   return (
@@ -26,7 +26,7 @@ export function FeedbackHeader({ onCollectAll, isBatchCalling }) {
       </div>
 
       {/* Main Content Area */}
-      <div className="relative z-10 flex flex-col items-center max-w-4xl mx-auto h-full justify-center">
+      <div className="relative z-10 flex flex-col sm:flex-row items-center justify-center gap-4 max-w-4xl mx-auto h-full">
 
         {/* Futuristic Huge Button */}
         {onCollectAll && (
@@ -54,6 +54,21 @@ export function FeedbackHeader({ onCollectAll, isBatchCalling }) {
             <span className="relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.5)] uppercase">
               {isBatchCalling ? 'COLLECTING FEEDBACKS...' : 'COLLECT ALL FEEDBACKS'}
             </span>
+          </button>
+        )}
+
+        {/* Futuristic Download Reviews Button */}
+        {onDownloadReviews && (
+          <button
+            onClick={onDownloadReviews}
+            className={`group/dl relative overflow-hidden rounded-xl px-6 py-3 font-extrabold text-sm sm:text-base tracking-wider flex items-center justify-center gap-2.5 transition-all duration-300 active:scale-95 border w-full sm:w-auto cursor-pointer ${
+              isDark
+                ? 'bg-[#0e0e12]/80 backdrop-blur-lg border-zinc-700 text-zinc-200 hover:border-emerald-400 hover:text-white hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]'
+                : 'bg-white border-slate-300 text-slate-800 hover:bg-slate-50 hover:border-emerald-600 shadow-md'
+            }`}
+          >
+            <Download className="w-5 h-5 text-emerald-400 transition-transform duration-300 group-hover/dl:-translate-y-0.5" />
+            <span className="uppercase">DOWNLOAD FEEDBACKS</span>
           </button>
         )}
       </div>

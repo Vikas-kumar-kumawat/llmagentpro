@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useTheme } from '../../context/ThemeContext';
 import {
   queryRagKnowledgeBase,
+  querySuperAgent,
   getRagDocuments,
   uploadRagDocument,
   deleteRagDocument,
@@ -130,11 +131,7 @@ export function ChatbotSection() {
     setIsLoading(true);
 
     try {
-      const queryWithContext = userRole === 'admin'
-        ? `[ADMIN EXEC QUERY]: ${userQuery}`
-        : userQuery;
-
-      const res = await queryRagKnowledgeBase(queryWithContext);
+      const res = await querySuperAgent(userQuery, userRole);
       const replyText = res.answer || `I am connected to the official BFibernet ${userRole.toUpperCase()} knowledge base. How can I help you today?`;
 
       setMessages((prev) => [
@@ -146,6 +143,8 @@ export function ChatbotSection() {
           sources: res.sources || [],
           retrieved_chunks: res.retrieved_chunks || [],
           media_gallery: res.media_gallery || (res.image ? [res.image] : []),
+          selected_agent: res.selected_agent,
+          instructions: res.instructions,
           role: userRole,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }
@@ -355,14 +354,6 @@ export function ChatbotSection() {
 
         {/* Right Action Controls */}
         <div className="flex items-center gap-2 sm:gap-3">
-          {/* Admin Role Badge */}
-          <div className={`px-3 py-1.5 rounded-none text-xs font-extrabold flex items-center gap-1.5 border ${
-            isDark ? 'bg-[#18181c] text-emerald-400 border-[#282832]' : 'bg-emerald-50 text-emerald-700 border-emerald-200'
-          }`}>
-            <Shield className="w-3.5 h-3.5" />
-            <span>Admin Executive</span>
-          </div>
-
           {/* Docs Button */}
           <button
             onClick={() => { setIsKbModalOpen(true); fetchKbInfo(); }}
@@ -437,16 +428,11 @@ export function ChatbotSection() {
                 <Sparkles className="w-7 h-7" />
               </div>
 
-              <h1 className={`text-3xl sm:text-4xl font-extrabold tracking-tight max-w-2xl ${
+              <h2 className={`mt-3 text-2xl sm:text-3xl font-extrabold tracking-tight max-w-2xl ${
                 isDark ? 'text-white' : 'text-slate-900'
               }`}>
-                Executive <span className="text-emerald-500">ISP Copilot</span>
-              </h1>
-              <p className={`mt-3 text-sm sm:text-base font-medium max-w-lg ${
-                isDark ? 'text-zinc-400' : 'text-slate-500'
-              }`}>
                 Manage your work and agents using prompt.
-              </p>
+              </h2>
             </div>
 
             {/* MARQUEE ROW: Single Moving Track with Fade Edges */}
@@ -683,6 +669,21 @@ export function ChatbotSection() {
 
                       {/* Main Response Body */}
                       <div className={`pt-1 leading-relaxed ${isDark ? 'text-zinc-200' : 'text-slate-800'}`}>
+                        {msg.selected_agent && msg.selected_agent !== 'none' && (
+                          <div className={`mb-3 p-3 rounded-lg border flex flex-col gap-1.5 ${
+                            isDark ? 'bg-[#0a0a0d] border-emerald-500/30' : 'bg-emerald-50 border-emerald-200'
+                          }`}>
+                            <div className="flex items-center gap-2 text-emerald-500 font-bold text-xs uppercase tracking-widest">
+                              <Zap className="w-3.5 h-3.5 animate-pulse" />
+                              Deployed Sub-Agent: {msg.selected_agent.replace('_', ' ')}
+                            </div>
+                            {msg.instructions && (
+                              <div className={`text-xs font-mono italic ${isDark ? 'text-zinc-400' : 'text-emerald-700'}`}>
+                                "{msg.instructions}"
+                              </div>
+                            )}
+                          </div>
+                        )}
                         <FormattedMessage
                           content={msg.text}
                           isAgent={true}
@@ -785,17 +786,6 @@ export function ChatbotSection() {
               ? 'bg-[#0a0a0d] border-[#22222a] focus-within:border-emerald-500/50 focus-within:bg-[#0c0c10] shadow-[0_0_40px_rgba(0,0,0,0.5)]'
               : 'bg-white border-slate-300 focus-within:border-emerald-500 shadow-xl'
           }`}>
-            <button
-              type="button"
-              onClick={() => alert("Attachment upload ready.")}
-              className={`p-2.5 rounded-none border transition cursor-pointer flex items-center justify-center ${
-                isDark ? 'bg-[#121216] border-[#22222a] text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30' : 'bg-slate-50 border-slate-200 text-slate-500 hover:text-emerald-600'
-              }`}
-              title="Attach File"
-            >
-              <Paperclip className="w-4 h-4" />
-            </button>
-
             {/* Input Line */}
             <input
               type="text"

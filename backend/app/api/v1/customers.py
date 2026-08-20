@@ -11,6 +11,10 @@ router = APIRouter(prefix="/customers", tags=["Customers"])
 class CreateCustomerRequest(BaseModel):
     name: str
     phone: str
+    rating: Optional[int] = 5
+    feedback_text: Optional[str] = "No previous feedback recorded."
+    sentiment: Optional[str] = "neutral"
+    category: Optional[str] = "general"
 
 class UpdateCustomerRequest(BaseModel):
     name: Optional[str] = None
@@ -37,16 +41,25 @@ def create_customer(request: CreateCustomerRequest):
     fb_id, ticket_id = DataRepository.save_feedback(
         customer_name=name,
         phone=phone,
-        rating=5,
-        feedback_text="No previous feedback recorded.",
-        sentiment="neutral",
-        category="general",
+        rating=request.rating or 5,
+        feedback_text=request.feedback_text or "No previous feedback recorded.",
+        sentiment=request.sentiment or "neutral",
+        category=request.category or "general",
         followup_needed=False
     )
 
     DataRepository.ensure_contact_exists(name, phone)
 
-    return {"success": True, "id": fb_id, "customer_name": name, "phone": phone}
+    return {
+        "success": True, 
+        "id": fb_id, 
+        "customer_name": name, 
+        "phone": phone,
+        "rating": request.rating or 5,
+        "feedback_text": request.feedback_text or "No previous feedback recorded.",
+        "sentiment": request.sentiment or "neutral",
+        "category": request.category or "general"
+    }
 
 @router.get("/{customer_id}")
 def get_customer(customer_id: str):

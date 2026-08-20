@@ -21,3 +21,45 @@ export const DEFAULT_FEEDBACKS = [
   { id: 'd9', customer_name: 'Karan Malhotra', phone: '+919876543218', feedback_text: 'Plan upgrades are too expensive.', sentiment: 'neutral', rating: 3, category: 'billing', created_at: '3 days ago' },
   { id: 'd10', customer_name: 'Pooja Joshi', phone: '+919876543219', feedback_text: 'Best ISP I have ever used.', sentiment: 'positive', rating: 5, category: 'general', created_at: '3 days ago' }
 ];
+
+export function downloadFeedbacksCSV(feedbacks = []) {
+  const listToExport = Array.isArray(feedbacks) && feedbacks.length > 0 ? feedbacks : null;
+
+  if (!listToExport) {
+    window.open('/api/v1/agents/feedback/export', '_blank');
+    return;
+  }
+
+  const headers = ['ID', 'Customer Name', 'Phone', 'Rating', 'Sentiment', 'Summary / Feedback', 'Category', 'Timestamp', 'Status'];
+  
+  const csvRows = [headers.join(',')];
+
+  listToExport.forEach(item => {
+    const text = item.feedback_text || item.summary || '';
+    const cleanText = String(text).replace(/"/g, '""').replace(/\n/g, ' ');
+    const row = [
+      `"${item.id || ''}"`,
+      `"${String(item.customer_name || '').replace(/"/g, '""')}"`,
+      `"${String(item.phone || '').replace(/"/g, '""')}"`,
+      `"${item.rating || ''}"`,
+      `"${String(item.sentiment || '').replace(/"/g, '""')}"`,
+      `"${cleanText}"`,
+      `"${String(item.category || '').replace(/"/g, '""')}"`,
+      `"${String(item.created_at || item.timestamp || '').replace(/"/g, '""')}"`,
+      `"${String(item.status || 'Active').replace(/"/g, '""')}"`
+    ];
+    csvRows.push(row.join(','));
+  });
+
+  const blob = new Blob([csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `feedback_reviews_${new Date().toISOString().slice(0, 10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  setTimeout(() => {
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }, 100);
+}
