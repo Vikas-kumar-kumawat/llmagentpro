@@ -440,32 +440,32 @@ export function FeedbackAgentSection({ feedbackEntries = [], isLoading = false, 
       {/* 1. Header Bar */}
       <FeedbackHeader onCollectAll={handleCollectAllFeedbacks} isBatchCalling={isBatchCalling} />
 
-      {/* 2. Stat Metric Cards */}
-      <FeedbackMetricsCards metrics={metrics} />
-
-      {/* 3. AI Voice Persona Card */}
-      <FeedbackVoiceBanner
-        voicePersona={voicePersona}
-        setVoicePersona={setVoicePersona}
-        isPlayingDemo={isPlayingDemo}
-        handlePlayDemo={handlePlayDemo}
+      {/* 2. Batch Outbound Call Campaign Progress Banner */}
+      <BatchCallingBanner
+        isBatchCalling={isBatchCalling}
+        batchProgress={batchProgress}
+        handleCancelBatchCall={handleCancelBatchCall}
       />
 
       {/* Action Toast */}
       {callingState.msg && (
-        <div className={`mb-6 p-3.5 rounded-xl border text-xs font-mono flex items-center gap-2 animate-fadeIn ${
-          isDark ? 'bg-[#09090b] border-[#27272a] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        <div className={`mb-6 p-3.5 rounded-none border text-xs font-mono flex items-center gap-2 animate-fadeIn ${
+          isDark ? 'bg-[#050507] border-[#22222a] text-emerald-400' : 'bg-white border-slate-200 text-emerald-600 shadow-sm'
         }`}>
           <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
           <span>{callingState.msg}</span>
         </div>
       )}
 
-      {/* 4. Batch Outbound Call Campaign Progress Banner */}
-      <BatchCallingBanner
-        isBatchCalling={isBatchCalling}
-        batchProgress={batchProgress}
-        handleCancelBatchCall={handleCancelBatchCall}
+      {/* 3. Stat Metric Cards */}
+      <FeedbackMetricsCards metrics={metrics} />
+
+      {/* 4. AI Voice Persona Card */}
+      <FeedbackVoiceBanner
+        voicePersona={voicePersona}
+        setVoicePersona={setVoicePersona}
+        isPlayingDemo={isPlayingDemo}
+        handlePlayDemo={handlePlayDemo}
       />
 
       {/* 5. Feedbacks Table & Controls - Generous Spacing Above */}

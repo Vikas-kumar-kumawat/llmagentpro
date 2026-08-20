@@ -327,8 +327,7 @@ export function FeedbackDetailModal({
             {!isLiveCalling && (
               <button
                 onClick={() => {
-                  handleTriggerCall(selectedFeedback.customer_name, selectedFeedback.phone);
-                  setSelectedFeedback(null);
+                  handleTriggerCall(selectedFeedback.customer_name, selectedFeedback.phone, selectedFeedback);
                 }}
                 className={`px-4 sm:px-5 py-2.5 rounded-lg text-xs font-semibold border transition cursor-pointer flex items-center justify-center gap-2 flex-1 sm:flex-none ${
                   isDark 
