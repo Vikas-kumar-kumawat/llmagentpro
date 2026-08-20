@@ -51,7 +51,9 @@ def make_ai_outbound_call(request: TriggerCallRequest, req: Request):
 
     host_url = settings.base_url or str(req.base_url).rstrip("/")
     if host_url.startswith("http://localhost") or host_url.startswith("http://127."):
-        host_url = str(req.base_url).rstrip("/")
+        pass # Keep as is
+    elif host_url.startswith("http://"):
+        host_url = host_url.replace("http://", "https://", 1)
 
     cid_param = f"?customer_id={customer_id}"
     voice_url = f"{host_url}/api/v1/twilio/voice{cid_param}"
@@ -91,7 +93,12 @@ async def twilio_voice_webhook(request: Request, customer_id: Optional[str] = No
         request_phone = phone or form_data.get("To") or form_data.get("From")
 
         public_url = settings.base_url
-        host_url = public_url if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127.") else str(request.base_url).rstrip("/")
+        if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127."):
+            host_url = public_url
+        else:
+            host_url = str(request.base_url).rstrip("/")
+            if "localhost" not in host_url and "127.0.0.1" not in host_url and host_url.startswith("http://"):
+                host_url = host_url.replace("http://", "https://", 1)
         
         cid_param = f"?customer_id={customer_id}" if customer_id else ""
         feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
@@ -152,7 +159,12 @@ async def twilio_feedback_webhook(request: Request, customer_id: Optional[str] =
             customer_id = DataRepository.find_or_create_feedback("Customer", format_phone_number(called_phone))
 
         public_url = settings.base_url
-        host_url = public_url if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127.") else str(request.base_url).rstrip("/")
+        if public_url and not public_url.startswith("http://localhost") and not public_url.startswith("http://127."):
+            host_url = public_url
+        else:
+            host_url = str(request.base_url).rstrip("/")
+            if "localhost" not in host_url and "127.0.0.1" not in host_url and host_url.startswith("http://"):
+                host_url = host_url.replace("http://", "https://", 1)
         cid_param = f"?customer_id={customer_id}" if customer_id else ""
         feedback_url = f"{host_url}/api/v1/twilio/feedback{cid_param}"
 
